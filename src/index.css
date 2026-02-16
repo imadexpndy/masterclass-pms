@@ -1016,49 +1016,8 @@ a {
   align-content: start;
 }
 
-.pos-item-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+/* pos-item styles are defined in the NEW LAYOUT section below */
 
-.pos-item-card:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--border-gold);
-  transform: translateY(-2px);
-}
-
-.pos-item-card:active {
-  transform: scale(0.97);
-}
-
-.pos-item-card.unavailable {
-  opacity: 0.35;
-  pointer-events: none;
-}
-
-.pos-item-name {
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
-.pos-item-price {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--gold);
-}
-
-.pos-item-desc {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  line-height: 1.4;
-}
 
 /* ===== ORDER PANEL ===== */
 .order-panel {
@@ -1974,12 +1933,17 @@ a {
   position: relative;
   text-align: left;
   padding: 0 !important;
+  cursor: pointer;
 }
 
 .pos-item-card:hover {
   border-color: var(--gold);
   transform: translateY(-2px);
   box-shadow: var(--shadow);
+}
+
+.pos-item-card:active {
+  transform: scale(0.97);
 }
 
 .pos-item-card.unavailable {
