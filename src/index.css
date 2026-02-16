@@ -1707,6 +1707,33 @@ a {
   color: var(--text-muted);
 }
 
+/* ===== RECEIPT SCREEN VIEW ===== */
+.receipt-inner {
+  padding: 1rem;
+  background: white;
+  color: #000;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.receipt-inner * {
+  color: #000 !important;
+  font-weight: 700;
+  /* Bold on screen too */
+}
+
+.receipt-brand,
+.receipt-total,
+.receipt-header h3 {
+  font-weight: 900 !important;
+}
+
+.receipt-divider,
+hr {
+  border-color: #000 !important;
+  opacity: 1 !important;
+}
+
+/* ===== PRINT STYLES ===== */
 @media print {
   @page {
     margin: 0;
@@ -1767,41 +1794,58 @@ a {
 
   .receipt-inner * {
     visibility: visible;
-    color: #000 !important;
-    font-family: Arial, Helvetica, sans-serif;
-    /* Clear readable font for thermal printers */
-    font-weight: 600 !important;
-    /* Bold all text for better visibility */
+    color: #000000 !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    /* Monospace often prints cleaner */
+    font-weight: 700 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    text-shadow: none !important;
+    -webkit-font-smoothing: none !important;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Make headers extra bold */
+  /* Make headers extra bold and black */
   .receipt-brand,
   .receipt-total,
-  .receipt-total span {
+  .receipt-total span,
+  .receipt-header,
+  h3 {
     font-weight: 900 !important;
+    color: #000000 !important;
   }
 
-  /* Ensure small text is still readable */
+  /* Ensure small text is still readable and dark */
   .receipt-sub,
   .receipt-meta,
   .receipt-address,
   .receipt-footer,
   .receipt-footer div {
     font-size: 0.8rem !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+    opacity: 1 !important;
   }
 
   /* Receipt items need to be clearly readable */
   .receipt-item,
   .receipt-item span {
-    font-size: 0.85rem !important;
-    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    /* Slightly larger */
+    font-weight: 700 !important;
+    color: #000000 !important;
   }
 
   .receipt-item-right {
-    font-weight: 700 !important;
+    font-weight: 800 !important;
+  }
+
+  /* Separators/Lines should be solid black */
+  .receipt-divider,
+  hr {
+    border-color: #000000 !important;
+    border-top: 1px dashed #000000 !important;
+    opacity: 1 !important;
   }
 
   button,

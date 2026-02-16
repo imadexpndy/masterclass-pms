@@ -582,7 +582,7 @@ export default function POS() {
             {/* Cash Change Calculator Modal */}
             {showCashModal && (
                 <div className="modal-overlay" onClick={() => { setShowCashModal(false); setAmountReceived(''); }}>
-                    <div className="modal" onClick={e => e.stopPropagation()} style={{ minWidth: 380 }}>
+                    <div className="modal" onClick={e => e.stopPropagation()} style={{ minWidth: 680 }}>
                         <div className="modal-header">
                             <h3 className="modal-title">
                                 <IconCash size={18} style={{ marginRight: 6, verticalAlign: '-3px' }} />
@@ -593,46 +593,53 @@ export default function POS() {
                             </button>
                         </div>
 
-                        <div className="change-display">
-                            <div className="total-label">{t('totalToPay')}</div>
-                            <div className="total-value">{total.toFixed(2)} DH</div>
-                        </div>
+                        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+                            {/* Left: Payment Info */}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                <div className="change-display">
+                                    <div className="total-label">{t('totalToPay')}</div>
+                                    <div className="total-value">{total.toFixed(2)} DH</div>
+                                </div>
 
-                        <div className="change-received">
-                            <input
-                                className="change-received-input"
-                                type="text"
-                                inputMode="decimal"
-                                placeholder="0.00"
-                                value={amountReceived}
-                                onChange={e => setAmountReceived(e.target.value)}
-                                autoFocus
-                            />
-                        </div>
+                                <div className="change-received">
+                                    <input
+                                        className="change-received-input"
+                                        type="text"
+                                        inputMode="decimal"
+                                        placeholder="0.00"
+                                        value={amountReceived}
+                                        onChange={e => setAmountReceived(e.target.value)}
+                                        autoFocus
+                                    />
+                                </div>
 
-                        {amountReceived && (
-                            <div className={`change-result ${(parseFloat(amountReceived) || 0) >= total ? 'positive' : 'negative'}`}>
-                                <div className="change-label">{t('changeDue')}</div>
-                                <div className="change-value">
-                                    {((parseFloat(amountReceived) || 0) - total).toFixed(2)} DH
+                                {amountReceived && (
+                                    <div className={`change-result ${(parseFloat(amountReceived) || 0) >= total ? 'positive' : 'negative'}`}>
+                                        <div className="change-label">{t('changeDue')}</div>
+                                        <div className="change-value">
+                                            {((parseFloat(amountReceived) || 0) - total).toFixed(2)} DH
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Right: Numpad */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                <div className="numpad">
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, 'C'].map(k => (
+                                        <button key={k} className="numpad-key" onClick={() => numpadPress(String(k))}>{k}</button>
+                                    ))}
+                                </div>
+                                {/* Quick amounts */}
+                                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                    {[50, 100, 200, 500].map(amt => (
+                                        <button key={amt} className="btn btn-ghost btn-sm" style={{ flex: 1, justifyContent: 'center', minWidth: 50 }}
+                                            onClick={() => setAmountReceived(String(amt))}>
+                                            {amt}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
-                        )}
-
-                        <div className="numpad">
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, 'C'].map(k => (
-                                <button key={k} className="numpad-key" onClick={() => numpadPress(String(k))}>{k}</button>
-                            ))}
-                        </div>
-
-                        {/* Quick amounts */}
-                        <div style={{ display: 'flex', gap: 6, marginTop: '0.8rem', flexWrap: 'wrap' }}>
-                            {[50, 100, 200, 500].map(amt => (
-                                <button key={amt} className="btn btn-ghost btn-sm" style={{ flex: 1, justifyContent: 'center', minWidth: 60 }}
-                                    onClick={() => setAmountReceived(String(amt))}>
-                                    {amt}
-                                </button>
-                            ))}
                         </div>
 
                         <div className="modal-actions">
