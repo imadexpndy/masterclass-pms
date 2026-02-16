@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { HashRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import App from './App'
@@ -27,7 +27,7 @@ seedDatabase().catch(console.error);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <LangProvider>
         <ThemeProvider>
           <AuthProvider>
@@ -35,6 +35,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           </AuthProvider>
         </ThemeProvider>
       </LangProvider>
-    </BrowserRouter>
+    </HashRouter>
   </React.StrictMode>
 )

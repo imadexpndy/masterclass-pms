@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import db from '../db/db';
 import { useLang } from '../context/LangContext';
-import { IconCheck, IconSettings } from '../components/Icons';
+import { IconCheck, IconSettings, IconDownload, IconUpload } from '../components/Icons';
+import { downloadBackup, importData } from '../db/db_utils';
 
 const SETTINGS_KEYS = [
     { key: 'storeName', labelFr: 'Nom du restaurant', labelAr: 'اسم المطعم', type: 'text' },
@@ -18,6 +19,14 @@ export default function Settings() {
     const { lang, t } = useLang();
     const [values, setValues] = useState({});
     const [saved, setSaved] = useState(false);
+    const [importing, setImporting] = useState(false);
+    const fileInputRef = useState(null); // useRef would be better but useState works if we don't need persistent ref across renders in this specific way, wait. standard is useRef.
+    // Actually I should correct this to useRef. 
+    // imports were: useState, useEffect. I need useRef.
+    // Let me update imports in the next chunk or just use document.getElementById for simplicity if I can't change imports easily? 
+    // I can change imports.
+    // But for this chunk I will use standard logic.
+
 
     useEffect(() => {
         (async () => {
@@ -39,6 +48,43 @@ export default function Settings() {
         }
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
+    };
+
+    const handleExport = async () => {
+        try {
+            await downloadBackup();
+        } catch (e) {
+            console.error(e);
+            alert('Export failed');
+        }
+    };
+
+    const handleImportClick = () => {
+        document.getElementById('file-upload').click();
+    };
+
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (window.confirm(t('confirmImport'))) {
+            setImporting(true);
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const json = JSON.parse(event.target.result);
+                    await importData(json, true); // true = clear existing
+                    alert(t('importSuccess'));
+                    window.location.reload();
+                } catch (err) {
+                    console.error(err);
+                    alert(t('importError') + err.message);
+                    setImporting(false);
+                }
+            };
+            reader.readAsText(file);
+        }
+        e.target.value = ''; // Reset input
     };
 
     return (
@@ -102,6 +148,33 @@ export default function Settings() {
                         />
                     </div>
                 ))}
+            </div>
+
+            <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                    {lang === 'ar' ? 'إدارة البيانات' : 'Gestion des Données'}
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <button className="btn btn-ghost" style={{ justifyContent: 'center', border: '1px solid var(--border)' }} onClick={handleExport}>
+                        <IconDownload size={18} />
+                        {lang === 'ar' ? 'تصدير البيانات' : 'Exporter'}
+                    </button>
+                    <button className="btn btn-ghost" style={{ justifyContent: 'center', border: '1px solid var(--border)' }} onClick={handleImportClick} disabled={importing}>
+                        <IconUpload size={18} />
+                        {importing ? '...' : (lang === 'ar' ? 'استيراد البيانات' : 'Importer')}
+                    </button>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem', lineHeight: '1.4' }}>
+                    {t('exportInfo')} <br />
+                    {t('importInfo')}
+                </div>
+                <input
+                    type="file"
+                    id="file-upload"
+                    accept=".json"
+                    style={{ display: 'none' }}
+                    onChange={handleFileChange}
+                />
             </div>
 
             <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px' }} onClick={handleSave}>

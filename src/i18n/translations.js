@@ -95,6 +95,20 @@ const translations = {
         cancel: 'Annuler',
 
         // Receipt
+        receiptPoweredBy: 'Pied de page (Powered by)',
+
+        // Data Management
+        dataManagement: 'Gestion des Données',
+        backupData: 'Sauvegarde des Données',
+        restoreData: 'Restauration des Données',
+        exportInfo: 'Télécharger une copie de toutes les données (ventes, menu, paramètres).',
+        importInfo: 'Restaurer les données depuis un fichier de sauvegarde. ATTENTION: Cela effacera les données actuelles !',
+        exportBtn: 'Exporter les données',
+        importBtn: 'Importer les données',
+        backupSuccess: 'Sauvegarde téléchargée avec succès',
+        importSuccess: 'Données restaurées avec succès !',
+        importError: 'Erreur lors de la restauration : ',
+        confirmImport: 'Êtes-vous sûr de vouloir remplacer toutes les données actuelles par celles du fichier ? Cette action est irréversible.',
         receipt: 'Reçu',
         waiter: 'Serveur',
         paymentMethod: 'Paiement',
@@ -289,6 +303,20 @@ const translations = {
         change: 'الباقي',
         thankYou: 'شكرا على زيارتكم!',
         print: 'طبع',
+        receiptPoweredBy: 'تذييل (مدعوم من)',
+
+        // Data Management
+        dataManagement: 'إدارة البيانات',
+        backupData: 'نسخ احتياطي للبيانات',
+        restoreData: 'استعادة البيانات',
+        exportInfo: 'تحميل نسخة من جميع البيانات (المبيعات، القائمة، الإعدادات).',
+        importInfo: 'استعادة البيانات من ملف النسخ الاحتياطي. تحذير: سيتم حذف البيانات الحالية!',
+        exportBtn: 'تصدير البيانات',
+        importBtn: 'استيراد البيانات',
+        backupSuccess: 'تم تحميل النسخة الاحتياطية بنجاح',
+        importSuccess: 'تم استعادة البيانات بنجاح!',
+        importError: 'خطأ أثناء الاستعادة: ',
+        confirmImport: 'هل أنت متأكد أنك تريد استبدال جميع البيانات الحالية ببيانات الملف؟ هذا الإجراء لا يمكن التراجع عنه.',
 
         // Kitchen
         currentOrders: 'الطلبات الحالية',
