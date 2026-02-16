@@ -5,9 +5,14 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Disable Hardware Acceleration for better compatibility on all Windows hardware
+// (Fixes the common "Black Screen" issue on some laptops)
+app.disableHardwareAcceleration();
+
 let mainWindow;
 
 function createWindow() {
+    const isDev = !app.isPackaged;
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
@@ -19,8 +24,12 @@ function createWindow() {
         icon: path.join(__dirname, '../public/icon-512.png') // Use PWA icon
     });
 
-    // In development, load from Vite dev server
-    const isDev = !app.isPackaged;
+    // Allow opening DevTools in production for debugging
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+        if (input.key === 'F12' || (input.control && input.shift && input.key.toLowerCase() === 'i')) {
+            mainWindow.webContents.openDevTools();
+        }
+    });
 
     if (isDev) {
         mainWindow.loadURL('http://localhost:3456');
