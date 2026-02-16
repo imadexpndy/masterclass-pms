@@ -41,6 +41,25 @@ export default function POS() {
     const [amountReceived, setAmountReceived] = useState('');
     const [paymentInfo, setPaymentInfo] = useState(null);
 
+    // Smart print: uses Electron silent print if a printer is configured, otherwise falls back to window.print()
+    const smartPrint = async () => {
+        const printerName = settings.printerName;
+        if (printerName && window.electron?.silentPrint) {
+            try {
+                const result = await window.electron.silentPrint(printerName);
+                if (!result.success) {
+                    console.warn('Silent print failed, falling back:', result.error);
+                    window.print();
+                }
+            } catch (e) {
+                console.warn('Silent print error, falling back:', e);
+                window.print();
+            }
+        } else {
+            window.print();
+        }
+    };
+
     // URL params: pre-select table and optionally trigger payment
     useEffect(() => {
         const tbl = searchParams.get('table');
@@ -329,7 +348,7 @@ export default function POS() {
 
         // Auto-print receipt
         setTimeout(() => {
-            window.print();
+            smartPrint();
         }, 500);
     };
 
@@ -427,7 +446,7 @@ export default function POS() {
                     <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => { setShowBill(false); setPaidOrder(null); }}>
                         <IconX size={16} /> {t('close')}
                     </button>
-                    <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => window.print()}>
+                    <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => smartPrint()}>
                         <IconPrint size={16} /> {t('printReceipt')}
                     </button>
                 </div>

@@ -1,5 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('electron', {
-    // Expose APIs here if needed
+    // Printer APIs
+    getPrinters: () => ipcRenderer.invoke('get-printers'),
+    silentPrint: (printerName) => ipcRenderer.invoke('silent-print', printerName),
 });

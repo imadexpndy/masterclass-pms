@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -21,7 +21,7 @@ function createWindow() {
             nodeIntegration: false,
             contextIsolation: true,
         },
-        icon: path.join(__dirname, '../public/icon-512.png') // Use PWA icon
+        icon: path.join(__dirname, '../public/icon-512.png')
     });
 
     // Allow opening DevTools in production for debugging
@@ -35,7 +35,6 @@ function createWindow() {
         mainWindow.loadURL('http://localhost:3456');
         mainWindow.webContents.openDevTools();
     } else {
-        // In production, load the built index.html
         mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
     }
 
@@ -43,6 +42,47 @@ function createWindow() {
         mainWindow = null;
     });
 }
+
+// ===== IPC HANDLERS FOR PRINTING =====
+
+// Return list of available printers
+ipcMain.handle('get-printers', async () => {
+    if (!mainWindow) return [];
+    const printers = mainWindow.webContents.getPrinters();
+    return printers.map(p => ({
+        name: p.name,
+        displayName: p.displayName || p.name,
+        isDefault: p.isDefault,
+        status: p.status,
+    }));
+});
+
+// Silent print to a specific printer (no dialog)
+ipcMain.handle('silent-print', async (event, printerName) => {
+    return new Promise((resolve) => {
+        if (!mainWindow) {
+            resolve({ success: false, error: 'No window' });
+            return;
+        }
+
+        const options = {
+            silent: true,
+            printBackground: true,
+            deviceName: printerName,
+            margins: { marginType: 'none' },
+        };
+
+        mainWindow.webContents.print(options, (success, failureReason) => {
+            if (success) {
+                resolve({ success: true });
+            } else {
+                resolve({ success: false, error: failureReason });
+            }
+        });
+    });
+});
+
+// ===== APP LIFECYCLE =====
 
 app.on('ready', createWindow);
 

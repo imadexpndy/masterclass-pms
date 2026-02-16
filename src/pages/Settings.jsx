@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import db from '../db/db';
 import { useLang } from '../context/LangContext';
-import { IconCheck, IconSettings, IconDownload, IconUpload } from '../components/Icons';
+import { IconCheck, IconSettings, IconDownload, IconUpload, IconPrint } from '../components/Icons';
 import { downloadBackup, importData } from '../db/db_utils';
 
 const SETTINGS_KEYS = [
@@ -20,13 +20,12 @@ export default function Settings() {
     const [values, setValues] = useState({});
     const [saved, setSaved] = useState(false);
     const [importing, setImporting] = useState(false);
-    const fileInputRef = useState(null); // useRef would be better but useState works if we don't need persistent ref across renders in this specific way, wait. standard is useRef.
-    // Actually I should correct this to useRef. 
-    // imports were: useState, useEffect. I need useRef.
-    // Let me update imports in the next chunk or just use document.getElementById for simplicity if I can't change imports easily? 
-    // I can change imports.
-    // But for this chunk I will use standard logic.
 
+    // Printer state
+    const [printers, setPrinters] = useState([]);
+    const [selectedPrinter, setSelectedPrinter] = useState('');
+    const [loadingPrinters, setLoadingPrinters] = useState(false);
+    const isElectron = !!window.electron?.getPrinters;
 
     useEffect(() => {
         (async () => {
@@ -34,8 +33,31 @@ export default function Settings() {
             const map = {};
             all.forEach(s => { map[s.key] = s.value; });
             setValues(map);
+            // Load saved printer
+            if (map.printerName) {
+                setSelectedPrinter(map.printerName);
+            }
         })();
     }, []);
+
+    // Detect printers when in Electron
+    useEffect(() => {
+        if (isElectron) {
+            refreshPrinters();
+        }
+    }, [isElectron]);
+
+    const refreshPrinters = async () => {
+        if (!isElectron) return;
+        setLoadingPrinters(true);
+        try {
+            const list = await window.electron.getPrinters();
+            setPrinters(list || []);
+        } catch (e) {
+            console.error('Failed to get printers:', e);
+        }
+        setLoadingPrinters(false);
+    };
 
     const handleChange = (key, val) => {
         setValues(prev => ({ ...prev, [key]: val }));
@@ -45,6 +67,10 @@ export default function Settings() {
     const handleSave = async () => {
         for (const s of SETTINGS_KEYS) {
             await db.settings.put({ key: s.key, value: values[s.key] || '' });
+        }
+        // Save selected printer
+        if (selectedPrinter) {
+            await db.settings.put({ key: 'printerName', value: selectedPrinter });
         }
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
@@ -73,7 +99,7 @@ export default function Settings() {
             reader.onload = async (event) => {
                 try {
                     const json = JSON.parse(event.target.result);
-                    await importData(json, true); // true = clear existing
+                    await importData(json, true);
                     alert(t('importSuccess'));
                     window.location.reload();
                 } catch (err) {
@@ -84,7 +110,7 @@ export default function Settings() {
             };
             reader.readAsText(file);
         }
-        e.target.value = ''; // Reset input
+        e.target.value = '';
     };
 
     return (
@@ -149,6 +175,56 @@ export default function Settings() {
                     </div>
                 ))}
             </div>
+
+            {/* Printer Selection — Only visible in Electron */}
+            {isElectron && (
+                <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+                    <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <IconPrint size={16} />
+                        {lang === 'ar' ? 'الطابعة' : 'Imprimante'}
+                    </h3>
+                    <div className="form-group">
+                        <label className="form-label">
+                            {lang === 'ar' ? 'اختر الطابعة (طباعة تلقائية بدون نافذة)' : 'Sélectionner l\'imprimante (impression automatique sans popup)'}
+                        </label>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            <select
+                                className="input"
+                                value={selectedPrinter}
+                                onChange={(e) => { setSelectedPrinter(e.target.value); setSaved(false); }}
+                                style={{ flex: 1 }}
+                            >
+                                <option value="">
+                                    {loadingPrinters
+                                        ? (lang === 'ar' ? 'جاري البحث...' : 'Recherche...')
+                                        : (lang === 'ar' ? '-- اختر طابعة --' : '-- Choisir une imprimante --')
+                                    }
+                                </option>
+                                {printers.map(p => (
+                                    <option key={p.name} value={p.name}>
+                                        {p.displayName} {p.isDefault ? '⭐' : ''}
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                className="btn btn-ghost"
+                                onClick={refreshPrinters}
+                                disabled={loadingPrinters}
+                                style={{ border: '1px solid var(--border)', padding: '8px 12px' }}
+                                title={lang === 'ar' ? 'تحديث' : 'Rafraîchir'}
+                            >
+                                ↻
+                            </button>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem', lineHeight: '1.4' }}>
+                            {lang === 'ar'
+                                ? 'عند اختيار طابعة، ستتم الطباعة تلقائيًا بدون نافذة ويندوز'
+                                : 'En sélectionnant une imprimante, le ticket s\'imprimera automatiquement sans popup Windows.'
+                            }
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
                 <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem' }}>
