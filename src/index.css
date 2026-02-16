@@ -727,6 +727,7 @@ a {
 
 /* ===== LOGIN PAGE ===== */
 .login-page {
+  width: 100vw;
   height: 100vh;
   display: flex;
   align-items: center;
@@ -745,43 +746,94 @@ a {
     radial-gradient(ellipse at 70% 30%, rgba(201, 169, 110, 0.04) 0%, transparent 50%);
 }
 
-.login-card {
+.login-card-horizontal {
   position: relative;
   z-index: 1;
+  display: flex;
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 2.5rem;
-  width: 380px;
-  max-width: 90vw;
-  text-align: center;
+  overflow: hidden;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  max-width: 90vw;
+  max-height: 90vh;
 }
 
-.login-logo {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--gold);
-  margin-bottom: 0.3rem;
+.login-brand-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2.5rem;
+  background: linear-gradient(160deg, rgba(201, 169, 110, 0.08) 0%, rgba(201, 169, 110, 0.02) 100%);
+  border-right: 1px solid var(--border);
+  min-width: 280px;
 }
 
-.login-subtitle {
-  font-size: 0.75rem;
+.login-brand-inner {
+  text-align: center;
+}
+
+.login-brand-logo {
+  width: 180px;
+  height: auto;
+  margin-bottom: 12px;
+}
+
+.login-brand-subtitle {
+  font-size: 0.72rem;
   color: var(--text-muted);
   letter-spacing: 3px;
   text-transform: uppercase;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.login-brand-decoration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.login-brand-line {
+  width: 40px;
+  height: 1px;
+  background: var(--border-gold);
+}
+
+.login-brand-diamond {
+  color: var(--gold);
+  font-size: 0.6rem;
+  opacity: 0.6;
+}
+
+.login-auth-panel {
+  padding: 2.5rem;
+  min-width: 340px;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-auth-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1.2rem;
+  text-align: center;
 }
 
 .user-select-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .user-select-btn {
-  padding: 12px 8px;
+  padding: 14px 8px;
   background: var(--bg-card);
   border: 2px solid var(--border);
   border-radius: var(--radius-sm);
@@ -810,6 +862,22 @@ a {
   text-transform: capitalize;
 }
 
+.selected-user-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+  padding: 10px;
+  background: var(--bg-elevated);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.selected-user-header:hover {
+  background: var(--bg-card-hover);
+}
+
 .pin-display {
   display: flex;
   gap: 10px;
@@ -833,13 +901,13 @@ a {
 .pin-pad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  max-width: 240px;
+  gap: 6px;
+  max-width: 220px;
   margin: 0 auto;
 }
 
 .pin-key {
-  padding: 14px;
+  padding: 12px;
   font-size: 1.2rem;
   font-weight: 600;
   background: var(--bg-card);
@@ -865,6 +933,7 @@ a {
   color: var(--red);
   font-size: 0.8rem;
   margin-top: 1rem;
+  text-align: center;
   animation: fadeIn 0.3s ease;
 }
 
@@ -1589,10 +1658,15 @@ a {
 }
 
 .receipt-inner {
-  background: var(--bg-surface);
+  background: #fff;
+  color: #000;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.5rem;
+}
+
+.receipt-inner * {
+  color: #000 !important;
 }
 
 .receipt-header {

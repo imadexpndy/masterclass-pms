@@ -9,6 +9,7 @@ import Reports from './pages/Reports';
 import Inventory from './pages/Inventory';
 import UserMgmt from './pages/UserMgmt';
 import MenuMgmt from './pages/MenuMgmt';
+import Settings from './pages/Settings';
 import AppShell from './components/AppShell';
 
 function ProtectedRoute({ children, roles }) {
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="inventory" element={<ProtectedRoute roles={['admin']}><Inventory /></ProtectedRoute>} />
         <Route path="users" element={<ProtectedRoute roles={['admin']}><UserMgmt /></ProtectedRoute>} />
         <Route path="menu" element={<ProtectedRoute roles={['admin']}><MenuMgmt /></ProtectedRoute>} />
+        <Route path="settings" element={<ProtectedRoute roles={['admin']}><Settings /></ProtectedRoute>} />
       </Route>
     </Routes>
   );

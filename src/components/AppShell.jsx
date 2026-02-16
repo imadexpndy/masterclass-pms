@@ -7,7 +7,7 @@ import {
     IconDashboard, IconCart, IconTable, IconChef, IconChart,
     IconBox, IconUsers, IconMenuBoard, IconSun, IconMoon,
     IconLogout, IconWifi, IconWifiOff, IconClock, IconGlobe,
-    IconMaximize, IconMinimize, IconDownload
+    IconMaximize, IconMinimize, IconDownload, IconSettings
 } from './Icons';
 import logo from '../assets/logo_masterclass.svg';
 
@@ -62,6 +62,7 @@ export default function AppShell() {
         { path: '/inventory', icon: IconBox, label: t('navInventory'), roles: ['admin'] },
         { path: '/users', icon: IconUsers, label: t('navUsers'), roles: ['admin'] },
         { path: '/menu', icon: IconMenuBoard, label: t('navMenu'), roles: ['admin'] },
+        { path: '/settings', icon: IconSettings, label: t('navSettings'), roles: ['admin'] },
     ];
 
     const pageTitles = {
@@ -73,6 +74,7 @@ export default function AppShell() {
         '/inventory': t('navInventory'),
         '/users': t('navUsers'),
         '/menu': t('navMenu'),
+        '/settings': t('navSettings'),
     };
 
     useEffect(() => {

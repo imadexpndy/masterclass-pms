@@ -11,6 +11,7 @@ import {
     IconBreakfast, IconSalad, IconTagine, IconPizza, IconPasta,
     IconSteak, IconWrap, IconSandwich, IconJuice, IconCoffee, IconDessert
 } from '../components/Icons';
+import logo from '../assets/logo_masterclass.svg';
 
 const CATEGORY_ICONS = {
     breakfast: IconBreakfast, salad: IconSalad, tagine: IconTagine,
@@ -28,6 +29,8 @@ export default function POS() {
     const activeOrders = useLiveQuery(() => db.orders.where('status').anyOf('pending', 'preparing', 'ready', 'served').toArray()) || [];
     const allOrderItems = useLiveQuery(() => db.orderItems.toArray()) || [];
     const users = useLiveQuery(() => db.users.toArray()) || [];
+    const settingsArr = useLiveQuery(() => db.settings.toArray()) || [];
+    const settings = Object.fromEntries(settingsArr.map(s => [s.key, s.value]));
 
     const [activeCat, setActiveCat] = useState(null);
     const [cart, setCart] = useState([]);
@@ -341,13 +344,14 @@ export default function POS() {
     if (showBill && paidOrder) {
         return (
             <div className="receipt-card">
-                <div className="print-receipt receipt-inner">
+                <div className="print-receipt receipt-inner" style={{ color: '#000' }}>
                     <div className="receipt-header" style={{ marginBottom: '10px', textAlign: 'center' }}>
-                        <div className="receipt-brand" style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2px' }}>MASTER CLASS</div>
-                        <div className="receipt-sub" style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>RESTAURANT & CAFÉ</div>
+                        <img src={logo} alt="Logo" style={{ width: 120, height: 'auto', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
+                        <div className="receipt-brand" style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2px', color: '#000' }}>{settings.storeName || 'MASTER CLASS'}</div>
+                        <div className="receipt-sub" style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT & CAFÉ'}</div>
                         <div className="receipt-address" style={{ fontSize: '0.7rem', marginTop: '5px' }}>
-                            123 Avenue Mohammed VI, Marrakech<br />
-                            Tel: 05 24 00 00 00
+                            {settings.storeAddress || '123 Avenue Mohammed VI, Marrakech'}<br />
+                            Tel: {settings.storePhone || '05 24 00 00 00'}
                         </div>
 
                         <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
@@ -413,9 +417,9 @@ export default function POS() {
                     <div style={{ borderTop: '1px dashed #000', margin: '15px 0' }} />
 
                     <div className="receipt-footer" style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem' }}>WiFi: MasterClass_Guest / Password123</div>
-                        <div style={{ fontWeight: 800, fontSize: '0.9rem', margin: '10px 0' }}>*** {t('thankYou')} ***</div>
-                        <div style={{ fontSize: '0.6rem' }}>Powered by MasterPOS</div>
+                        <div style={{ fontSize: '0.7rem' }}>WiFi: {settings.wifiName || 'MasterClass_Guest'} / {settings.wifiPassword || 'Password123'}</div>
+                        <div style={{ fontWeight: 800, fontSize: '0.9rem', margin: '10px 0' }}>*** {settings.receiptFooter || t('thankYou')} ***</div>
+                        <div style={{ fontSize: '0.6rem' }}>{settings.receiptPoweredBy || 'Powered by MasterPOS'}</div>
                     </div>
                 </div>
 

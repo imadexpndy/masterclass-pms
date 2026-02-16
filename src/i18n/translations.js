@@ -16,6 +16,7 @@ const translations = {
         navInventory: 'Inventaire',
         navUsers: 'Utilisateurs',
         navMenu: 'Menu',
+        navSettings: 'Paramètres',
 
         // Login
         loginTitle: 'Point de Vente',
@@ -202,6 +203,7 @@ const translations = {
         navInventory: 'المخزون',
         navUsers: 'المستخدمين',
         navMenu: 'القائمة',
+        navSettings: 'الإعدادات',
 
         // Login
         loginTitle: 'نقطة البيع',

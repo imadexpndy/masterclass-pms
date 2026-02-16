@@ -234,5 +234,23 @@ export async function seedDatabase() {
         }
     }
 
+    // ===== SEED DEFAULT SETTINGS =====
+    const defaultSettings = [
+        { key: 'storeName', value: 'MASTER CLASS' },
+        { key: 'storeSubtitle', value: 'RESTAURANT & CAFÉ' },
+        { key: 'storeAddress', value: '123 Avenue Mohammed VI, Marrakech' },
+        { key: 'storePhone', value: '05 24 00 00 00' },
+        { key: 'wifiName', value: 'MasterClass_Guest' },
+        { key: 'wifiPassword', value: 'Password123' },
+        { key: 'receiptFooter', value: 'Merci de votre visite!' },
+        { key: 'receiptPoweredBy', value: 'Powered by MasterPOS' },
+    ];
+    for (const s of defaultSettings) {
+        const existing = await db.settings.get(s.key);
+        if (!existing) {
+            await db.settings.put(s);
+        }
+    }
+
     console.log('Database seeded with', items.length, 'menu items');
 }

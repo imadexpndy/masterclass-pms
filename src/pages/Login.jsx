@@ -33,78 +33,87 @@ export default function Login() {
 
     return (
         <div className="login-page">
-            <div className="login-card">
-                <div className="login-logo">
-                    <img src={logo} alt="MasterClass" style={{ width: 180, height: 'auto', marginBottom: 10 }} />
+            <div className="login-card-horizontal">
+                {/* Left Brand Panel */}
+                <div className="login-brand-panel">
+                    <div className="login-brand-inner">
+                        <img src={logo} alt="MasterClass" className="login-brand-logo" />
+                        <div className="login-brand-subtitle">{t('appSubtitle')}</div>
+                        <div className="login-brand-decoration">
+                            <div className="login-brand-line" />
+                            <div className="login-brand-diamond">◆</div>
+                            <div className="login-brand-line" />
+                        </div>
+                    </div>
                 </div>
-                <div className="login-subtitle">{t('appSubtitle')}</div>
 
-                {/* User Selection */}
-                {!selectedUser ? (
-                    <div className="user-select-grid">
-                        {users.map(u => (
-                            <button
-                                key={u.id}
-                                className={`user-select-btn ${selectedUser === u.id ? 'selected' : ''}`}
-                                onClick={() => { setSelectedUser(u.id); setPin(''); setError(''); }}
-                                style={{ padding: '20px' }}
-                            >
-                                <div className="user-avatar" style={{ width: 64, height: 64, margin: '0 auto 12px', fontSize: '1.5rem', lineHeight: '64px' }}>
-                                    {u.name.charAt(0)}
-                                </div>
-                                <div className="user-btn-name" style={{ fontSize: '1.1rem', fontWeight: 600 }}>{u.name}</div>
-                                <div className="user-btn-role" style={{ fontSize: '0.9rem' }}>{t(`role${u.role.charAt(0).toUpperCase() + u.role.slice(1)}`) || u.role}</div>
-                            </button>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="selected-user-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: '2rem', padding: '10px', background: 'var(--bg-elevated)', borderRadius: '12px', cursor: 'pointer' }} onClick={() => setSelectedUser(null)}>
-                        <div className="user-avatar" style={{ width: 40, height: 40, fontSize: '1rem', lineHeight: '40px' }}>
-                            {users.find(u => u.id === selectedUser)?.name.charAt(0)}
-                        </div>
-                        <div style={{ textAlign: 'left' }}>
-                            <div style={{ fontWeight: 600, fontSize: '1rem' }}>{users.find(u => u.id === selectedUser)?.name}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('clickToChange')}</div>
-                        </div>
-                        <IconX size={20} style={{ marginLeft: 'auto', color: 'var(--text-muted)' }} />
-                    </div>
-                )}
-
-                {selectedUser && (
-                    <>
-                        {/* PIN Display */}
-                        <div className="pin-display">
-                            {[0, 1, 2, 3].map(i => (
-                                <div key={i} className={`pin-dot ${i < pin.length ? 'filled' : ''}`} />
-                            ))}
-                        </div>
-
-                        {/* PIN Pad */}
-                        <div className="pin-pad">
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, 'back'].map((k, i) => (
-                                k === '' ? <div key={i} /> : (
-                                    <button key={i} className={`pin-key ${k === 'back' ? 'backspace' : ''}`}
-                                        onClick={() => numpadPress(String(k))} style={{ height: 80, fontSize: '1.5rem' }}>
-                                        {k === 'back' ? <IconX size={28} /> : k}
+                {/* Right Auth Panel */}
+                <div className="login-auth-panel">
+                    {!selectedUser ? (
+                        <>
+                            <h3 className="login-auth-title">{t('loginSelectUser')}</h3>
+                            <div className="user-select-grid">
+                                {users.map(u => (
+                                    <button
+                                        key={u.id}
+                                        className="user-select-btn"
+                                        onClick={() => { setSelectedUser(u.id); setPin(''); setError(''); }}
+                                    >
+                                        <div className="user-avatar" style={{ width: 52, height: 52, margin: '0 auto 8px', fontSize: '1.2rem', lineHeight: '52px' }}>
+                                            {u.name.charAt(0)}
+                                        </div>
+                                        <div className="user-btn-name">{u.name}</div>
+                                        <div className="user-btn-role">{t(`role${u.role.charAt(0).toUpperCase() + u.role.slice(1)}`) || u.role}</div>
                                     </button>
-                                )
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="selected-user-header" onClick={() => setSelectedUser(null)}>
+                                <div className="user-avatar" style={{ width: 40, height: 40, fontSize: '1rem', lineHeight: '40px' }}>
+                                    {users.find(u => u.id === selectedUser)?.name.charAt(0)}
+                                </div>
+                                <div style={{ textAlign: 'left', flex: 1 }}>
+                                    <div style={{ fontWeight: 600, fontSize: '1rem' }}>{users.find(u => u.id === selectedUser)?.name}</div>
+                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{t('clickToChange')}</div>
+                                </div>
+                                <IconX size={18} style={{ color: 'var(--text-muted)' }} />
+                            </div>
 
-                        {/* Login Button */}
-                        <button
-                            className="btn btn-primary"
-                            style={{ width: '100%', justifyContent: 'center', marginTop: '1rem', padding: '14px' }}
-                            onClick={submit}
-                            disabled={pin.length < 4}
-                        >
-                            <IconLogout size={16} style={{ transform: 'scaleX(-1)' }} />
-                            {t('loginConnect')}
-                        </button>
+                            {/* PIN Display */}
+                            <div className="pin-display">
+                                {[0, 1, 2, 3].map(i => (
+                                    <div key={i} className={`pin-dot ${i < pin.length ? 'filled' : ''}`} />
+                                ))}
+                            </div>
 
-                        {error && <div className="login-error">{error}</div>}
-                    </>
-                )}
+                            {/* PIN Pad */}
+                            <div className="pin-pad">
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, 'back'].map((k, i) => (
+                                    k === '' ? <div key={i} /> : (
+                                        <button key={i} className={`pin-key ${k === 'back' ? 'backspace' : ''}`}
+                                            onClick={() => numpadPress(String(k))} style={{ height: 64, fontSize: '1.3rem' }}>
+                                            {k === 'back' ? <IconX size={22} /> : k}
+                                        </button>
+                                    )
+                                ))}
+                            </div>
+
+                            <button
+                                className="btn btn-primary"
+                                style={{ width: '100%', justifyContent: 'center', marginTop: '1rem', padding: '12px' }}
+                                onClick={submit}
+                                disabled={pin.length < 4}
+                            >
+                                <IconLogout size={16} style={{ transform: 'scaleX(-1)' }} />
+                                {t('loginConnect')}
+                            </button>
+
+                            {error && <div className="login-error">{error}</div>}
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );
