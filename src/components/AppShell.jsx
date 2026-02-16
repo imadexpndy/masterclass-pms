@@ -31,10 +31,15 @@ export default function AppShell() {
     }, []);
 
     const handleInstall = async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') setDeferredPrompt(null);
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') setDeferredPrompt(null);
+        } else if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            alert('Pour installer : appuyez sur le bouton Partager (⎙) puis "Sur l\'écran d\'accueil"');
+        } else {
+            alert('Pour installer l\'application, utilisez le menu de votre navigateur > "Installer l\'application"');
+        }
     };
 
     const toggleFullscreen = () => {
@@ -157,7 +162,7 @@ export default function AppShell() {
                         >
                             {isFullscreen ? <IconMinimize size={18} /> : <IconMaximize size={18} />}
                         </button>
-                        {deferredPrompt && (
+                        {!window.matchMedia('(display-mode: standalone)').matches && (
                             <button
                                 className="theme-toggle install-btn"
                                 onClick={handleInstall}
