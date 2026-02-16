@@ -28,7 +28,8 @@ export default function App() {
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
       <Route path="/" element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
-        <Route index element={<Dashboard />} />
+        <Route index element={<Tables />} />
+        <Route path="dashboard" element={<ProtectedRoute roles={['admin']}><Dashboard /></ProtectedRoute>} />
         <Route path="pos" element={<POS />} />
         <Route path="tables" element={<Tables />} />
         <Route path="kitchen" element={<ProtectedRoute roles={['admin', 'kitchen']}><Kitchen /></ProtectedRoute>} />

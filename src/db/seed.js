@@ -15,15 +15,24 @@ export async function seedDatabase() {
             { id: uid(), name: 'Cuisine', pin: '3333', role: 'kitchen', active: true },
         ]);
 
-        // ===== TABLES =====
+        // ===== TABLES (24 Salle + 26 Terrasse = 50) =====
         const tables = [];
-        for (let i = 1; i <= 12; i++) {
+        for (let i = 1; i <= 24; i++) {
             tables.push({
                 id: uid(),
-                name: `Table ${i}`,
+                name: `Salle ${i}`,
                 status: 'free',
-                seats: i <= 8 ? 4 : 6,
-                zone: i <= 8 ? 'salle' : 'terrasse'
+                seats: 4,
+                zone: 'salle'
+            });
+        }
+        for (let i = 1; i <= 26; i++) {
+            tables.push({
+                id: uid(),
+                name: `Terrasse ${i}`,
+                status: 'free',
+                seats: 4,
+                zone: 'terrasse'
             });
         }
         await db.diningTables.bulkAdd(tables);

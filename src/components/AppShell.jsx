@@ -58,10 +58,11 @@ export default function AppShell() {
         return () => document.removeEventListener('fullscreenchange', handler);
     }, []);
 
+    // Tables first, then POS, Dashboard (admin only), rest
     const navItems = [
-        { path: '/', icon: IconDashboard, label: t('navDashboard'), roles: ['admin', 'waiter', 'cashier', 'kitchen'] },
+        { path: '/', icon: IconTable, label: t('navTables'), roles: ['admin', 'waiter', 'cashier'] },
         { path: '/pos', icon: IconCart, label: t('navPOS'), roles: ['admin', 'waiter', 'cashier'] },
-        { path: '/tables', icon: IconTable, label: t('navTables'), roles: ['admin', 'waiter', 'cashier'] },
+        { path: '/dashboard', icon: IconDashboard, label: t('navDashboard'), roles: ['admin'] },
         { path: '/kitchen', icon: IconChef, label: t('navKitchen'), roles: ['admin', 'kitchen'] },
         { path: '/reports', icon: IconChart, label: t('navReports'), roles: ['admin', 'cashier'] },
         { path: '/inventory', icon: IconBox, label: t('navInventory'), roles: ['admin'] },
@@ -71,8 +72,9 @@ export default function AppShell() {
     ];
 
     const pageTitles = {
-        '/': t('navDashboard'),
+        '/': t('tableManagement'),
         '/pos': t('loginTitle'),
+        '/dashboard': t('navDashboard'),
         '/tables': t('tableManagement'),
         '/kitchen': t('kitchenDisplay'),
         '/reports': t('viewReports'),
@@ -130,6 +132,27 @@ export default function AppShell() {
                 </nav>
 
                 <div className="sidebar-footer">
+                    {/* Fullscreen & Install moved here */}
+                    <div style={{ display: 'flex', gap: 6, padding: '8px 16px', justifyContent: 'center' }}>
+                        <button
+                            className="theme-toggle"
+                            onClick={toggleFullscreen}
+                            title={isFullscreen ? t('exitFullscreen') : t('enterFullscreen')}
+                            style={{ width: 32, height: 32 }}
+                        >
+                            {isFullscreen ? <IconMinimize size={14} /> : <IconMaximize size={14} />}
+                        </button>
+                        {!window.matchMedia('(display-mode: standalone)').matches && (
+                            <button
+                                className="theme-toggle"
+                                onClick={handleInstall}
+                                title={t('installApp')}
+                                style={{ width: 32, height: 32 }}
+                            >
+                                <IconDownload size={14} />
+                            </button>
+                        )}
+                    </div>
                     <div className="sidebar-user" onClick={logout} title={t('logout')}>
                         <div className="user-avatar">{user?.name?.charAt(0)}</div>
                         <div className="user-info">
@@ -144,46 +167,34 @@ export default function AppShell() {
             {/* Main */}
             <div className="main-content">
                 <header className="header-bar">
-                    <h2 className="header-title">{pageTitle}</h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <h2 className="header-title">{pageTitle}</h2>
+                        <span className="header-clock">
+                            <IconClock size={13} />
+                            {clock}
+                        </span>
+                    </div>
                     <div className="header-right">
+                        <div className={`online-badge ${online ? 'online' : 'offline'}`}>
+                            {online ? <IconWifi size={12} /> : <IconWifiOff size={12} />}
+                            {online ? t('online') : t('offline')}
+                        </div>
                         <button
                             className="theme-toggle"
                             onClick={toggleLang}
                             title={lang === 'fr' ? 'العربية' : 'Français'}
-                            style={{ fontSize: '0.9rem', fontWeight: 600, width: 'auto', padding: '0 12px', gap: 6 }}
+                            style={{ fontSize: '0.75rem', fontWeight: 700, width: 'auto', padding: '0 10px', gap: 4 }}
                         >
-                            <IconGlobe size={16} />
+                            <IconGlobe size={13} />
                             {lang === 'fr' ? 'AR' : 'FR'}
                         </button>
-                        <button
-                            className="theme-toggle"
-                            onClick={toggleFullscreen}
-                            title={isFullscreen ? t('exitFullscreen') : t('enterFullscreen')}
-                        >
-                            {isFullscreen ? <IconMinimize size={18} /> : <IconMaximize size={18} />}
-                        </button>
-                        {!window.matchMedia('(display-mode: standalone)').matches && (
-                            <button
-                                className="theme-toggle install-btn"
-                                onClick={handleInstall}
-                                title={t('installApp')}
-                                style={{ background: 'var(--primary)', color: 'white', border: 'none' }}
-                            >
-                                <IconDownload size={18} />
-                                <span style={{ marginLeft: 6, fontSize: '0.8rem', fontWeight: 600 }}>Installer</span>
-                            </button>
-                        )}
                         <button
                             className="theme-toggle"
                             onClick={toggleTheme}
                             title={theme === 'dark' ? t('lightMode') : t('darkMode')}
                         >
-                            {theme === 'dark' ? <IconSun size={18} /> : <IconMoon size={18} />}
+                            {theme === 'dark' ? <IconSun size={15} /> : <IconMoon size={15} />}
                         </button>
-                        <div className={`online-badge ${online ? 'online' : 'offline'}`}>
-                            {online ? <IconWifi size={13} /> : <IconWifiOff size={13} />}
-                            {online ? t('online') : t('offline')}
-                        </div>
                     </div>
                 </header>
                 <div className="page-body">
