@@ -11,7 +11,7 @@ import {
     IconBreakfast, IconSalad, IconTagine, IconPizza, IconPasta,
     IconSteak, IconWrap, IconSandwich, IconJuice, IconCoffee, IconDessert
 } from '../components/Icons';
-import logo from '../assets/logo_masterclass.svg';
+import logo from '../assets/menu images/logo master classe ticket.svg';
 
 const CATEGORY_ICONS = {
     breakfast: IconBreakfast, salad: IconSalad, tagine: IconTagine,
