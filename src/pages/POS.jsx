@@ -499,7 +499,7 @@ export default function POS() {
                     <div className="receipt-footer" style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '0.7rem' }}>WiFi: {settings.wifiName || 'MasterClass_Guest'} / {settings.wifiPassword || 'Password123'}</div>
                         <div style={{ fontWeight: 800, fontSize: '0.9rem', margin: '10px 0' }}>*** {settings.receiptFooter || t('thankYou')} ***</div>
-                        <div style={{ fontSize: '0.6rem' }}>{settings.receiptPoweredBy || 'Powered by MasterPOS'}</div>
+                        <div style={{ fontSize: '0.6rem' }}>{settings.receiptPoweredBy || 'Powered by Expndy'}</div>
                     </div>
                 </div>
 
