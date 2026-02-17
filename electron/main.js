@@ -74,7 +74,7 @@ ipcMain.handle('silent-print', async (event, printerName) => {
             silent: true,
             printBackground: true,
             deviceName: printerName,
-            margins: { marginType: 'none' },
+            // margins: { marginType: 'printableArea' } // Let the printer driver decide
         };
 
         mainWindow.webContents.print(options, (success, failureReason) => {
