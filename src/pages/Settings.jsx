@@ -68,10 +68,9 @@ export default function Settings() {
         for (const s of SETTINGS_KEYS) {
             await db.settings.put({ key: s.key, value: values[s.key] || '' });
         }
-        // Save selected printer
-        if (selectedPrinter) {
-            await db.settings.put({ key: 'printerName', value: selectedPrinter });
-        }
+        // Save printer settings
+        await db.settings.put({ key: 'printerName', value: selectedPrinter || '' });
+        await db.settings.put({ key: 'autoPrint', value: values.autoPrint || 'on' });
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
     };
@@ -176,16 +175,44 @@ export default function Settings() {
                 ))}
             </div>
 
-            {/* Printer Selection — Only visible in Electron */}
-            {isElectron && (
-                <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-                    <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <IconPrint size={16} />
-                        {lang === 'ar' ? 'الطابعة' : 'Imprimante'}
-                    </h3>
-                    <div className="form-group">
+            {/* Printer Settings — Always visible */}
+            <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <IconPrint size={16} />
+                    {lang === 'ar' ? 'الطابعة والطباعة' : 'Imprimante & Impression'}
+                </h3>
+
+                {/* Auto-print toggle */}
+                <div className="form-group">
+                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span>{lang === 'ar' ? 'طباعة تلقائية بعد الدفع' : 'Impression automatique après paiement'}</span>
+                        <button
+                            type="button"
+                            onClick={() => { handleChange('autoPrint', values.autoPrint === 'off' ? 'on' : 'off'); }}
+                            style={{
+                                width: 48, height: 26, borderRadius: 13, border: 'none', cursor: 'pointer',
+                                background: values.autoPrint !== 'off' ? 'var(--green)' : 'var(--border)',
+                                position: 'relative', transition: '0.2s',
+                            }}
+                        >
+                            <span style={{
+                                position: 'absolute', top: 3, width: 20, height: 20, borderRadius: '50%', background: '#fff',
+                                left: values.autoPrint !== 'off' ? 25 : 3, transition: '0.2s',
+                            }} />
+                        </button>
+                    </label>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                        {lang === 'ar'
+                            ? 'عند التفعيل، يتم طباعة الفاتورة تلقائياً بعد كل عملية دفع'
+                            : 'Le ticket s\'imprime automatiquement après chaque paiement'}
+                    </div>
+                </div>
+
+                {/* Electron: Printer selector */}
+                {isElectron ? (
+                    <div className="form-group" style={{ marginTop: '1rem' }}>
                         <label className="form-label">
-                            {lang === 'ar' ? 'اختر الطابعة (طباعة تلقائية بدون نافذة)' : 'Sélectionner l\'imprimante (impression automatique sans popup)'}
+                            {lang === 'ar' ? 'اختر الطابعة (طباعة بدون نافذة)' : 'Sélectionner l\'imprimante (impression sans popup)'}
                         </label>
                         <div style={{ display: 'flex', gap: 8 }}>
                             <select
@@ -216,15 +243,32 @@ export default function Settings() {
                                 ↻
                             </button>
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem', lineHeight: '1.4' }}>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.5rem', lineHeight: '1.4' }}>
                             {lang === 'ar'
-                                ? 'عند اختيار طابعة، ستتم الطباعة تلقائيًا بدون نافذة ويندوز'
-                                : 'En sélectionnant une imprimante, le ticket s\'imprimera automatiquement sans popup Windows.'
-                            }
+                                ? 'عند اختيار طابعة، ستتم الطباعة تلقائيًا بدون نافذة'
+                                : 'L\'impression se fera en silence, sans popup.'}
                         </div>
                     </div>
-                </div>
-            )}
+                ) : (
+                    <div style={{ marginTop: '1rem', padding: '12px 14px', borderRadius: 10, background: 'var(--blue-bg)', border: '1px solid rgba(96,165,250,0.2)' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--blue)', marginBottom: 6 }}>
+                            {lang === 'ar' ? 'ℹ️ وضع المتصفح' : 'ℹ️ Mode navigateur'}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                            {lang === 'ar'
+                                ? 'في المتصفح، ستظهر نافذة الطباعة دائماً (قيود المتصفح). للطباعة الصامتة: استخدم تطبيق الإلكترون.'
+                                : 'Dans le navigateur, la fenêtre d\'impression s\'affiche toujours (limitation Chrome). Pour l\'impression silencieuse, utilisez l\'application Electron.'
+                            }
+                            <br />
+                            <strong style={{ color: 'var(--text)' }}>
+                                {lang === 'ar'
+                                    ? '💡 نصيحة: حدد الطابعة كطابعة افتراضية في Chrome حتى يكفي نقرة واحدة.'
+                                    : '💡 Astuce : Définissez votre imprimante ticket comme imprimante par défaut dans Chrome pour n\'avoir qu\'à cliquer "Imprimer".'}
+                            </strong>
+                        </div>
+                    </div>
+                )}
+            </div>
 
             <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
                 <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem' }}>

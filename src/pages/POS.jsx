@@ -346,10 +346,12 @@ export default function POS() {
         setAmountReceived('');
         setPaymentInfo(null);
 
-        // Auto-print receipt
-        setTimeout(() => {
-            smartPrint();
-        }, 500);
+        // Auto-print receipt (if enabled in settings)
+        if (settings.autoPrint !== 'off') {
+            setTimeout(() => {
+                smartPrint();
+            }, 500);
+        }
     };
 
     const numpadPress = (key) => {
@@ -461,15 +463,18 @@ export default function POS() {
                 <div className="pos-categories">
                     {categories.map(cat => {
                         const CatIcon = CATEGORY_ICONS[cat.iconKey || cat.icon] || IconReceipt;
+                        const itemCount = allItems.filter(i => i.categoryId === cat.id).length;
                         return (
                             <button
                                 key={cat.id}
                                 className={`cat-pill ${catId === cat.id ? 'active' : ''}`}
                                 onClick={() => setActiveCat(cat.id)}
-                                style={{ padding: '12px 24px', fontSize: '1.1rem' }}
                             >
-                                <CatIcon size={24} />
-                                <span>{lang === 'ar' && cat.nameAr ? cat.nameAr : cat.name}</span>
+                                <CatIcon size={22} />
+                                <div className="cat-info">
+                                    <span style={{ fontWeight: 600 }}>{lang === 'ar' && cat.nameAr ? cat.nameAr : cat.name}</span>
+                                    <span className="cat-count">{itemCount} {lang === 'ar' ? 'عنصر' : 'articles'}</span>
+                                </div>
                             </button>
                         );
                     })}

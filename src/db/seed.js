@@ -1,3 +1,5 @@
+import imgOrangina from '../assets/orangina.png';
+import imgSidiAli from '../assets/sidi_ali.png';
 import db from './db';
 
 const uid = () => crypto.randomUUID();
@@ -186,10 +188,10 @@ export async function seedDatabase() {
         { id: uid(), categoryId: 'cat-drinks', name: 'Verveine', price: 12, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1504382103100-db7e92322d39?auto=format&fit=crop&w=500&q=60' },
         { id: uid(), categoryId: 'cat-drinks', name: 'Infusions', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1504382103100-db7e92322d39?auto=format&fit=crop&w=500&q=60' },
         { id: uid(), categoryId: 'cat-drinks', name: 'Soda', price: 10, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1592253167780-ff4439df5fcc?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Orangina', price: 12, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1637178921831-16034c8c7705?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Eau 33cl', price: 5, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1625708458528-802ec79b1ed8?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Eau 50cl', price: 8, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1625708458528-802ec79b1ed8?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Eau 1.5L', price: 12, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1625708458528-802ec79b1ed8?auto=format&fit=crop&w=500&q=60' },
+        { id: uid(), categoryId: 'cat-drinks', name: 'Orangina', price: 12, description: '', available: true, stockQty: 999, image: imgOrangina },
+        { id: uid(), categoryId: 'cat-drinks', name: 'Eau 33cl', price: 5, description: '', available: true, stockQty: 999, image: imgSidiAli },
+        { id: uid(), categoryId: 'cat-drinks', name: 'Eau 50cl', price: 8, description: '', available: true, stockQty: 999, image: imgSidiAli },
+        { id: uid(), categoryId: 'cat-drinks', name: 'Eau 1.5L', price: 12, description: '', available: true, stockQty: 999, image: imgSidiAli },
         { id: uid(), categoryId: 'cat-drinks', name: 'Oulmes 50cl', price: 10, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1517093911940-08cb5b3952e7?auto=format&fit=crop&w=500&q=60' },
         { id: uid(), categoryId: 'cat-drinks', name: 'Oulmes 1.5L', price: 12, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1517093911940-08cb5b3952e7?auto=format&fit=crop&w=500&q=60' },
 
@@ -259,6 +261,76 @@ export async function seedDatabase() {
         if (!existing) {
             await db.settings.put(s);
         }
+    }
+
+    // ===== UPDATE SALLE GRID POSITIONS (8×6 Grid) =====
+    const salleTables = await db.diningTables.where('zone').equals('salle').toArray();
+    const needsGridUpdate = salleTables.some(t => t.row === undefined);
+
+    if (needsGridUpdate && salleTables.length > 0) {
+        // Grid positions: [row, col] — 0-indexed. 8 cols (0-7), 6 rows (0-5)
+        const gridLayout = [
+            // Row 0: S1, S2, S3 (top-left cluster) + S4 (top-right)
+            { row: 0, col: 0 }, { row: 0, col: 1 }, { row: 0, col: 2 }, { row: 0, col: 6 },
+            // Row 1: S5, S6
+            { row: 1, col: 0 }, { row: 1, col: 1 },
+            // Row 2: S7 (left) + S8-S11 (center-right block)
+            { row: 2, col: 0 }, { row: 2, col: 3 }, { row: 2, col: 4 }, { row: 2, col: 5 }, { row: 2, col: 6 },
+            // Row 3: S12-S15 (center-right block)
+            { row: 3, col: 3 }, { row: 3, col: 4 }, { row: 3, col: 5 }, { row: 3, col: 6 },
+            // Row 4: S16, S17
+            { row: 4, col: 0 }, { row: 4, col: 2 },
+            // Row 5: S18-S24 (bottom row, 7 tables)
+            { row: 5, col: 1 }, { row: 5, col: 2 }, { row: 5, col: 3 }, { row: 5, col: 4 }, { row: 5, col: 5 }, { row: 5, col: 6 }, { row: 5, col: 7 },
+        ];
+
+        const sortedSalle = salleTables.sort((a, b) => {
+            const numA = parseInt(a.name.replace(/\D/g, '')) || 0;
+            const numB = parseInt(b.name.replace(/\D/g, '')) || 0;
+            return numA - numB;
+        });
+
+        for (let i = 0; i < sortedSalle.length; i++) {
+            if (gridLayout[i]) {
+                await db.diningTables.update(sortedSalle[i].id, {
+                    row: gridLayout[i].row,
+                    col: gridLayout[i].col,
+                    type: 'table'
+                });
+            }
+        }
+    }
+
+    // ===== SEED BASES & TVs (if not present) =====
+    const bases = await db.diningTables.where('type').equals('base').toArray();
+    if (bases.length === 0) {
+        await db.diningTables.bulkAdd([
+            { id: 'base-1', name: 'Base 1', status: 'free', zone: 'salle', seats: 0, row: 2, col: 2, type: 'base' },
+            { id: 'base-2', name: 'Base 2', status: 'free', zone: 'salle', seats: 0, row: 4, col: 3, type: 'base' },
+        ]);
+    }
+
+    const tvs = await db.diningTables.where('type').equals('tv').toArray();
+    if (tvs.length === 0) {
+        await db.diningTables.bulkAdd([
+            { id: 'tv-1', name: 'TV1', status: 'free', zone: 'salle', seats: 0, row: 4, col: 5, type: 'tv' },
+            { id: 'tv-2', name: 'TV2', status: 'free', zone: 'salle', seats: 0, row: 4, col: 6, type: 'tv' },
+        ]);
+    }
+
+    const doors = await db.diningTables.where('type').equals('door').toArray();
+    if (doors.length === 0) {
+        await db.diningTables.bulkAdd([
+            { id: 'door-1', name: 'Entrée', status: 'free', zone: 'salle', seats: 0, row: 0, col: 3, type: 'door' }, // Top middle
+            { id: 'door-2', name: 'Sortie', status: 'free', zone: 'salle', seats: 0, row: 5, col: 0, type: 'door' }, // Bottom left
+        ]);
+    }
+
+    const caisse = await db.diningTables.where('type').equals('caisse').toArray();
+    if (caisse.length === 0) {
+        await db.diningTables.add(
+            { id: 'caisse-1', name: 'Caisse', status: 'free', zone: 'salle', seats: 0, row: 5, col: 1, type: 'caisse' } // Bottom left next to door
+        );
     }
 
     console.log('Database seeded with', items.length, 'menu items');

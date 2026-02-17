@@ -14,7 +14,7 @@ db.version(1).stores({
 });
 
 db.version(2).stores({
-    diningTables: 'id, name, status, zone',
+    diningTables: 'id, name, status, zone, seats',
     payments: 'id, orderId, method, createdAt'
 }).upgrade(tx => {
     return tx.table('diningTables').toCollection().modify(t => {
@@ -24,6 +24,14 @@ db.version(2).stores({
             t.zone = (num >= 9 && num <= 12) ? 'terrasse' : 'salle';
         }
     });
+});
+
+db.version(3).stores({
+    diningTables: 'id, name, status, zone, seats, x, y, width, height, shape, rotation'
+});
+
+db.version(4).stores({
+    diningTables: 'id, name, status, zone, seats, row, col, type'
 });
 
 export default db;

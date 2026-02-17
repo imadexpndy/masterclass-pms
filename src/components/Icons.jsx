@@ -80,3 +80,7 @@ export const IconHome = (p) => <I {...p} d={<><path d="M3 9l9-7 9 7v11a2 2 0 0 1
 export const IconBuilding = (p) => <I {...p} d={<><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M9 22v-4h6v4" /><path d="M8 6h.01M16 6h.01M12 6h.01M8 10h.01M16 10h.01M12 10h.01M8 14h.01M16 14h.01M12 14h.01" /></>} />;
 export const IconTreePalm = (p) => <I {...p} d={<><path d="M13 8c0-2.76-2.46-5-5.5-5S2 5.24 2 8h2l1-1 1 1h4" /><path d="M13 7.14A5.82 5.82 0 0 1 16.5 6c3.04 0 5.5 2.24 5.5 5h-2l-1-1-1 1h-3" /><path d="M5.89 9.71c-2.15 2.15-2.3 5.47-.35 7.43l4.24-4.25.7-.7.71-.71 4.24-4.24c1.96 1.96 1.8 5.28-.35 7.43" /><path d="M11 15.5c.5 2.5-.17 4.5-1 6.5h4c-.83-2-1.5-4-1-6.5" /></>} />;
 export const IconGlobe = (p) => <I {...p} d={<><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></>} />;
+export const IconDoor = (p) => <I {...p} d={<><path d="M14 2v19" /><path d="M4 22h16" /><path d="M6 22V4a2 2 0 0 1 2-2h6" /><circle cx="12" cy="12" r="1" /></>} />;
+export const IconDesktop = (p) => <I {...p} d={<><rect x="2" y="3" width="20" height="14" rx="2" ry="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></>} />;
+
+

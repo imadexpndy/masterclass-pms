@@ -1,197 +1,267 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useNavigate } from 'react-router-dom';
 import db from '../db/db';
 import { useLang } from '../context/LangContext';
 import {
     IconTable, IconCircle, IconBuilding, IconTreePalm,
-    IconEye, IconPlus, IconPrint, IconCash, IconCreditCard, IconX
+    IconCheck, IconX, IconDoor, IconMoney
 } from '../components/Icons';
 
-export default function Tables() {
-    const tables = useLiveQuery(() => db.diningTables.toArray()) || [];
-    const orders = useLiveQuery(() => db.orders.where('status').anyOf('pending', 'preparing', 'ready', 'served').toArray()) || [];
-    const allOrderItems = useLiveQuery(() => db.orderItems.toArray()) || [];
-    const navigate = useNavigate();
-    const { t } = useLang();
-    const [activeZone, setActiveZone] = useState('all');
-    const [detailTable, setDetailTable] = useState(null);
+const ROWS = 6;
+const COLS = 8;
 
-    const getTableOrder = (tableId) => orders.find(o => o.tableId === tableId);
-    const getOrderItems = (orderId) => allOrderItems.filter(i => i.orderId === orderId);
+/* ── Grid Cell Component ── */
+const GridCell = ({ row, col, children, onDrop, onDragOver }) => (
+    <div
+        className={`grid-cell ${children ? 'occupied' : 'empty'}`}
+        data-row={row}
+        data-col={col}
+        onDragOver={onDragOver}
+        onDrop={(e) => onDrop(e, row, col)}
+    >
+        {children}
+    </div>
+);
 
-    const filteredTables = activeZone === 'all' ? tables : tables.filter(t => t.zone === activeZone);
+/* ── Table Item on the Grid ── */
+const GridTable = ({ item, onClick, onDragStart, onEditName }) => {
+    const [editing, setEditing] = useState(false);
+    const [editValue, setEditValue] = useState(item.name);
+    const inputRef = useRef(null);
 
-    const freeCount = filteredTables.filter(t => t.status === 'free').length;
-    const occCount = filteredTables.filter(t => t.status === 'occupied').length;
-    const resCount = filteredTables.filter(t => t.status === 'reserved').length;
+    const statusClass = item.type === 'base' ? 'base' : item.type === 'tv' ? 'tv' : item.type === 'door' ? 'door' : item.type === 'caisse' ? 'caisse' : item.status;
 
-    const handleTableClick = (table) => {
-        if (table.status === 'free') {
-            navigate(`/pos?table=${table.id}`);
-        } else if (table.status === 'occupied') {
-            setDetailTable(table);
-        }
-    };
-
-    const toggleStatus = async (e, table) => {
+    const handleDoubleClick = (e) => {
         e.stopPropagation();
-        const nextStatus = { free: 'reserved', reserved: 'free', occupied: 'free' };
-        const newStatus = nextStatus[table.status] || 'free';
-        await db.diningTables.update(table.id, { status: newStatus });
-
-        if (newStatus === 'free' && table.status === 'occupied') {
-            const order = getTableOrder(table.id);
-            if (order) await db.orders.update(order.id, { status: 'served', updatedAt: new Date().toISOString() });
-        }
+        setEditValue(item.name);
+        setEditing(true);
+        setTimeout(() => inputRef.current?.select(), 50);
     };
 
-    const salleCount = tables.filter(t => t.zone === 'salle').length;
-    const terrasseCount = tables.filter(t => t.zone === 'terrasse').length;
+    const handleSave = () => {
+        const trimmed = editValue.trim();
+        if (trimmed && trimmed !== item.name) {
+            onEditName(item.id, trimmed);
+        }
+        setEditing(false);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') handleSave();
+        if (e.key === 'Escape') setEditing(false);
+    };
+
+    // Bases, TVs, Doors, Caisse are not clickable for POS
+    const handleClick = () => {
+        if (item.type === 'table' || !item.type) {
+            onClick(item);
+        }
+    };
 
     return (
-        <>
-            {/* Zone Tabs */}
-            <div className="tables-zone-tabs" style={{ gap: 16 }}>
-                <button className={`zone-tab ${activeZone === 'all' ? 'active' : ''}`} onClick={() => setActiveZone('all')} style={{ padding: '16px 24px', fontSize: '1.1rem' }}>
-                    <IconTable size={24} />
-                    {t('allZones')}
-                    <span className="zone-count" style={{ fontSize: '1rem', padding: '4px 10px' }}>{tables.length}</span>
-                </button>
-                <button className={`zone-tab ${activeZone === 'salle' ? 'active' : ''}`} onClick={() => setActiveZone('salle')} style={{ padding: '16px 24px', fontSize: '1.1rem' }}>
-                    <IconBuilding size={24} />
-                    {t('zoneSalle')}
-                    <span className="zone-count" style={{ fontSize: '1rem', padding: '4px 10px' }}>{salleCount}</span>
-                </button>
-                <button className={`zone-tab ${activeZone === 'terrasse' ? 'active' : ''}`} onClick={() => setActiveZone('terrasse')} style={{ padding: '16px 24px', fontSize: '1.1rem' }}>
-                    <IconTreePalm size={24} />
-                    {t('zoneTerrasse')}
-                    <span className="zone-count" style={{ fontSize: '1rem', padding: '4px 10px' }}>{terrasseCount}</span>
-                </button>
-            </div>
-
-            <div className="stats-grid">
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ background: 'var(--green-bg)' }}>
-                        <IconCircle filled size={14} color="var(--green)" />
-                    </div>
-                    <div className="stat-content">
-                        <div className="label">{t('free')}</div>
-                        <div className="value" style={{ color: 'var(--green)' }}>{freeCount}</div>
-                    </div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ background: 'var(--orange-bg)' }}>
-                        <IconCircle filled size={14} color="var(--orange)" />
-                    </div>
-                    <div className="stat-content">
-                        <div className="label">{t('occupied')}</div>
-                        <div className="value" style={{ color: 'var(--orange)' }}>{occCount}</div>
-                    </div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ background: 'var(--blue-bg)' }}>
-                        <IconCircle filled size={14} color="var(--blue)" />
-                    </div>
-                    <div className="stat-content">
-                        <div className="label">{t('reserved')}</div>
-                        <div className="value" style={{ color: 'var(--blue)' }}>{resCount}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="tables-grid">
-                {filteredTables.map(table => {
-                    const order = getTableOrder(table.id);
-                    const statusLabels = { free: t('free'), occupied: t('occupied'), reserved: t('reserved') };
-                    const badgeClass = { free: 'badge-green', occupied: 'badge-orange', reserved: 'badge-blue' };
-                    return (
-                        <div
-                            key={table.id}
-                            className={`table-card ${table.status}`}
-                            onClick={() => handleTableClick(table)}
-                            style={{ padding: '24px', minHeight: 180 }}
-                        >
-                            <div className="table-icon" style={{ marginBottom: 16 }}>
-                                <IconTable size={48} />
-                            </div>
-                            <div className="table-name" style={{ fontSize: '1.5rem', marginBottom: 8 }}>{table.name}</div>
-                            <div className="table-seats" style={{ fontSize: '1rem' }}>{table.seats} {t('seats')} • {table.zone === 'terrasse' ? t('zoneTerrasse') : t('zoneSalle')}</div>
-                            <span className={`badge ${badgeClass[table.status] || ''}`} style={{ padding: '6px 12px', fontSize: '0.9rem', marginTop: 12 }}>
-                                <IconCircle filled size={8} />
-                                {statusLabels[table.status]}
-                            </span>
-                            {order && (
-                                <div className="table-order-total" style={{ fontSize: '1.2rem', marginTop: 12 }}>
-                                    {(order.total || 0).toFixed(2)} DH
-                                </div>
-                            )}
-                            <button
-                                className="btn btn-ghost btn-sm"
-                                style={{ marginTop: 16, width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '12px' }}
-                                onClick={(e) => toggleStatus(e, table)}
-                            >
-                                {table.status === 'free' ? t('reserve') : t('freeTable')}
-                            </button>
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Table Detail Modal */}
-            {detailTable && (
-                <div className="modal-overlay" onClick={() => setDetailTable(null)}>
-                    <div className="modal" onClick={e => e.stopPropagation()} style={{ minWidth: 420 }}>
-                        <div className="modal-header">
-                            <h3 className="modal-title">
-                                <IconTable size={18} style={{ marginRight: 6, verticalAlign: '-3px' }} />
-                                {detailTable.name}
-                            </h3>
-                            <button className="modal-close" onClick={() => setDetailTable(null)}>
-                                <IconX size={18} />
-                            </button>
-                        </div>
-
-                        {(() => {
-                            const order = getTableOrder(detailTable.id);
-                            if (!order) return <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>{t('noActiveOrders')}</p>;
-                            const items = getOrderItems(order.id);
-                            return (
-                                <>
-                                    <div className="table-detail-items">
-                                        {items.map(item => (
-                                            <div key={item.id} className="table-detail-line">
-                                                <span>{item.quantity}x {item.itemName}</span>
-                                                <span style={{ fontWeight: 600, color: 'var(--gold)' }}>
-                                                    {(item.unitPrice * item.quantity).toFixed(2)} DH
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="table-detail-total">
-                                        <span>{t('total')}</span>
-                                        <span>{(order.total || 0).toFixed(2)} DH</span>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: 8, marginTop: '1rem' }}>
-                                        <button className="btn btn-ghost btn-sm" style={{ flex: 1, justifyContent: 'center' }}
-                                            onClick={() => { setDetailTable(null); navigate(`/pos?table=${detailTable.id}`); }}>
-                                            <IconPlus size={14} /> {t('addItems')}
-                                        </button>
-                                        <button className="btn btn-success btn-sm" style={{ flex: 1, justifyContent: 'center' }}
-                                            onClick={() => { setDetailTable(null); navigate(`/pos?table=${detailTable.id}&pay=cash`); }}>
-                                            <IconCash size={14} /> {t('cash')}
-                                        </button>
-                                        <button className="btn btn-primary btn-sm" style={{ flex: 1, justifyContent: 'center' }}
-                                            onClick={() => { setDetailTable(null); navigate(`/pos?table=${detailTable.id}&pay=card`); }}>
-                                            <IconCreditCard size={14} /> {t('card')}
-                                        </button>
-                                    </div>
-                                </>
-                            );
-                        })()}
-                    </div>
-                </div>
+        <div
+            className={`grid-item ${statusClass}`}
+            draggable
+            onDragStart={(e) => onDragStart(e, item)}
+            onClick={handleClick}
+            onDoubleClick={handleDoubleClick}
+            title={item.type === 'table' || !item.type ? 'Cliquer → Caisse' : item.name}
+        >
+            {/* Status indicator dot (Only for tables) */}
+            {(item.type === 'table' || !item.type) && (
+                <span className={`grid-item-dot ${item.status}`} />
             )}
-        </>
+
+            {item.type === 'door' ? (
+                <div className="door-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#fff' }}>
+                    <IconDoor size={22} />
+                    <span className="grid-item-label" style={{ fontSize: '0.75rem' }}>{item.name}</span>
+                </div>
+            ) : item.type === 'caisse' ? (
+                <div className="caisse-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#fff' }}>
+                    <IconMoney size={24} />
+                    <span className="grid-item-label" style={{ fontSize: '0.75rem', color: '#fff' }}>{item.name}</span>
+                </div>
+            ) : editing ? (
+                <input
+                    ref={inputRef}
+                    className="grid-item-edit"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onBlur={handleSave}
+                    onKeyDown={handleKeyDown}
+                    onClick={(e) => e.stopPropagation()}
+                    autoFocus
+                />
+            ) : (
+                <span className="grid-item-label">
+                    {item.type === 'tv' ? '📺 ' : ''}
+                    {item.name}
+                </span>
+            )}
+        </div>
+    );
+};
+
+export default function Tables() {
+    const allItems = useLiveQuery(() => db.diningTables.toArray()) || [];
+    const orders = useLiveQuery(() => db.orders.where('status').anyOf('pending', 'preparing', 'ready', 'served').toArray()) || [];
+    const navigate = useNavigate();
+    const { t, lang } = useLang();
+    const [activeZone, setActiveZone] = useState('salle');
+    const [dragItem, setDragItem] = useState(null);
+
+    // Filter by zone
+    const zoneItems = allItems.filter(i => i.zone === activeZone);
+    const tables = zoneItems.filter(i => i.type === 'table' || (!i.type && i.seats > 0));
+    const salleCount = allItems.filter(i => i.zone === 'salle' && (i.type === 'table' || (!i.type && i.seats > 0))).length;
+    const terrasseCount = allItems.filter(i => i.zone === 'terrasse' && (i.type === 'table' || (!i.type && i.seats > 0))).length;
+
+    // Stats (tables only)
+    const freeCount = tables.filter(t => t.status === 'free').length;
+    const occCount = tables.filter(t => t.status === 'occupied').length;
+
+    // Build grid map: key = "row-col" → item
+    const gridMap = {};
+    zoneItems.forEach(item => {
+        if (item.row !== undefined && item.col !== undefined) {
+            gridMap[`${item.row}-${item.col}`] = item;
+        }
+    });
+
+    // ── Handlers ──
+
+    const handleTableClick = (table) => {
+        // Direct navigation to POS/Caisse
+        navigate(`/pos?table=${table.id}`);
+    };
+
+    const handleDragStart = (e, item) => {
+        setDragItem(item);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', item.id);
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDrop = async (e, row, col) => {
+        e.preventDefault();
+        if (!dragItem) return;
+
+        const key = `${row}-${col}`;
+        const existingItem = gridMap[key];
+
+        // If dropping on an occupied cell (that isn't itself), swap positions
+        if (existingItem && existingItem.id !== dragItem.id) {
+            await db.diningTables.update(existingItem.id, {
+                row: dragItem.row,
+                col: dragItem.col
+            });
+        }
+
+        await db.diningTables.update(dragItem.id, { row, col });
+        setDragItem(null);
+    };
+
+    const handleEditName = async (id, newName) => {
+        await db.diningTables.update(id, { name: newName });
+    };
+
+    // ── Render Grid (Salle only uses custom grid, Terrasse uses simple grid) ──
+    const isSalle = activeZone === 'salle';
+
+    const renderSalleGrid = () => {
+        const cells = [];
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                const item = gridMap[`${r}-${c}`];
+                cells.push(
+                    <GridCell
+                        key={`${r}-${c}`}
+                        row={r}
+                        col={c}
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                    >
+                        {item && (
+                            <GridTable
+                                item={item}
+                                onClick={handleTableClick}
+                                onDragStart={handleDragStart}
+                                onEditName={handleEditName}
+                            />
+                        )}
+                    </GridCell>
+                );
+            }
+        }
+        return cells;
+    };
+
+    // Terrasse: simple list of tables (unchanged from before, but simpler)
+    const renderTerrasseGrid = () => {
+        const terrTables = zoneItems
+            .filter(i => i.type === 'table' || !i.type)
+            .sort((a, b) => {
+                const numA = parseInt(a.name.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.name.replace(/\D/g, '')) || 0;
+                return numA - numB;
+            });
+
+        return terrTables.map(table => (
+            <div
+                key={table.id}
+                className={`terrasse-table ${table.status}`}
+                onClick={() => handleTableClick(table)}
+            >
+                <span className={`grid-item-dot ${table.status}`} />
+                <span className="grid-item-label">{table.name.replace('Terrasse ', 'T')}</span>
+            </div>
+        ));
+    };
+
+    return (
+        <div className="tables-layout">
+            {/* ═══ Floor Plan ═══ */}
+            <div className="floor-plan-panel">
+                {/* Zone tabs */}
+                <div className="floor-zone-tabs">
+                    <button className={`floor-zone-tab ${activeZone === 'salle' ? 'active' : ''}`} onClick={() => setActiveZone('salle')}>
+                        <IconBuilding size={18} />
+                        {t('zoneSalle')}
+                        <span className="zone-badge">{salleCount}</span>
+                    </button>
+                    <button className={`floor-zone-tab ${activeZone === 'terrasse' ? 'active' : ''}`} onClick={() => setActiveZone('terrasse')}>
+                        <IconTreePalm size={18} />
+                        {t('zoneTerrasse')}
+                        <span className="zone-badge">{terrasseCount}</span>
+                    </button>
+                </div>
+
+                {/* Grid */}
+                <div className={`floor-grid ${isSalle ? 'salle-grid' : 'terrasse-grid'}`}>
+                    {isSalle ? renderSalleGrid() : renderTerrasseGrid()}
+                </div>
+
+                {/* Legend bar */}
+                <div className="floor-legend">
+                    <div className="floor-legend-items">
+                        <span className="floor-legend-item">
+                            <IconCircle filled size={10} color="var(--green)" /> {lang === 'ar' ? 'حرة' : 'Libre'} <strong>{freeCount}</strong>
+                        </span>
+                        <span className="floor-legend-item">
+                            <IconCircle filled size={10} color="var(--orange)" /> {lang === 'ar' ? 'مشغولة' : 'Occupée'} <strong>{occCount}</strong>
+                        </span>
+                    </div>
+                    <div className="floor-legend-hint">
+                        {lang === 'ar' ? 'اسحب للتحريك · انقر مرتين للتسمية' : 'Glisser pour déplacer · Double-clic pour renommer'}
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }

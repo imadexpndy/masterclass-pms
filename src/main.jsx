@@ -9,6 +9,7 @@ import './index.css'
 
 import { LangProvider } from './context/LangContext'
 import { registerSW } from 'virtual:pwa-register'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 const updateSW = registerSW({
   onNeedRefresh() {
@@ -27,14 +28,16 @@ seedDatabase().catch(console.error);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <HashRouter>
-      <LangProvider>
-        <ThemeProvider>
-          <AuthProvider>
-            <App />
-          </AuthProvider>
-        </ThemeProvider>
-      </LangProvider>
-    </HashRouter>
+    <ErrorBoundary>
+      <HashRouter>
+        <LangProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </ThemeProvider>
+        </LangProvider>
+      </HashRouter>
+    </ErrorBoundary>
   </React.StrictMode>
 )
