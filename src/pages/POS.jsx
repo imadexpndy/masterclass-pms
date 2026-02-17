@@ -164,7 +164,7 @@ export default function POS() {
         if (settings.autoPrint !== 'off') {
             setTimeout(() => {
                 smartPrint();
-            }, 500);
+            }, 800);
         }
     };
 
@@ -221,7 +221,7 @@ export default function POS() {
 
                 // Auto-print for existing order payment
                 if (settings.autoPrint !== 'off') {
-                    setTimeout(() => smartPrint(), 500);
+                    setTimeout(() => smartPrint(), 800);
                 }
             }
 
@@ -247,7 +247,7 @@ export default function POS() {
                         await smartPrint();
                         setShowBill(false);
                         setPaidOrder(null);
-                    }, 500);
+                    }, 800);
                 }
             }
             return;
@@ -407,7 +407,7 @@ export default function POS() {
         if (settings.autoPrint !== 'off') {
             setTimeout(() => {
                 smartPrint();
-            }, 500);
+            }, 800);
         }
     };
 
@@ -642,7 +642,7 @@ export default function POS() {
                                 // Auto-close receipt and return to POS
                                 setShowBill(false);
                                 setPaidOrder(null);
-                            }, 600);
+                            }, 800);
                         }} disabled={cart.length === 0}>
                             <IconPrint size={14} /> {lang === 'ar' ? 'طبع' : 'Imprimer'}
                         </button>
