@@ -223,11 +223,11 @@ export default function POS() {
             id: orderId,
             tableId: tableId || null,
             waiterId: user.id,
-            status: paymentMethod === 'pending' ? 'pending' : 'paid',
+            status: (paymentMethod === 'pending' || paymentMethod === 'print') ? 'pending' : 'paid',
             createdAt: now,
             updatedAt: now,
             total,
-            paymentMethod,
+            paymentMethod: paymentMethod === 'print' ? 'pending' : paymentMethod,
             synced: false,
         };
 
@@ -256,6 +256,23 @@ export default function POS() {
             const table = tables.find(t => t.id === tableId);
             setPaidOrder({
                 ...order,
+                items: orderItems,
+                waiterName: waiter?.name || user?.name || '—',
+                tableName: table?.name || '',
+                changeGiven: 0,
+                amountReceived: 0,
+            });
+            setShowBill(true);
+        }
+
+        // 'print' mode: also show receipt (but order stays pending)
+        if (paymentMethod === 'print') {
+            const waiter = users.find(u => u.id === user.id);
+            const table = tables.find(t => t.id === tableId);
+            setPaidOrder({
+                ...order,
+                status: 'pending',
+                paymentMethod: 'pending',
                 items: orderItems,
                 waiterName: waiter?.name || user?.name || '—',
                 tableName: table?.name || '',
@@ -577,8 +594,11 @@ export default function POS() {
                         <button className="btn btn-success btn-sm" style={{ flex: 1 }} onClick={() => sendOrder('cash')} disabled={cart.length === 0}>
                             <IconCash size={14} /> {t('cash')}
                         </button>
-                        <button className="btn btn-success btn-sm" style={{ flex: 1 }} onClick={() => sendOrder('card')} disabled={cart.length === 0}>
-                            <IconCreditCard size={14} /> {t('card')}
+                        <button className="btn btn-success btn-sm" style={{ flex: 1 }} onClick={async () => {
+                            await sendOrder('print');
+                            setTimeout(() => smartPrint(), 600);
+                        }} disabled={cart.length === 0}>
+                            <IconPrint size={14} /> {lang === 'ar' ? 'طبع' : 'Imprimer'}
                         </button>
                     </div>
                 </div>
