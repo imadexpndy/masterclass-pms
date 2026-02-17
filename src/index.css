@@ -2091,9 +2091,9 @@ hr {
     margin: 0;
     padding: 0;
     background: white;
-    width: 80mm;
-    min-width: 80mm;
-    max-width: 80mm;
+    width: 72mm;
+    min-width: 72mm;
+    max-width: 72mm;
   }
 
   .login-page,
@@ -2109,8 +2109,8 @@ hr {
     display: block !important;
     height: auto !important;
     overflow: visible !important;
-    width: 80mm !important;
-    max-width: 80mm !important;
+    width: 72mm !important;
+    max-width: 72mm !important;
     position: static !important;
     margin: 0 auto !important;
     padding: 0 !important;
@@ -2131,8 +2131,8 @@ hr {
     position: relative;
     width: 100%;
     margin: 0;
-    padding: 3mm 3mm 3mm 5mm;
-    /* Extra left padding to avoid thermal printer's non-printable zone */
+    padding: 4mm;
+    /* Equal padding on all sides — pageSize in main.js accounts for non-printable zone */
     box-sizing: border-box;
     box-shadow: none;
     border: none;
