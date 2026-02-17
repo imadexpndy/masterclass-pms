@@ -608,7 +608,13 @@ export default function POS() {
                         </button>
                         <button className="btn btn-success btn-sm" style={{ flex: 1 }} onClick={async () => {
                             await sendOrder('print');
-                            setTimeout(() => smartPrint(), 600);
+                            // Brief delay for receipt to render, then print and auto-close
+                            setTimeout(async () => {
+                                await smartPrint();
+                                // Auto-close receipt and return to POS
+                                setShowBill(false);
+                                setPaidOrder(null);
+                            }, 600);
                         }} disabled={cart.length === 0}>
                             <IconPrint size={14} /> {lang === 'ar' ? 'طبع' : 'Imprimer'}
                         </button>
