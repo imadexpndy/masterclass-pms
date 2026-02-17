@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useNavigate } from 'react-router-dom';
 import db from '../db/db';
@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import {
     IconTable, IconCircle, IconBuilding, IconTreePalm,
     IconCheck, IconX, IconDoor, IconMoney,
-    IconPlus, IconTrash
+    IconPlus, IconTrash, IconDesktop, IconBox, IconChevronDown
 } from '../components/Icons';
 
 const ROWS = 6;
@@ -86,6 +86,16 @@ const GridTable = ({ item, onClick, onDragStart, onEditName }) => {
                     <IconMoney size={24} />
                     <span className="grid-item-label" style={{ fontSize: '0.75rem', color: '#fff' }}>{item.name}</span>
                 </div>
+            ) : item.type === 'tv' ? (
+                <div className="tv-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#93c5fd' }}>
+                    <IconDesktop size={20} />
+                    <span className="grid-item-label" style={{ fontSize: '0.75rem' }}>{item.name}</span>
+                </div>
+            ) : item.type === 'base' ? (
+                <div className="base-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#cbd5e1' }}>
+                    <IconBox size={20} />
+                    <span className="grid-item-label" style={{ fontSize: '0.75rem' }}>{item.name}</span>
+                </div>
             ) : editing ? (
                 <input
                     ref={inputRef}
@@ -99,7 +109,6 @@ const GridTable = ({ item, onClick, onDragStart, onEditName }) => {
                 />
             ) : (
                 <span className="grid-item-label">
-                    {item.type === 'tv' ? '📺 ' : ''}
                     {item.name}
                 </span>
             )}
@@ -116,6 +125,21 @@ export default function Tables() {
     const [dragItem, setDragItem] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
     const [trashHover, setTrashHover] = useState(false);
+
+    // Add Menu State
+    const [showAddMenu, setShowAddMenu] = useState(false);
+    const menuRef = useRef(null);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setShowAddMenu(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     // Filter by zone
     const zoneItems = allItems.filter(i => i.zone === activeZone);
@@ -176,14 +200,19 @@ export default function Tables() {
         }
 
         await db.diningTables.update(dragItem.id, { row, col });
-        handleDragEnd(); // Reset state
+        handleDragEnd();
     };
 
     const handleEditName = async (id, newName) => {
         await db.diningTables.update(id, { name: newName });
     };
 
-    const handleAddTable = async () => {
+    const handleAddItem = async (type) => {
+        setShowAddMenu(false);
+
+        let newName = '';
+        let status = 'free'; // default
+
         if (activeZone === 'salle') {
             // Find first empty cell
             for (let r = 0; r < ROWS; r++) {
@@ -191,18 +220,28 @@ export default function Tables() {
                     const key = `${r}-${c}`;
                     if (!gridMap[key]) {
                         // Found empty slot
-                        // Generate name: Find max number in existing tables to increment?
-                        // Simple approach: "Table X"
-                        const newName = `T-${salleCount + 1 + Math.floor(Math.random() * 10)}`;
+                        if (type === 'table') {
+                            newName = `T-${salleCount + 1 + Math.floor(Math.random() * 10)}`;
+                        } else if (type === 'tv') {
+                            const tvCount = zoneItems.filter(i => i.type === 'tv').length;
+                            newName = `TV ${tvCount + 1}`;
+                        } else if (type === 'base') {
+                            const baseCount = zoneItems.filter(i => i.type === 'base').length;
+                            newName = `BASE ${baseCount + 1}`;
+                        } else if (type === 'door') {
+                            const doorCount = zoneItems.filter(i => i.type === 'door').length;
+                            newName = doorCount === 0 ? 'ENTRÉE' : 'SORTIE';
+                        }
+
                         await db.diningTables.add({
                             id: uid(),
                             name: newName,
-                            status: 'free',
-                            seats: 4,
+                            status: type === 'table' ? 'free' : 'active', // 'active' for others simply to have a class
+                            seats: type === 'table' ? 4 : 0,
                             zone: 'salle',
                             row: r,
                             col: c,
-                            type: 'table'
+                            type: type
                         });
                         return;
                     }
@@ -210,15 +249,21 @@ export default function Tables() {
             }
             alert("La grille est pleine !");
         } else {
-            // Terrasse
-            const newName = `Terrasse ${terrasseCount + 1}`;
+            // Terrasse -> Only tables allowed usually? Or allow all?
+            // Allow all for now, displayed as list items
+            if (type === 'table') {
+                newName = `Terrasse ${terrasseCount + 1}`;
+            } else {
+                newName = `${type.toUpperCase()} ${Date.now().toString().slice(-4)}`;
+            }
+
             await db.diningTables.add({
                 id: uid(),
                 name: newName,
                 status: 'free',
                 seats: 4,
                 zone: 'terrasse',
-                type: 'table'
+                type: type
             });
         }
     };
@@ -233,7 +278,7 @@ export default function Tables() {
         handleDragEnd();
     };
 
-    // ── Render Grid (Salle only uses custom grid, Terrasse uses simple grid) ──
+    // ── Render Grid ──
     const isSalle = activeZone === 'salle';
 
     const renderSalleGrid = () => {
@@ -264,24 +309,25 @@ export default function Tables() {
         return cells;
     };
 
-    // Terrasse: simple list of tables
     const renderTerrasseGrid = () => {
         const terrTables = zoneItems
-            .filter(i => i.type === 'table' || !i.type)
-            .sort((a, b) => {
-                const numA = parseInt(a.name.replace(/\D/g, '')) || 0;
-                const numB = parseInt(b.name.replace(/\D/g, '')) || 0;
-                return numA - numB;
+            .sort((a, b) => { // Sort by creation or name
+                return a.name.localeCompare(b.name);
             });
 
-        return terrTables.map(table => (
+        return terrTables.map(item => (
             <div
-                key={table.id}
-                className={`terrasse-table ${table.status}`}
-                onClick={() => handleTableClick(table)}
+                key={item.id}
+                className={`terrasse-table ${item.status}`}
+                onClick={() => handleTableClick(item)}
             >
-                <span className={`grid-item-dot ${table.status}`} />
-                <span className="grid-item-label">{table.name.replace('Terrasse ', 'T')}</span>
+                {/* Icon based on type */}
+                {item.type === 'tv' && <IconDesktop size={20} />}
+                {item.type === 'base' && <IconBox size={20} />}
+                {item.type === 'door' && <IconDoor size={20} />}
+                {(!item.type || item.type === 'table') && <span className={`grid-item-dot ${item.status}`} />}
+
+                <span className="grid-item-label">{item.name.replace('Terrasse ', 'T')}</span>
             </div>
         ));
     };
@@ -303,13 +349,36 @@ export default function Tables() {
                         <span className="zone-badge">{terrasseCount}</span>
                     </button>
 
-                    {/* NEW: Add Table Button (Admin Only) */}
+                    {/* NEW: Add Item Menu (Admin Only) */}
                     {user?.role === 'admin' && (
-                        <div className="table-controls">
-                            <button className="add-table-btn" onClick={handleAddTable} title="Ajouter une table">
+                        <div className="table-controls" ref={menuRef} style={{ position: 'relative' }}>
+                            <button
+                                className="add-table-btn"
+                                onClick={() => setShowAddMenu(!showAddMenu)}
+                                title="Ajouter un élément"
+                            >
                                 <IconPlus size={16} />
                                 <span>{lang === 'ar' ? 'إضافة' : 'Ajouter'}</span>
+                                <IconChevronDown size={14} />
                             </button>
+
+                            {/* Dropdown Menu */}
+                            {showAddMenu && (
+                                <div className="add-menu-dropdown">
+                                    <button onClick={() => handleAddItem('table')}>
+                                        <IconTable size={16} /> Table
+                                    </button>
+                                    <button onClick={() => handleAddItem('tv')}>
+                                        <IconDesktop size={16} /> TV
+                                    </button>
+                                    <button onClick={() => handleAddItem('base')}>
+                                        <IconBox size={16} /> Base
+                                    </button>
+                                    <button onClick={() => handleAddItem('door')}>
+                                        <IconDoor size={16} /> Porte
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -334,7 +403,7 @@ export default function Tables() {
                     </div>
                 </div>
 
-                {/* TRASH ZONE (Visible only when dragging) */}
+                {/* TRASH ZONE */}
                 {user?.role === 'admin' && (
                     <div
                         className={`trash-zone ${isDragging ? 'visible' : ''} ${trashHover ? 'drag-over' : ''}`}
