@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useNavigate } from 'react-router-dom';
 import db from '../db/db';
 import { useLang } from '../context/LangContext';
+import { useAuth } from '../context/AuthContext';
 import {
     IconTable, IconCircle, IconBuilding, IconTreePalm,
     IconCheck, IconX, IconDoor, IconMoney,
@@ -110,6 +111,7 @@ export default function Tables() {
     const allItems = useLiveQuery(() => db.diningTables.toArray()) || [];
     const navigate = useNavigate();
     const { t, lang } = useLang();
+    const { user } = useAuth();
     const [activeZone, setActiveZone] = useState('salle');
     const [dragItem, setDragItem] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -301,13 +303,15 @@ export default function Tables() {
                         <span className="zone-badge">{terrasseCount}</span>
                     </button>
 
-                    {/* NEW: Add Table Button */}
-                    <div className="table-controls">
-                        <button className="add-table-btn" onClick={handleAddTable} title="Ajouter une table">
-                            <IconPlus size={16} />
-                            <span>{lang === 'ar' ? 'إضافة' : 'Ajouter'}</span>
-                        </button>
-                    </div>
+                    {/* NEW: Add Table Button (Admin Only) */}
+                    {user?.role === 'admin' && (
+                        <div className="table-controls">
+                            <button className="add-table-btn" onClick={handleAddTable} title="Ajouter une table">
+                                <IconPlus size={16} />
+                                <span>{lang === 'ar' ? 'إضافة' : 'Ajouter'}</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Grid */}
@@ -331,15 +335,17 @@ export default function Tables() {
                 </div>
 
                 {/* TRASH ZONE (Visible only when dragging) */}
-                <div
-                    className={`trash-zone ${isDragging ? 'visible' : ''} ${trashHover ? 'drag-over' : ''}`}
-                    onDragOver={(e) => { e.preventDefault(); setTrashHover(true); }}
-                    onDragLeave={() => setTrashHover(false)}
-                    onDrop={handleTrashDrop}
-                    title="Glisser ici pour supprimer"
-                >
-                    <IconTrash size={24} />
-                </div>
+                {user?.role === 'admin' && (
+                    <div
+                        className={`trash-zone ${isDragging ? 'visible' : ''} ${trashHover ? 'drag-over' : ''}`}
+                        onDragOver={(e) => { e.preventDefault(); setTrashHover(true); }}
+                        onDragLeave={() => setTrashHover(false)}
+                        onDrop={handleTrashDrop}
+                        title="Glisser ici pour supprimer"
+                    >
+                        <IconTrash size={24} />
+                    </div>
+                )}
             </div>
         </div>
     );
