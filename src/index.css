@@ -2131,8 +2131,8 @@ hr {
     position: relative;
     width: 100%;
     margin: 0;
-    padding: 3mm;
-    /* Padding on all 4 edges so text is not cut off */
+    padding: 3mm 3mm 3mm 5mm;
+    /* Extra left padding to avoid thermal printer's non-printable zone */
     box-sizing: border-box;
     box-shadow: none;
     border: none;
