@@ -198,11 +198,11 @@ export default function POS() {
             await db.orders.update(existingOrder.id, {
                 total,
                 updatedAt: new Date().toISOString(),
-                status: paymentMethod === 'pending' ? existingOrder.status : 'paid',
-                paymentMethod: paymentMethod === 'pending' ? existingOrder.paymentMethod : paymentMethod,
+                status: (paymentMethod === 'pending' || paymentMethod === 'print') ? existingOrder.status : 'paid',
+                paymentMethod: (paymentMethod === 'pending' || paymentMethod === 'print') ? existingOrder.paymentMethod : paymentMethod,
             });
 
-            if (paymentMethod !== 'pending') {
+            if (paymentMethod !== 'pending' && paymentMethod !== 'print') {
                 if (tableId) await db.diningTables.update(tableId, { status: 'free' });
                 const waiter = users.find(u => u.id === existingOrder.waiterId);
                 const table = tables.find(t => t.id === existingOrder.tableId);
@@ -222,6 +222,32 @@ export default function POS() {
                 // Auto-print for existing order payment
                 if (settings.autoPrint !== 'off') {
                     setTimeout(() => smartPrint(), 500);
+                }
+            }
+
+            // 'print' mode for existing order
+            if (paymentMethod === 'print') {
+                const waiter = users.find(u => u.id === existingOrder.waiterId);
+                const table = tables.find(t => t.id === existingOrder.tableId);
+                setPaidOrder({
+                    ...existingOrder,
+                    total,
+                    paymentMethod: 'pending', // Display as pending on receipt
+                    items: newOrderItems,
+                    waiterName: waiter?.name || user?.name || '—',
+                    tableName: table?.name || '',
+                    changeGiven: 0,
+                    amountReceived: 0,
+                });
+                setShowBill(true);
+                // Don't clear cart for print
+
+                if (settings.autoPrint !== 'off') {
+                    setTimeout(async () => {
+                        await smartPrint();
+                        setShowBill(false);
+                        setPaidOrder(null);
+                    }, 500);
                 }
             }
             return;
@@ -294,7 +320,9 @@ export default function POS() {
             setShowBill(true);
         }
 
-        setCart([]);
+        if (paymentMethod !== 'print') {
+            setCart([]);
+        }
     };
 
     const handleCashConfirm = () => {
