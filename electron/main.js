@@ -74,7 +74,10 @@ ipcMain.handle('silent-print', async (event, printerName) => {
             silent: true,
             printBackground: true,
             deviceName: printerName,
-            // margins: { marginType: 'printableArea' } // Let the printer driver decide
+            // 80mm × 200mm in microns — matches thermal receipt printer width
+            // Without this, Electron defaults to A4 (210mm), causing blank/tiny prints
+            pageSize: { width: 80000, height: 200000 },
+            margins: { marginType: 'none' },
         };
 
         mainWindow.webContents.print(options, (success, failureReason) => {
