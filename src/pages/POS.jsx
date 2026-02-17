@@ -159,6 +159,13 @@ export default function POS() {
         setShowCashModal(false);
         setCart([]);
         setPaymentInfo(null);
+
+        // Auto-print receipt (if enabled in settings)
+        if (settings.autoPrint !== 'off') {
+            setTimeout(() => {
+                smartPrint();
+            }, 500);
+        }
     };
 
     const sendOrder = async (paymentMethod = 'pending') => {
@@ -211,6 +218,11 @@ export default function POS() {
                 });
                 setShowBill(true);
                 setCart([]);
+
+                // Auto-print for existing order payment
+                if (settings.autoPrint !== 'off') {
+                    setTimeout(() => smartPrint(), 500);
+                }
             }
             return;
         }
