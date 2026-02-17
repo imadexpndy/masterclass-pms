@@ -5,11 +5,13 @@ import db from '../db/db';
 import { useLang } from '../context/LangContext';
 import {
     IconTable, IconCircle, IconBuilding, IconTreePalm,
-    IconCheck, IconX, IconDoor, IconMoney
+    IconCheck, IconX, IconDoor, IconMoney,
+    IconPlus, IconTrash
 } from '../components/Icons';
 
 const ROWS = 6;
 const COLS = 8;
+const uid = () => crypto.randomUUID();
 
 /* ── Grid Cell Component ── */
 const GridCell = ({ row, col, children, onDrop, onDragOver }) => (
@@ -106,19 +108,20 @@ const GridTable = ({ item, onClick, onDragStart, onEditName }) => {
 
 export default function Tables() {
     const allItems = useLiveQuery(() => db.diningTables.toArray()) || [];
-    const orders = useLiveQuery(() => db.orders.where('status').anyOf('pending', 'preparing', 'ready', 'served').toArray()) || [];
     const navigate = useNavigate();
     const { t, lang } = useLang();
     const [activeZone, setActiveZone] = useState('salle');
     const [dragItem, setDragItem] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [trashHover, setTrashHover] = useState(false);
 
     // Filter by zone
     const zoneItems = allItems.filter(i => i.zone === activeZone);
-    const tables = zoneItems.filter(i => i.type === 'table' || (!i.type && i.seats > 0));
     const salleCount = allItems.filter(i => i.zone === 'salle' && (i.type === 'table' || (!i.type && i.seats > 0))).length;
     const terrasseCount = allItems.filter(i => i.zone === 'terrasse' && (i.type === 'table' || (!i.type && i.seats > 0))).length;
 
     // Stats (tables only)
+    const tables = zoneItems.filter(i => i.type === 'table' || (!i.type && i.seats > 0));
     const freeCount = tables.filter(t => t.status === 'free').length;
     const occCount = tables.filter(t => t.status === 'occupied').length;
 
@@ -139,8 +142,15 @@ export default function Tables() {
 
     const handleDragStart = (e, item) => {
         setDragItem(item);
+        setIsDragging(true);
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', item.id);
+    };
+
+    const handleDragEnd = () => {
+        setIsDragging(false);
+        setDragItem(null);
+        setTrashHover(false);
     };
 
     const handleDragOver = (e) => {
@@ -164,11 +174,61 @@ export default function Tables() {
         }
 
         await db.diningTables.update(dragItem.id, { row, col });
-        setDragItem(null);
+        handleDragEnd(); // Reset state
     };
 
     const handleEditName = async (id, newName) => {
         await db.diningTables.update(id, { name: newName });
+    };
+
+    const handleAddTable = async () => {
+        if (activeZone === 'salle') {
+            // Find first empty cell
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const key = `${r}-${c}`;
+                    if (!gridMap[key]) {
+                        // Found empty slot
+                        // Generate name: Find max number in existing tables to increment?
+                        // Simple approach: "Table X"
+                        const newName = `T-${salleCount + 1 + Math.floor(Math.random() * 10)}`;
+                        await db.diningTables.add({
+                            id: uid(),
+                            name: newName,
+                            status: 'free',
+                            seats: 4,
+                            zone: 'salle',
+                            row: r,
+                            col: c,
+                            type: 'table'
+                        });
+                        return;
+                    }
+                }
+            }
+            alert("La grille est pleine !");
+        } else {
+            // Terrasse
+            const newName = `Terrasse ${terrasseCount + 1}`;
+            await db.diningTables.add({
+                id: uid(),
+                name: newName,
+                status: 'free',
+                seats: 4,
+                zone: 'terrasse',
+                type: 'table'
+            });
+        }
+    };
+
+    const handleTrashDrop = async (e) => {
+        e.preventDefault();
+        if (!dragItem) return;
+
+        if (window.confirm(`Supprimer ${dragItem.name} ?`)) {
+            await db.diningTables.delete(dragItem.id);
+        }
+        handleDragEnd();
     };
 
     // ── Render Grid (Salle only uses custom grid, Terrasse uses simple grid) ──
@@ -202,7 +262,7 @@ export default function Tables() {
         return cells;
     };
 
-    // Terrasse: simple list of tables (unchanged from before, but simpler)
+    // Terrasse: simple list of tables
     const renderTerrasseGrid = () => {
         const terrTables = zoneItems
             .filter(i => i.type === 'table' || !i.type)
@@ -225,7 +285,7 @@ export default function Tables() {
     };
 
     return (
-        <div className="tables-layout">
+        <div className="tables-layout" onDragEnd={handleDragEnd}>
             {/* ═══ Floor Plan ═══ */}
             <div className="floor-plan-panel">
                 {/* Zone tabs */}
@@ -240,6 +300,14 @@ export default function Tables() {
                         {t('zoneTerrasse')}
                         <span className="zone-badge">{terrasseCount}</span>
                     </button>
+
+                    {/* NEW: Add Table Button */}
+                    <div className="table-controls">
+                        <button className="add-table-btn" onClick={handleAddTable} title="Ajouter une table">
+                            <IconPlus size={16} />
+                            <span>{lang === 'ar' ? 'إضافة' : 'Ajouter'}</span>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Grid */}
@@ -260,6 +328,17 @@ export default function Tables() {
                     <div className="floor-legend-hint">
                         {lang === 'ar' ? 'اسحب للتحريك · انقر مرتين للتسمية' : 'Glisser pour déplacer · Double-clic pour renommer'}
                     </div>
+                </div>
+
+                {/* TRASH ZONE (Visible only when dragging) */}
+                <div
+                    className={`trash-zone ${isDragging ? 'visible' : ''} ${trashHover ? 'drag-over' : ''}`}
+                    onDragOver={(e) => { e.preventDefault(); setTrashHover(true); }}
+                    onDragLeave={() => setTrashHover(false)}
+                    onDrop={handleTrashDrop}
+                    title="Glisser ici pour supprimer"
+                >
+                    <IconTrash size={24} />
                 </div>
             </div>
         </div>
