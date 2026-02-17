@@ -48,13 +48,18 @@ function createWindow() {
 // Return list of available printers
 ipcMain.handle('get-printers', async () => {
     if (!mainWindow) return [];
-    const printers = mainWindow.webContents.getPrinters();
-    return printers.map(p => ({
-        name: p.name,
-        displayName: p.displayName || p.name,
-        isDefault: p.isDefault,
-        status: p.status,
-    }));
+    try {
+        const printers = await mainWindow.webContents.getPrintersAsync();
+        return printers.map(p => ({
+            name: p.name,
+            displayName: p.displayName || p.name,
+            isDefault: p.isDefault,
+            status: p.status,
+        }));
+    } catch (e) {
+        console.error('getPrintersAsync failed:', e);
+        return [];
+    }
 });
 
 // Silent print to a specific printer (no dialog)

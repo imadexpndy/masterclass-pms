@@ -12,6 +12,8 @@ export default function Dashboard() {
     const menuItems = useLiveQuery(() => db.menuItems.toArray()) || [];
     const orderItems = useLiveQuery(() => db.orderItems.toArray()) || [];
     const users = useLiveQuery(() => db.users.toArray()) || [];
+    const settingsArr = useLiveQuery(() => db.settings.toArray()) || [];
+    const settings = Object.fromEntries(settingsArr.map(s => [s.key, s.value]));
     const navigate = useNavigate();
 
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -260,7 +262,15 @@ export default function Dashboard() {
                                 <button className="btn btn-ghost" onClick={() => setSelectedOrder(null)}>
                                     {t('close')}
                                 </button>
-                                <button className="btn btn-primary" onClick={() => window.print()}>
+                                <button className="btn btn-primary" onClick={async () => {
+                                    const printerName = settings?.printerName;
+                                    if (printerName && window.electron?.silentPrint) {
+                                        try {
+                                            const result = await window.electron.silentPrint(printerName);
+                                            if (!result.success) window.print();
+                                        } catch { window.print(); }
+                                    } else { window.print(); }
+                                }}>
                                     <IconReceipt size={16} /> {t('printReceipt')}
                                 </button>
                             </div>
