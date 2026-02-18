@@ -59,15 +59,15 @@ export const IconCircle = ({ filled, size = 10, color = 'currentColor', ...p }) 
 // ===== Category Icons (replace emojis) =====
 export const IconBreakfast = (p) => <I {...p} d={<><path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" /></>} />;
 export const IconSalad = (p) => <I {...p} d={<><path d="M7 21h10" /><path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9z" /><path d="M12 3c-1.5 0-2.9.5-4 1.5a6.96 6.96 0 0 0-2 5.5h12a6.96 6.96 0 0 0-2-5.5A5.96 5.96 0 0 0 12 3z" /></>} />;
-export const IconTagine = (p) => <I {...p} d={<><ellipse cx="12" cy="17" rx="9" ry="4" /><path d="M12 3l-4 10h8L12 3z" /></>} />;
-export const IconPizza = (p) => <I {...p} d={<><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z" /><path d="M12 2l-3 18" /><path d="M12 2l3 18" /><path d="M5 9h14" /></>} />;
-export const IconPasta = (p) => <I {...p} d={<><path d="M16 2s3 4 3 10-3 10-3 10" /><path d="M8 2s-3 4-3 10 3 10 3 10" /><path d="M2 12h20" /><path d="M7 7h10" /><path d="M7 17h10" /></>} />;
-export const IconSteak = (p) => <I {...p} d={<><path d="M13 3C8 3 4 7 4 12s4 9 9 9c2.5 0 4.5-1 6-2.5 1.5-1.5 2-3.5 2-5.5C21 8 17.5 3 13 3z" /><path d="M9 12s1-2 3-2 3 2 3 2" /></>} />;
-export const IconWrap = (p) => <I {...p} d={<><path d="M4 20L20 4" /><path d="M4 4c0 8 4 16 16 16" /><path d="M4 4c8 0 16 4 16 16" /></>} />;
+export const IconTagine = (p) => <I {...p} d={<><ellipse cx="12" cy="18" rx="9" ry="3" /><path d="M3 18c0-7 4-12 9-14c5 2 9 7 9 14" /><circle cx="12" cy="4" r="1" /></>} />;
+export const IconPizza = (p) => <I {...p} d={<><path d="M12 2L3 20.5h18L12 2z" /><circle cx="10" cy="13" r="1" /><circle cx="13" cy="9" r="1" /><circle cx="14" cy="15" r="1" /><path d="M3 20.5a1 1 0 0 0 .9.5h14.2a1 1 0 0 0 .9-.5" /></>} />;
+export const IconPasta = (p) => <I {...p} d={<><path d="M4 16c0 3.5 3.5 6 8 6s8-2.5 8-6" /><path d="M4 16H2" /><path d="M20 16h2" /><path d="M7 16c0-5 1-9 2.5-11" /><path d="M10.5 16c0-4.5 .5-8.5 1.5-11" /><path d="M13.5 16c0-4.5-.5-8.5-1.5-11" /><path d="M17 16c0-5-1-9-2.5-11" /></>} />;
+export const IconSteak = (p) => <I {...p} d={<><ellipse cx="12" cy="12" rx="9" ry="7" /><path d="M8 12c1-1 2.5-1.5 4-1.5s3 .5 4 1.5" /><path d="M9 9.5c.5-.3 1.5-.5 3-.5s2.5.2 3 .5" /></>} />;
+export const IconWrap = (p) => <I {...p} d={<><path d="M5 20L9 4h6l4 16" /><path d="M8 12h8" /><ellipse cx="12" cy="20" rx="7" ry="1.5" /></>} />;
 export const IconSandwich = (p) => <I {...p} d={<><path d="M3 11h18l-1.5-5A2 2 0 0 0 17.6 4H6.4a2 2 0 0 0-1.9 1.4L3 11z" /><path d="M3 15h18" /><path d="M5 19h14a2 2 0 0 0 2-2H3a2 2 0 0 0 2 2z" /><path d="M3 11v4h18v-4" /></>} />;
-export const IconJuice = (p) => <I {...p} d={<><path d="M8 2h8l-2 18H10L8 2z" /><path d="M6 6h12" /><path d="M7 10h10" /></>} />;
+export const IconJuice = (p) => <I {...p} d={<><path d="M8 2h8l-1.5 18h-5L8 2z" /><path d="M7 6h10" /><path d="M16 2l3-1" /><circle cx="12" cy="12" r="1.5" /></>} />;
 export const IconCoffee = (p) => <I {...p} d={<><path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" /></>} />;
-export const IconDessert = (p) => <I {...p} d={<><path d="M12 2v6" /><path d="M8 8l4-2 4 2" /><path d="M5 12a7 7 0 0 0 14 0" /><path d="M5 12H3l2-4h14l2 4h-2" /><path d="M10 22v-4" /><path d="M14 22v-4" /></>} />;
+export const IconDessert = (p) => <I {...p} d={<><circle cx="12" cy="7" r="4" /><path d="M8 10l-2 12h12l-2-12" /><path d="M12 3v-1" /><path d="M10 14h4" /></>} />;
 
 // ===== Misc =====
 export const IconBell = (p) => <I {...p} d={<><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></>} />;
