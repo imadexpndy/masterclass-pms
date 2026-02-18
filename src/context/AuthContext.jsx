@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import db from '../db/db';
+import { logActivity } from '../db/activityLog';
 
 const AuthContext = createContext(null);
 
@@ -27,10 +28,12 @@ export function AuthProvider({ children }) {
         const userData = { id: u.id, name: u.name, role: u.role };
         setUser(userData);
         localStorage.setItem('mc_pos_user', JSON.stringify(userData));
+        logActivity(u.id, u.name, 'login', '', { role: u.role });
         return { ok: true };
     };
 
     const logout = () => {
+        if (user) logActivity(user.id, user.name, 'logout');
         setUser(null);
         localStorage.removeItem('mc_pos_user');
     };

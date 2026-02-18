@@ -34,4 +34,8 @@ db.version(4).stores({
     diningTables: 'id, name, status, zone, seats, row, col, type'
 });
 
+db.version(5).stores({
+    activityLog: '++id, userId, action, timestamp'
+});
+
 export default db;

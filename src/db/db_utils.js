@@ -107,3 +107,39 @@ export const resetAllOrders = async () => {
         return { success: false, error: error.message };
     }
 };
+
+/**
+ * Reset only today's orders (orders, orderItems, payments created today)
+ */
+export const resetTodayOrders = async () => {
+    try {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        const todayOrders = await db.orders
+            .filter(o => new Date(o.createdAt) >= todayStart)
+            .toArray();
+
+        const todayOrderIds = todayOrders.map(o => o.id);
+
+        await db.transaction('rw', [db.orders, db.orderItems, db.payments], async () => {
+            // Delete order items for today's orders
+            for (const orderId of todayOrderIds) {
+                await db.orderItems.where('orderId').equals(orderId).delete();
+            }
+            // Delete today's orders
+            await db.orders.bulkDelete(todayOrderIds);
+            // Delete payments for today's orders
+            if (db.payments) {
+                for (const orderId of todayOrderIds) {
+                    await db.payments.where('orderId').equals(orderId).delete();
+                }
+            }
+        });
+
+        return { success: true, count: todayOrderIds.length };
+    } catch (error) {
+        console.error('Reset today orders failed:', error);
+        return { success: false, error: error.message };
+    }
+};

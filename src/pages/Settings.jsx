@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import db from '../db/db';
 import { useLang } from '../context/LangContext';
+import { useAuth } from '../context/AuthContext';
+import { logActivity } from '../db/activityLog';
 import { IconCheck, IconSettings, IconDownload, IconUpload, IconPrint } from '../components/Icons';
 import { downloadBackup, importData } from '../db/db_utils';
 
@@ -17,6 +19,7 @@ const SETTINGS_KEYS = [
 
 export default function Settings() {
     const { lang, t } = useLang();
+    const { user } = useAuth();
     const [values, setValues] = useState({});
     const [saved, setSaved] = useState(false);
     const [importing, setImporting] = useState(false);
@@ -72,6 +75,7 @@ export default function Settings() {
         await db.settings.put({ key: 'printerName', value: selectedPrinter || '' });
         await db.settings.put({ key: 'autoPrint', value: values.autoPrint || 'on' });
         await db.settings.put({ key: 'ramadanMode', value: values.ramadanMode || 'off' });
+        logActivity(user?.id, user?.name, 'settings_save', '', { printer: selectedPrinter });
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
     };

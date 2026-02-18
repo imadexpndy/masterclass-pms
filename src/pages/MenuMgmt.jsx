@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import db from '../db/db';
 import { useLang } from '../context/LangContext';
+import { useAuth } from '../context/AuthContext';
+import { logActivity } from '../db/activityLog';
 import { IconPlus, IconTrash, IconSettings, IconX, IconMenuBoard } from '../components/Icons';
 
 export default function MenuMgmt() {
     const { t } = useLang();
+    const { user } = useAuth();
     const categories = useLiveQuery(() => db.categories.orderBy('sortOrder').toArray()) || [];
     const items = useLiveQuery(() => db.menuItems.toArray()) || [];
     const [activeTab, setActiveTab] = useState('items');
@@ -24,40 +27,45 @@ export default function MenuMgmt() {
     };
     const openEditItem = (item) => {
         setEditing(item);
-        setForm({ name: item.name, nameAr: item.nameAr || '', price: String(item.price), categoryId: item.categoryId, description: item.description || '', image: item.image || '' });
-        setShowModal(true);
+        setEditingItem(item);
+        setItemForm({ name: item.name, nameAr: item.nameAr || '', price: String(item.price), categoryId: item.categoryId, description: item.description || '', image: item.image || '' });
+        setShowItemModal(true);
     };
 
     const saveItem = async () => {
-        if (!form.name || !form.price || !form.categoryId) return;
-        const data = { name: form.name, nameAr: form.nameAr, price: parseFloat(form.price), categoryId: form.categoryId, description: form.description, image: form.image, available: true, stockQty: 999 };
-        if (editing) {
-            await db.menuItems.update(editing.id, data);
+        if (!itemForm.name || !itemForm.price) return;
+        if (editingItem) {
+            await db.menuItems.update(editingItem.id, { ...itemForm, price: parseFloat(itemForm.price) });
+            logActivity(user?.id, user?.name, 'menu_edit', itemForm.name, { price: itemForm.price });
         } else {
-            await db.menuItems.add({ id: crypto.randomUUID(), ...data });
+            await db.menuItems.add({ id: crypto.randomUUID(), ...itemForm, price: parseFloat(itemForm.price), available: true, stockQty: 100 });
+            logActivity(user?.id, user?.name, 'menu_add', itemForm.name, { price: itemForm.price });
         }
-        setShowModal(false);
+        setShowItemModal(false);
     };
 
     const deleteItem = async (item) => {
-        if (confirm(`${t('confirmDelete')} "${item.name}" ?`)) await db.menuItems.delete(item.id);
+        await db.menuItems.delete(item.id);
+        logActivity(user?.id, user?.name, 'menu_delete', item.name);
     };
 
     // Categories
     const openAddCat = () => { setCatForm({ name: '', nameAr: '', iconKey: '' }); setShowCatModal(true); };
     const saveCat = async () => {
         if (!catForm.name) return;
-        const maxSort = categories.reduce((m, c) => Math.max(m, c.sortOrder || 0), 0);
-        await db.categories.add({ id: 'cat-' + Date.now(), name: catForm.name, nameAr: catForm.nameAr, iconKey: catForm.iconKey || 'steak', sortOrder: maxSort + 1 });
+        await db.categories.add({ id: crypto.randomUUID(), name: catForm.name, nameAr: catForm.nameAr, iconKey: catForm.iconKey || 'pizza', sortOrder: categories.length });
+        logActivity(user?.id, user?.name, 'category_add', catForm.name);
         setShowCatModal(false);
     };
 
     const deleteCat = async (cat) => {
-        const count = items.filter(i => i.categoryId === cat.id).length;
-        if (confirm(`${t('confirmDelete')} "${cat.name}"?`)) {
-            await db.menuItems.where('categoryId').equals(cat.id).delete();
-            await db.categories.delete(cat.id);
+        const hasItems = items.some(i => i.categoryId === cat.id);
+        if (hasItems) {
+            alert(t('categoryHasItems'));
+            return;
         }
+        await db.categories.delete(cat.id);
+        logActivity(user?.id, user?.name, 'category_delete', cat.name);
     };
 
     const filteredItems = filter === 'all' ? items : items.filter(i => i.categoryId === filter);

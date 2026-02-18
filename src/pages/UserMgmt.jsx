@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import db from '../db/db';
 import { useLang } from '../context/LangContext';
+import { useAuth } from '../context/AuthContext';
+import { logActivity } from '../db/activityLog';
 import { IconPlus, IconSettings, IconTrash, IconCheck, IconX, IconUsers } from '../components/Icons';
 
 export default function UserMgmt() {
     const { t } = useLang();
+    const { user } = useAuth();
     const users = useLiveQuery(() => db.users.toArray()) || [];
     const [showModal, setShowModal] = useState(false);
     const [editing, setEditing] = useState(null);
@@ -18,19 +21,23 @@ export default function UserMgmt() {
         if (!form.name || !form.pin || form.pin.length !== 4) return;
         if (editing) {
             await db.users.update(editing.id, { name: form.name, pin: form.pin, role: form.role });
+            logActivity(user?.id, user?.name, 'user_edit', form.name, { role: form.role });
         } else {
             await db.users.add({ id: crypto.randomUUID(), name: form.name, pin: form.pin, role: form.role, active: true });
+            logActivity(user?.id, user?.name, 'user_add', form.name, { role: form.role });
         }
         setShowModal(false);
     };
 
     const toggleActive = async (u) => {
         await db.users.update(u.id, { active: !u.active });
+        logActivity(user?.id, user?.name, 'user_toggle', u.name, { active: !u.active });
     };
 
     const deleteUser = async (u) => {
         if (confirm(`${t('confirmDelete')} ${u.name} ?`)) {
             await db.users.delete(u.id);
+            logActivity(user?.id, user?.name, 'user_delete', u.name);
         }
     };
 

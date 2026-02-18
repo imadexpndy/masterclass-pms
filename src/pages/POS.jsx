@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import db from '../db/db';
 import { useAuth } from '../context/AuthContext';
 import { addToSyncQueue } from '../db/sync';
+import { logActivity } from '../db/activityLog';
 import { useLang } from '../context/LangContext';
 import {
     IconReceipt, IconCart, IconCash, IconCreditCard, IconPrint,
@@ -128,6 +129,8 @@ export default function POS() {
             updatedAt: new Date().toISOString(),
             total: total,
         });
+        // Log payment activity
+        logActivity(user.id, user.name, 'order_pay', `#${order.id.slice(0, 6)}`, { total, method });
 
         if (tableId) {
             await db.diningTables.update(tableId, { status: 'free' });
@@ -283,6 +286,9 @@ export default function POS() {
 
         await db.orders.add(order);
         await db.orderItems.bulkAdd(orderItems);
+
+        // Log activity
+        logActivity(user.id, user.name, 'order_create', `#${orderId.slice(0, 6)}`, { total, table: tables.find(t => t.id === tableId)?.name || '', items: cart.length });
 
         if (tableId) {
             await db.diningTables.update(tableId, { status: 'occupied' });

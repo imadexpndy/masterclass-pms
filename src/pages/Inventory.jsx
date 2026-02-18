@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import db from '../db/db';
 import { useLang } from '../context/LangContext';
+import { useAuth } from '../context/AuthContext';
+import { logActivity } from '../db/activityLog';
 import { IconBox, IconSearch } from '../components/Icons';
 
 export default function Inventory() {
     const { t } = useLang();
+    const { user } = useAuth();
     const categories = useLiveQuery(() => db.categories.orderBy('sortOrder').toArray()) || [];
     const items = useLiveQuery(() => db.menuItems.toArray()) || [];
     const [filter, setFilter] = useState('all');
@@ -19,11 +22,13 @@ export default function Inventory() {
 
     const toggleAvailable = async (item) => {
         await db.menuItems.update(item.id, { available: !item.available });
+        logActivity(user?.id, user?.name, 'item_toggle', item.name, { available: !item.available });
     };
 
     const updateStock = async (item, delta) => {
         const newQty = Math.max(0, (item.stockQty || 0) + delta);
         await db.menuItems.update(item.id, { stockQty: newQty });
+        logActivity(user?.id, user?.name, 'stock_update', item.name, { from: item.stockQty, to: newQty, delta });
     };
 
     const lowStock = items.filter(i => i.stockQty <= 10 && i.available);
