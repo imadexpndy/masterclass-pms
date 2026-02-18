@@ -238,6 +238,24 @@ const translations = {
         enterFullscreen: 'Plein écran',
         exitFullscreen: 'Quitter plein écran',
         installApp: "Installer l'application",
+
+        // Developer
+        devLogin: 'Accès Développeur',
+        devPanel: 'Panneau Développeur',
+        devSetPassword: 'Créer un mot de passe',
+        devPasswordPlaceholder: 'Mot de passe (min 6, lettres + chiffres)',
+        devConfirmPassword: 'Confirmer le mot de passe',
+        devPasswordMismatch: 'Les mots de passe ne correspondent pas',
+        devPasswordWeak: 'Min 6 caractères avec lettres et chiffres',
+        devPasswordSet: 'Mot de passe créé !',
+        devEnterPassword: 'Entrer le mot de passe',
+        devWrongPassword: 'Mot de passe incorrect',
+        devResetOrders: 'Réinitialiser les commandes',
+        devResetConfirm: 'Supprimer TOUTES les commandes ? Cette action est irréversible.',
+        devResetSuccess: 'Toutes les commandes ont été supprimées !',
+        devResetError: 'Erreur lors de la réinitialisation',
+        devOrderCount: 'commandes en base',
+        devWelcome: 'Bienvenue',
     },
 
     ar: {
@@ -478,6 +496,24 @@ const translations = {
         enterFullscreen: 'شاشة كاملة',
         exitFullscreen: 'خروج من الشاشة الكاملة',
         installApp: 'تثبيت التطبيق',
+
+        // Developer
+        devLogin: 'دخول المطور',
+        devPanel: 'لوحة المطور',
+        devSetPassword: 'إنشاء كلمة مرور',
+        devPasswordPlaceholder: 'كلمة مرور (6+ حروف وأرقام)',
+        devConfirmPassword: 'تأكيد كلمة المرور',
+        devPasswordMismatch: 'كلمات المرور غير متطابقة',
+        devPasswordWeak: '6 أحرف على الأقل مع حروف وأرقام',
+        devPasswordSet: 'تم إنشاء كلمة المرور!',
+        devEnterPassword: 'أدخل كلمة المرور',
+        devWrongPassword: 'كلمة مرور خاطئة',
+        devResetOrders: 'إعادة تعيين الطلبات',
+        devResetConfirm: 'حذف كل الطلبات؟ لا يمكن التراجع.',
+        devResetSuccess: 'تم حذف جميع الطلبات!',
+        devResetError: 'خطأ أثناء إعادة التعيين',
+        devOrderCount: 'طلبات في القاعدة',
+        devWelcome: 'مرحبا',
     }
 };
 

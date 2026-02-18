@@ -76,3 +76,34 @@ export const downloadBackup = async () => {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 };
+
+/**
+ * Hash a password string using SHA-256 (Web Crypto API)
+ * @param {string} password The plain-text password
+ * @returns {string} Hex-encoded hash
+ */
+export const hashPassword = async (password) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+/**
+ * Reset all orders data (orders, orderItems, payments)
+ * Preserves menu, users, tables, settings, and categories
+ */
+export const resetAllOrders = async () => {
+    try {
+        await db.transaction('rw', [db.orders, db.orderItems, db.payments], async () => {
+            await db.orders.clear();
+            await db.orderItems.clear();
+            if (db.payments) await db.payments.clear();
+        });
+        return { success: true };
+    } catch (error) {
+        console.error('Reset orders failed:', error);
+        return { success: false, error: error.message };
+    }
+};
