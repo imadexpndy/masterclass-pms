@@ -9,7 +9,7 @@ import {
     IconReceipt, IconCart, IconCash, IconCreditCard, IconPrint,
     IconX, IconSend, IconTrash, IconCheck,
     IconBreakfast, IconSalad, IconTagine, IconPizza, IconPasta,
-    IconSteak, IconWrap, IconSandwich, IconJuice, IconCoffee, IconDessert
+    IconSteak, IconWrap, IconSandwich, IconJuice, IconCoffee, IconDessert, IconRamadan
 } from '../components/Icons';
 import logo from '../assets/menu images/logo master classe ticket.svg';
 
@@ -17,6 +17,7 @@ const CATEGORY_ICONS = {
     breakfast: IconBreakfast, salad: IconSalad, tagine: IconTagine,
     pizza: IconPizza, pasta: IconPasta, steak: IconSteak, wrap: IconWrap,
     sandwich: IconSandwich, juice: IconJuice, coffee: IconCoffee, dessert: IconDessert,
+    ramadan: IconRamadan,
 };
 
 export default function POS() {
@@ -498,6 +499,12 @@ export default function POS() {
 
                     <div className="receipt-footer" style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '0.7rem' }}>WiFi: {settings.wifiName || 'MasterClass_Guest'} / {settings.wifiPassword || 'Password123'}</div>
+                        {settings.ramadanMode === 'on' && (
+                            <div style={{ fontWeight: 900, fontSize: '1rem', margin: '8px 0', borderTop: '1px dashed #000', borderBottom: '1px dashed #000', padding: '6px 0' }}>
+                                ☪ رمضان كريم ☪
+                                <div style={{ fontSize: '0.7rem', fontWeight: 600 }}>Ramadan Karim</div>
+                            </div>
+                        )}
                         <div style={{ fontWeight: 800, fontSize: '0.9rem', margin: '10px 0' }}>*** {settings.receiptFooter || t('thankYou')} ***</div>
                         <div style={{ fontSize: '0.6rem' }}>{settings.receiptPoweredBy || 'Powered by Expndy'}</div>
                     </div>

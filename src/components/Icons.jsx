@@ -68,6 +68,7 @@ export const IconSandwich = (p) => <I {...p} d={<><path d="M3 11h18l-1.5-5A2 2 0
 export const IconJuice = (p) => <I {...p} d={<><path d="M8 2h8l-1.5 18h-5L8 2z" /><path d="M7 6h10" /><path d="M16 2l3-1" /><circle cx="12" cy="12" r="1.5" /></>} />;
 export const IconCoffee = (p) => <I {...p} d={<><path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" /></>} />;
 export const IconDessert = (p) => <I {...p} d={<><circle cx="12" cy="7" r="4" /><path d="M8 10l-2 12h12l-2-12" /><path d="M12 3v-1" /><path d="M10 14h4" /></>} />;
+export const IconRamadan = (p) => <I {...p} d={<><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /><circle cx="18" cy="5" r="1" fill="currentColor" stroke="none" /></>} />;
 
 // ===== Misc =====
 export const IconBell = (p) => <I {...p} d={<><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></>} />;

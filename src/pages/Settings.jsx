@@ -71,6 +71,7 @@ export default function Settings() {
         // Save printer settings
         await db.settings.put({ key: 'printerName', value: selectedPrinter || '' });
         await db.settings.put({ key: 'autoPrint', value: values.autoPrint || 'on' });
+        await db.settings.put({ key: 'ramadanMode', value: values.ramadanMode || 'off' });
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
     };
@@ -173,6 +174,30 @@ export default function Settings() {
                         />
                     </div>
                 ))}
+            </div>
+
+            {/* Ramadan Mode */}
+            <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem', border: values.ramadanMode === 'on' ? '2px solid #d4a843' : undefined, background: values.ramadanMode === 'on' ? 'linear-gradient(135deg, rgba(212,168,67,0.05), rgba(212,168,67,0.12))' : undefined }}>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    ☪ {lang === 'ar' ? 'وضع رمضان' : 'Mode Ramadan'}
+                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                    <div>
+                        <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>
+                            {lang === 'ar' ? 'رمضان كريم على التذكرة' : 'Ramadan Karim sur le ticket'}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                            {lang === 'ar' ? 'يظهر "رمضان كريم" على كل تذكرة' : 'Affiche "رمضان كريم" sur chaque ticket'}
+                        </div>
+                    </div>
+                    <button
+                        className={`btn ${values.ramadanMode === 'on' ? 'btn-primary' : 'btn-ghost'}`}
+                        onClick={() => handleChange('ramadanMode', values.ramadanMode === 'on' ? 'off' : 'on')}
+                        style={{ minWidth: 80, justifyContent: 'center', background: values.ramadanMode === 'on' ? '#d4a843' : undefined, borderColor: values.ramadanMode === 'on' ? '#d4a843' : undefined }}
+                    >
+                        {values.ramadanMode === 'on' ? (lang === 'ar' ? 'مفعّل ☪' : 'Activé ☪') : (lang === 'ar' ? 'معطّل' : 'Désactivé')}
+                    </button>
+                </div>
             </div>
 
             {/* Printer Settings — Always visible */}

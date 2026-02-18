@@ -30,6 +30,7 @@ export async function seedDatabase() {
             { id: 'cat-juices', name: 'Jus & Smoothies', nameAr: 'عصائر', iconKey: 'juice', sortOrder: 9 },
             { id: 'cat-drinks', name: 'Boissons', nameAr: 'مشروبات', iconKey: 'coffee', sortOrder: 10 },
             { id: 'cat-desserts', name: 'Desserts', nameAr: 'تحليات', iconKey: 'dessert', sortOrder: 11 },
+            { id: 'cat-ramadan', name: 'Ramadan', nameAr: 'رمضان', iconKey: 'ramadan', sortOrder: 0 },
         ];
         await db.categories.bulkAdd(cats);
     }
@@ -252,6 +253,16 @@ export async function seedDatabase() {
         { id: uid(), categoryId: 'cat-desserts', name: 'Pancake Miel', price: 15, description: '', available: true, stockQty: 999, image: '/menu/pancake.jpg' },
         { id: uid(), categoryId: 'cat-desserts', name: 'Pancake Chocolat', price: 20, description: '', available: true, stockQty: 999, image: '/menu/pancake.jpg' },
         { id: uid(), categoryId: 'cat-desserts', name: 'Pancake Fruits', price: 20, description: '', available: true, stockQty: 999, image: '/menu/pancake.jpg' },
+
+        // ===== RAMADAN =====
+        { id: uid(), categoryId: 'cat-ramadan', name: 'Formule MasterClass Ftour', nameAr: 'فطور ماستركلاس', price: 80, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Kefta ou Crevettes. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-ramadan', name: 'Ftour Traditionnel', nameAr: 'فطور تقليدي', price: 70, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Khlii. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-ramadan', name: 'Tajine Poulet Citronné + Frites', nameAr: 'طاجين دجاج بالحامض + فريت', price: 40, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-ramadan', name: 'Tajine de Kefta', nameAr: 'طاجين كفتة', price: 40, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-ramadan', name: 'Rfissa au Poulet', nameAr: 'رفيسة بالدجاج', price: 40, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-ramadan', name: 'Friture de Poisson', nameAr: 'مقلي سمك', price: 60, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-ramadan', name: 'Plat de Crevettes', nameAr: 'طبق كريفيت', price: 45, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-ramadan', name: 'Plat de Sardines (4 pcs)', nameAr: 'طبق سردين (4 قطع)', price: 30, description: '', available: true, stockQty: 999, image: '' },
     ];
 
     if (count === 0) {
@@ -282,6 +293,23 @@ export async function seedDatabase() {
         }
     }
 
+    // ===== RAMADAN MIGRATION (for existing DBs) =====
+    const ramadanCat = await db.categories.get('cat-ramadan');
+    if (!ramadanCat) {
+        await db.categories.add({ id: 'cat-ramadan', name: 'Ramadan', nameAr: 'رمضان', iconKey: 'ramadan', sortOrder: 0 });
+        await db.menuItems.bulkAdd([
+            { id: uid(), categoryId: 'cat-ramadan', name: 'Formule MasterClass Ftour', nameAr: 'فطور ماستركلاس', price: 80, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Kefta ou Crevettes. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
+            { id: uid(), categoryId: 'cat-ramadan', name: 'Ftour Traditionnel', nameAr: 'فطور تقليدي', price: 70, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Khlii. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
+            { id: uid(), categoryId: 'cat-ramadan', name: 'Tajine Poulet Citronné + Frites', nameAr: 'طاجين دجاج بالحامض + فريت', price: 40, description: '', available: true, stockQty: 999, image: '' },
+            { id: uid(), categoryId: 'cat-ramadan', name: 'Tajine de Kefta', nameAr: 'طاجين كفتة', price: 40, description: '', available: true, stockQty: 999, image: '' },
+            { id: uid(), categoryId: 'cat-ramadan', name: 'Rfissa au Poulet', nameAr: 'رفيسة بالدجاج', price: 40, description: '', available: true, stockQty: 999, image: '' },
+            { id: uid(), categoryId: 'cat-ramadan', name: 'Friture de Poisson', nameAr: 'مقلي سمك', price: 60, description: '', available: true, stockQty: 999, image: '' },
+            { id: uid(), categoryId: 'cat-ramadan', name: 'Plat de Crevettes', nameAr: 'طبق كريفيت', price: 45, description: '', available: true, stockQty: 999, image: '' },
+            { id: uid(), categoryId: 'cat-ramadan', name: 'Plat de Sardines (4 pcs)', nameAr: 'طبق سردين (4 قطع)', price: 30, description: '', available: true, stockQty: 999, image: '' },
+        ]);
+        console.log('Ramadan menu added!');
+    }
+
     // ===== SEED DEFAULT SETTINGS =====
     const defaultSettings = [
         { key: 'storeName', value: 'MASTER CLASS' },
@@ -291,7 +319,8 @@ export async function seedDatabase() {
         { key: 'wifiName', value: 'MasterClass_Guest' },
         { key: 'wifiPassword', value: 'Password123' },
         { key: 'receiptFooter', value: 'Merci de votre visite!' },
-        { key: 'receiptPoweredBy', value: 'Powered by MasterPOS' },
+        { key: 'receiptPoweredBy', value: 'Powered by Expndy' },
+        { key: 'ramadanMode', value: 'on' },
     ];
     for (const s of defaultSettings) {
         const existing = await db.settings.get(s.key);
