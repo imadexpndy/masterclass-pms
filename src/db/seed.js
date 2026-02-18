@@ -255,7 +255,7 @@ export async function seedDatabase() {
         { id: uid(), categoryId: 'cat-desserts', name: 'Pancake Fruits', price: 20, description: '', available: true, stockQty: 999, image: '/menu/pancake.jpg' },
 
         // ===== RAMADAN =====
-        { id: uid(), categoryId: 'cat-ramadan', name: 'Formule MasterClass Ftour', nameAr: 'فطور ماستركلاس', price: 80, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Kefta ou Crevettes. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-ramadan', name: 'Formule MasterClass Ftour', nameAr: 'فطور ماستركلاس', price: 90, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Kefta ou Crevettes. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
         { id: uid(), categoryId: 'cat-ramadan', name: 'Ftour Traditionnel', nameAr: 'فطور تقليدي', price: 70, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Khlii. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
         { id: uid(), categoryId: 'cat-ramadan', name: 'Tajine Poulet Citronné + Frites', nameAr: 'طاجين دجاج بالحامض + فريت', price: 40, description: '', available: true, stockQty: 999, image: '' },
         { id: uid(), categoryId: 'cat-ramadan', name: 'Tajine de Kefta', nameAr: 'طاجين كفتة', price: 40, description: '', available: true, stockQty: 999, image: '' },
@@ -298,7 +298,7 @@ export async function seedDatabase() {
     if (!ramadanCat) {
         await db.categories.add({ id: 'cat-ramadan', name: 'Ramadan', nameAr: 'رمضان', iconKey: 'ramadan', sortOrder: 0 });
         await db.menuItems.bulkAdd([
-            { id: uid(), categoryId: 'cat-ramadan', name: 'Formule MasterClass Ftour', nameAr: 'فطور ماستركلاس', price: 80, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Kefta ou Crevettes. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
+            { id: uid(), categoryId: 'cat-ramadan', name: 'Formule MasterClass Ftour', nameAr: 'فطور ماستركلاس', price: 90, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Kefta ou Crevettes. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
             { id: uid(), categoryId: 'cat-ramadan', name: 'Ftour Traditionnel', nameAr: 'فطور تقليدي', price: 70, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Khlii. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
             { id: uid(), categoryId: 'cat-ramadan', name: 'Tajine Poulet Citronné + Frites', nameAr: 'طاجين دجاج بالحامض + فريت', price: 40, description: '', available: true, stockQty: 999, image: '' },
             { id: uid(), categoryId: 'cat-ramadan', name: 'Tajine de Kefta', nameAr: 'طاجين كفتة', price: 40, description: '', available: true, stockQty: 999, image: '' },
