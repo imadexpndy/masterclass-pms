@@ -91,15 +91,18 @@ export const hashPassword = async (password) => {
 };
 
 /**
- * Reset all orders data (orders, orderItems, payments)
- * Preserves menu, users, tables, settings, and categories
+ * Reset all orders data (orders, orderItems, payments, syncQueue)
+ * Also resets all dining tables to 'free'
  */
 export const resetAllOrders = async () => {
     try {
-        await db.transaction('rw', [db.orders, db.orderItems, db.payments], async () => {
+        await db.transaction('rw', [db.orders, db.orderItems, db.payments, db.syncQueue, db.diningTables], async () => {
             await db.orders.clear();
             await db.orderItems.clear();
             if (db.payments) await db.payments.clear();
+            if (db.syncQueue) await db.syncQueue.clear();
+            // Reset all table statuses to free
+            await db.diningTables.toCollection().modify({ status: 'free' });
         });
         return { success: true };
     } catch (error) {
@@ -110,6 +113,7 @@ export const resetAllOrders = async () => {
 
 /**
  * Reset only today's orders (orders, orderItems, payments created today)
+ * Also clears syncQueue and resets affected tables
  */
 export const resetTodayOrders = async () => {
     try {
@@ -121,19 +125,23 @@ export const resetTodayOrders = async () => {
             .toArray();
 
         const todayOrderIds = todayOrders.map(o => o.id);
+        const affectedTableIds = [...new Set(todayOrders.map(o => o.tableId).filter(Boolean))];
 
-        await db.transaction('rw', [db.orders, db.orderItems, db.payments], async () => {
-            // Delete order items for today's orders
+        await db.transaction('rw', [db.orders, db.orderItems, db.payments, db.syncQueue, db.diningTables], async () => {
             for (const orderId of todayOrderIds) {
                 await db.orderItems.where('orderId').equals(orderId).delete();
             }
-            // Delete today's orders
             await db.orders.bulkDelete(todayOrderIds);
-            // Delete payments for today's orders
             if (db.payments) {
                 for (const orderId of todayOrderIds) {
                     await db.payments.where('orderId').equals(orderId).delete();
                 }
+            }
+            // Clear sync queue entries
+            if (db.syncQueue) await db.syncQueue.clear();
+            // Reset affected tables to free
+            for (const tableId of affectedTableIds) {
+                await db.diningTables.update(tableId, { status: 'free' });
             }
         });
 
