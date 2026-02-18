@@ -3,7 +3,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useNavigate } from 'react-router-dom';
 import db from '../db/db';
 import { useLang } from '../context/LangContext';
-import { IconMoney, IconClipboard, IconTable, IconReceipt, IconCart, IconChef, IconChart, IconTarget, IconX, IconUsers, IconCreditCard } from '../components/Icons';
+import { IconMoney, IconClipboard, IconTable, IconReceipt, IconCart, IconChef, IconChart, IconTarget, IconX, IconUsers, IconCreditCard, IconPrint } from '../components/Icons';
+import logo from '../assets/menu images/logo master classe ticket.svg';
 
 export default function Dashboard() {
     const { t, lang } = useLang();
@@ -17,6 +18,18 @@ export default function Dashboard() {
     const navigate = useNavigate();
 
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [showPrintReceipt, setShowPrintReceipt] = useState(false);
+
+    // Smart print: uses Electron silent print if configured, falls back to window.print()
+    const smartPrint = async () => {
+        const printerName = settings?.printerName;
+        if (printerName && window.electron?.silentPrint) {
+            try {
+                const result = await window.electron.silentPrint(printerName);
+                if (!result.success) window.print();
+            } catch { window.print(); }
+        } else { window.print(); }
+    };
 
     const today = new Date().toDateString();
     const todayOrders = orders.filter(o => new Date(o.createdAt).toDateString() === today);
@@ -262,22 +275,91 @@ export default function Dashboard() {
                                 <button className="btn btn-ghost" onClick={() => setSelectedOrder(null)}>
                                     {t('close')}
                                 </button>
-                                <button className="btn btn-primary" onClick={async () => {
-                                    const printerName = settings?.printerName;
-                                    if (printerName && window.electron?.silentPrint) {
-                                        try {
-                                            const result = await window.electron.silentPrint(printerName);
-                                            if (!result.success) window.print();
-                                        } catch { window.print(); }
-                                    } else { window.print(); }
+                                <button className="btn btn-primary" onClick={() => {
+                                    setShowPrintReceipt(true);
+                                    setTimeout(async () => {
+                                        await smartPrint();
+                                        setShowPrintReceipt(false);
+                                    }, 600);
                                 }}>
-                                    <IconReceipt size={16} /> {t('printReceipt')}
+                                    <IconPrint size={16} /> {t('printReceipt')}
                                 </button>
                             </div>
                         </div>
                     </div>
                 )
             }
+
+            {/* Receipt Print View (hidden on screen, visible on print) */}
+            {showPrintReceipt && selectedOrder && (
+                <div className="receipt-card">
+                    <div className="print-receipt receipt-inner" style={{ color: '#000' }}>
+                        <div className="receipt-header" style={{ marginBottom: '10px', textAlign: 'center' }}>
+                            <img src={logo} alt="Logo" style={{ width: 120, height: 'auto', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
+                            <div style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2px', color: '#000' }}>{settings.storeName || 'MASTER CLASS'}</div>
+                            <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT & CAFÉ'}</div>
+                            <div style={{ fontSize: '0.7rem', marginTop: '5px' }}>
+                                {settings.storeAddress || '123 Avenue Mohammed VI, Marrakech'}<br />
+                                Tel: {settings.storePhone || '05 24 00 00 00'}
+                            </div>
+                            <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
+                                <span>{new Date(selectedOrder.createdAt).toLocaleDateString('fr-FR')}</span>
+                                <span>{new Date(selectedOrder.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginTop: '2px' }}>
+                                <span>{t('orderNum')}: <strong>#{selectedOrder.id.slice(-6).toUpperCase()}</strong></span>
+                                <span>{selectedOrder.tableName || 'Takeaway'}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginTop: '2px' }}>
+                                <span>{t('waiter')}: {users.find(u => u.id === selectedOrder.waiterId)?.name || '—'}</span>
+                            </div>
+                        </div>
+
+                        <div style={{ borderTop: '1px dashed #000', margin: '5px 0' }} />
+                        <div style={{ display: 'flex', fontSize: '0.7rem', fontWeight: 700, marginBottom: '4px' }}>
+                            <span style={{ width: '10%' }}>Qt</span>
+                            <span style={{ flex: 1 }}>{t('item') || 'Item'}</span>
+                            <span style={{ width: '25%', textAlign: 'right' }}>{t('total') || 'Total'}</span>
+                        </div>
+                        <div style={{ borderTop: '1px solid #000', marginBottom: '5px' }} />
+
+                        {orderItems.filter(i => i.orderId === selectedOrder.id).map(item => (
+                            <div key={item.id} style={{ fontSize: '0.8rem', marginBottom: '4px', display: 'flex', alignItems: 'flex-start' }}>
+                                <span style={{ width: '10%' }}>{item.quantity}</span>
+                                <span style={{ flex: 1, padding: '0 4px', overflow: 'hidden', wordBreak: 'break-word' }}>{item.itemName}</span>
+                                <span style={{ width: '25%', textAlign: 'right', fontWeight: 600 }}>{(item.unitPrice * item.quantity).toFixed(2)}</span>
+                            </div>
+                        ))}
+
+                        <div style={{ borderTop: '1px dashed #000', margin: '10px 0' }} />
+                        <div style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '1rem', fontWeight: 700 }}>TOTAL</span>
+                            <span>{(selectedOrder.total || 0).toFixed(2)} <small style={{ fontSize: '0.8rem' }}>DH</small></span>
+                        </div>
+
+                        {selectedOrder.paymentMethod && selectedOrder.paymentMethod !== 'pending' && (
+                            <div style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', marginTop: '5px' }}>
+                                <span>{t('paymentMethod')}:</span>
+                                <span style={{ fontWeight: 700, textTransform: 'uppercase' }}>{selectedOrder.paymentMethod === 'cash' ? t('cash') : t('card')}</span>
+                            </div>
+                        )}
+
+                        <div style={{ borderTop: '1px dashed #000', margin: '15px 0' }} />
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.7rem' }}>WiFi: {settings.wifiName || 'MasterClass_Guest'} / {settings.wifiPassword || 'Password123'}</div>
+                            {settings.ramadanMode === 'on' && (
+                                <div style={{ fontWeight: 900, fontSize: '1rem', margin: '8px 0', borderTop: '1px dashed #000', borderBottom: '1px dashed #000', padding: '6px 0' }}>
+                                    ☪ رمضان كريم ☪
+                                    <div style={{ fontSize: '0.7rem', fontWeight: 600 }}>Ramadan Karim</div>
+                                </div>
+                            )}
+                            <div style={{ fontWeight: 800, fontSize: '0.9rem', margin: '10px 0' }}>*** {settings.receiptFooter || t('thankYou')} ***</div>
+                            <div style={{ fontSize: '0.6rem' }}>{settings.receiptPoweredBy || 'Powered by Expndy'}</div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
