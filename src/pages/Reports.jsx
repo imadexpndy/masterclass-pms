@@ -126,10 +126,10 @@ export default function Reports() {
     }, [filteredOrders, allUsers, lang]);
 
     // --- Period Label ---
-    const periodLabel = dateRange === 'today' ? "Aujourd'hui" :
-        dateRange === 'yesterday' ? "Hier" :
-            dateRange === 'week' ? "7 Derniers Jours" :
-                dateRange === 'month' ? "Ce Mois" :
+    const periodLabel = dateRange === 'today' ? t('today') :
+        dateRange === 'yesterday' ? t('yesterday') :
+            dateRange === 'week' ? t('sevenDays') :
+                dateRange === 'month' ? t('thisMonth') :
                     `${customStart} → ${customEnd}`;
 
     // ==========================================
@@ -144,44 +144,44 @@ export default function Reports() {
                         <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{settings.storeName || 'MasterClass'}</div>
                         <div style={{ fontSize: '0.65rem', color: '#666' }}>{settings.storeAddress || ''}</div>
                         <div style={{ fontWeight: 700, fontSize: '0.9rem', marginTop: 6, borderBottom: '2px solid #000', paddingBottom: 4 }}>
-                            RAPPORT DE CAISSE
+                            {t('cashRegisterReport')}
                         </div>
                         <div style={{ fontSize: '0.7rem', marginTop: 4 }}>
-                            Période: <strong>{periodLabel}</strong>
+                            {lang === 'ar' ? 'الفترة' : 'Période'}: <strong>{periodLabel}</strong>
                         </div>
                         <div style={{ fontSize: '0.65rem', color: '#666' }}>
-                            Imprimé le {new Date().toLocaleString(lang === 'ar' ? 'ar-MA' : 'fr-FR')}
+                            {t('printedOn')} {new Date().toLocaleString(lang === 'ar' ? 'ar-MA' : 'fr-FR')}
                         </div>
                     </div>
 
                     {/* Summary Totals */}
                     <div style={{ borderTop: '1px dashed #000', margin: '6px 0' }} />
-                    <div style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 4 }}>RÉSUMÉ</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 4 }}>{t('summary')}</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                        <span>Commandes total:</span>
-                        <span style={{ fontWeight: 700 }}>{filteredOrders.length} ({paidCount} payées, {unpaidCount} en cours)</span>
+                        <span>{t('totalOrders')}:</span>
+                        <span style={{ fontWeight: 700 }}>{filteredOrders.length} ({paidCount} {t('paidOrders')}, {unpaidCount} {t('pendingOrders')})</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                        <span>Total Espèces:</span>
+                        <span>{t('totalCash')}:</span>
                         <span style={{ fontWeight: 700 }}>{totals.cash.toFixed(2)} DH</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                        <span>Total Carte:</span>
+                        <span>{t('totalCard')}:</span>
                         <span style={{ fontWeight: 700 }}>{totals.card.toFixed(2)} DH</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                        <span>Non encaissé:</span>
+                        <span>{t('uncollected')}:</span>
                         <span style={{ fontWeight: 700, color: '#c00' }}>{totals.unpaid.toFixed(2)} DH</span>
                     </div>
                     <div style={{ borderTop: '1px solid #000', margin: '4px 0' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', fontWeight: 900 }}>
-                        <span>TOTAL PAYÉ:</span>
+                        <span>{t('totalPaid')}:</span>
                         <span>{totals.paid.toFixed(2)} DH</span>
                     </div>
 
                     {/* Breakdown by Day */}
                     <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
-                    <div style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 4 }}>DÉTAIL PAR JOUR</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 4 }}>{t('detailByDay')}</div>
 
                     {groupedData.map((day, i) => (
                         <div key={i} style={{ marginBottom: 8 }}>
@@ -189,8 +189,8 @@ export default function Reports() {
                                 {day.date}
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem' }}>
-                                <span>Espèces: {day.cash.toFixed(2)}</span>
-                                <span>Carte: {day.card.toFixed(2)}</span>
+                                <span>{t('especes')}: {day.cash.toFixed(2)}</span>
+                                <span>{t('carte')}: {day.card.toFixed(2)}</span>
                                 <span style={{ fontWeight: 700 }}>{day.total.toFixed(2)} DH</span>
                             </div>
 
@@ -206,17 +206,17 @@ export default function Reports() {
 
                     {/* Individual Orders */}
                     <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
-                    <div style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 4 }}>LISTE DES COMMANDES</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 4 }}>{t('ordersList')}</div>
 
                     <div style={{ fontSize: '0.65rem' }}>
                         {/* Header */}
                         <div style={{ display: 'flex', fontWeight: 700, borderBottom: '1px solid #000', paddingBottom: 2, marginBottom: 3 }}>
-                            <span style={{ width: '20%' }}>Heure</span>
+                            <span style={{ width: '20%' }}>{t('hour')}</span>
                             <span style={{ width: '15%' }}>N°</span>
-                            <span style={{ flex: 1 }}>Serveur</span>
-                            <span style={{ width: '18%', textAlign: 'center' }}>Mode</span>
-                            <span style={{ width: '12%', textAlign: 'center' }}>Payé</span>
-                            <span style={{ width: '18%', textAlign: 'right' }}>Total</span>
+                            <span style={{ flex: 1 }}>{t('waiter')}</span>
+                            <span style={{ width: '18%', textAlign: 'center' }}>{t('mode')}</span>
+                            <span style={{ width: '12%', textAlign: 'center' }}>{t('paid')}</span>
+                            <span style={{ width: '18%', textAlign: 'right' }}>{t('total')}</span>
                         </div>
 
                         {/* Orders sorted by time */}
@@ -241,7 +241,7 @@ export default function Reports() {
                     {/* Footer */}
                     <div style={{ borderTop: '1px dashed #000', margin: '10px 0' }} />
                     <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontWeight: 800, fontSize: '0.85rem' }}>*** FIN DU RAPPORT ***</div>
+                        <div style={{ fontWeight: 800, fontSize: '0.85rem' }}>{t('endOfReport')}</div>
                         <div style={{ fontSize: '0.6rem', marginTop: 4 }}>Powered by Expndy</div>
                     </div>
                 </div>
@@ -273,10 +273,10 @@ export default function Reports() {
                     <div>
                         <h1 style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             <IconChart size={32} style={{ color: 'var(--brand)' }} />
-                            <span style={{ fontSize: '1.8rem', fontWeight: 800 }}>Rapports & Caisse</span>
+                            <span style={{ fontSize: '1.8rem', fontWeight: 800 }}>{t('reportsTitle')}</span>
                         </h1>
                         <p style={{ color: 'var(--text-muted)', marginTop: 4 }}>
-                            Suivi du chiffre d'affaires et de la caisse par jour et par serveur.
+                            {t('reportsSubtitle')}
                         </p>
                     </div>
                     <button
@@ -290,7 +290,7 @@ export default function Reports() {
                         }}
                         style={{ gap: 8 }}
                     >
-                        <IconPrint size={18} /> Imprimer Rapport
+                        <IconPrint size={18} /> {t('printReport')}
                     </button>
                 </div>
             </div>
@@ -301,7 +301,7 @@ export default function Reports() {
 
                     {/* Period Filter */}
                     <div className="filter-group">
-                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: 8, color: 'var(--text-muted)' }}>Période</label>
+                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: 8, color: 'var(--text-muted)' }}>{lang === 'ar' ? 'الفترة' : 'Période'}</label>
                         <div style={{ display: 'flex', gap: 8 }}>
                             {['today', 'yesterday', 'week', 'month'].map(period => (
                                 <button
@@ -310,16 +310,16 @@ export default function Reports() {
                                     onClick={() => setDateRange(period)}
                                     style={{ padding: '8px 16px', borderRadius: 8 }}
                                 >
-                                    {period === 'today' ? "Aujourd'hui" :
-                                        period === 'yesterday' ? "Hier" :
-                                            period === 'week' ? "7 Jours" : "Ce Mois"}
+                                    {period === 'today' ? t('today') :
+                                        period === 'yesterday' ? t('yesterday') :
+                                            period === 'week' ? t('sevenDays') : t('thisMonth')}
                                 </button>
                             ))}
                             <button
                                 className={`btn ${dateRange === 'custom' ? 'btn-primary' : 'btn-ghost'}`}
                                 onClick={() => setDateRange('custom')}
                             >
-                                <IconCalendar size={18} /> Personnalisé
+                                <IconCalendar size={18} /> {t('custom')}
                             </button>
                         </div>
                     </div>
@@ -333,7 +333,7 @@ export default function Reports() {
                                 value={customStart}
                                 onChange={e => setCustomStart(e.target.value)}
                             />
-                            <span style={{ color: 'var(--text-muted)' }}>à</span>
+                            <span style={{ color: 'var(--text-muted)' }}>{lang === 'ar' ? 'إلى' : 'à'}</span>
                             <input
                                 type="date"
                                 className="form-input"
@@ -347,7 +347,7 @@ export default function Reports() {
 
                     {/* Waiter Filter */}
                     <div className="filter-group">
-                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: 8, color: 'var(--text-muted)' }}>Serveur</label>
+                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: 8, color: 'var(--text-muted)' }}>{t('waiter')}</label>
                         <div style={{ position: 'relative' }}>
                             <IconUsers size={18} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             <select
@@ -356,7 +356,7 @@ export default function Reports() {
                                 value={selectedWaiter}
                                 onChange={e => setSelectedWaiter(e.target.value)}
                             >
-                                <option value="all">Tous les serveurs</option>
+                                <option value="all">{lang === 'ar' ? 'كل النوادل' : 'Tous les serveurs'}</option>
                                 {allUsers.map(u => (
                                     <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
                                 ))}
@@ -374,7 +374,7 @@ export default function Reports() {
                         <IconChart size={28} />
                     </div>
                     <div className="stat-content">
-                        <div className="label">Total Ventes (CA)</div>
+                        <div className="label">{t('totalSalesCA')}</div>
                         <div className="value" style={{ color: 'var(--blue)' }}>{totals.total.toFixed(2)} DH</div>
                     </div>
                 </div>
@@ -384,9 +384,9 @@ export default function Reports() {
                         <IconCash size={28} />
                     </div>
                     <div className="stat-content">
-                        <div className="label">Encaissé (Payé)</div>
+                        <div className="label">{t('collected')}</div>
                         <div className="value" style={{ color: 'var(--green)' }}>{totals.paid.toFixed(2)} DH</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>{paidCount} commandes ({totals.cash.toFixed(0)} ESP / {totals.card.toFixed(0)} CB)</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>{paidCount} {t('ordersCount')} ({totals.cash.toFixed(0)} ESP / {totals.card.toFixed(0)} CB)</div>
                     </div>
                 </div>
 
@@ -395,9 +395,9 @@ export default function Reports() {
                         <IconCreditCard size={28} />
                     </div>
                     <div className="stat-content">
-                        <div className="label">Non Encaissé</div>
+                        <div className="label">{t('notCollected')}</div>
                         <div className="value" style={{ color: 'var(--orange)' }}>{totals.unpaid.toFixed(2)} DH</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>{unpaidCount} commandes en cours</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>{unpaidCount} {t('ordersCount')} {t('inProgress')}</div>
                     </div>
                 </div>
 
@@ -406,7 +406,7 @@ export default function Reports() {
                         <IconMoney size={28} />
                     </div>
                     <div className="stat-content">
-                        <div className="label">Total Commandes</div>
+                        <div className="label">{t('totalOrdersLabel')}</div>
                         <div className="value" style={{ color: 'var(--purple)' }}>{filteredOrders.length}</div>
                     </div>
                 </div>
@@ -414,25 +414,25 @@ export default function Reports() {
 
             {/* Detailed Table */}
             <div className="section-header">
-                <h3><IconCalendar size={18} /> Détail par Jour et Serveur</h3>
+                <h3><IconCalendar size={18} /> {t('dailyDetail')}</h3>
             </div>
 
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                 <table className="data-table">
                     <thead>
                         <tr style={{ background: 'var(--bg-main)' }}>
-                            <th style={{ padding: '16px' }}>Date</th>
-                            <th style={{ padding: '16px' }}>Serveur</th>
-                            <th style={{ padding: '16px', textAlign: 'right' }}>Espèces (Caisse)</th>
-                            <th style={{ padding: '16px', textAlign: 'right' }}>Carte (Système)</th>
-                            <th style={{ padding: '16px', textAlign: 'right' }}>Total</th>
+                            <th style={{ padding: '16px' }}>{t('date')}</th>
+                            <th style={{ padding: '16px' }}>{t('waiter')}</th>
+                            <th style={{ padding: '16px', textAlign: 'right' }}>{t('cashAmount')}</th>
+                            <th style={{ padding: '16px', textAlign: 'right' }}>{t('cardAmount')}</th>
+                            <th style={{ padding: '16px', textAlign: 'right' }}>{t('total')}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {groupedData.length === 0 ? (
                             <tr>
                                 <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                                    Aucune donnée pour cette période.
+                                    {t('noData')}
                                 </td>
                             </tr>
                         ) : (
@@ -442,7 +442,7 @@ export default function Reports() {
                                         <td style={{ padding: '12px 16px', fontSize: '1rem' }}>
                                             {day.date}
                                         </td>
-                                        <td>Global (Tous)</td>
+                                        <td>{lang === 'ar' ? 'إجمالي (الكل)' : 'Global (Tous)'}</td>
                                         <td style={{ textAlign: 'right', color: 'var(--green)' }}>{day.cash.toFixed(2)} DH</td>
                                         <td style={{ textAlign: 'right', color: 'var(--orange)' }}>{day.card.toFixed(2)} DH</td>
                                         <td style={{ textAlign: 'right', fontWeight: 700 }}>{day.total.toFixed(2)} DH</td>
@@ -454,7 +454,7 @@ export default function Reports() {
                                             <td style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px' }}>
                                                 <IconUsers size={14} style={{ color: 'var(--text-muted)' }} />
                                                 {w.name}
-                                                <span className="badge badge-gray" style={{ fontSize: '0.7em', padding: '2px 6px' }}>{w.count} cmds</span>
+                                                <span className="badge badge-gray" style={{ fontSize: '0.7em', padding: '2px 6px' }}>{w.count} {t('orderCount')}</span>
                                             </td>
                                             <td style={{ textAlign: 'right' }}>{w.cash.toFixed(2)} DH</td>
                                             <td style={{ textAlign: 'right' }}>{w.card.toFixed(2)} DH</td>
