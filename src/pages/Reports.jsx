@@ -4,23 +4,43 @@ import db from '../db/db';
 import { useLang } from '../context/LangContext';
 import {
     IconChart, IconCalendar, IconUsers, IconMoney,
-    IconCreditCard, IconCash, IconFilter, IconDownload
+    IconCreditCard, IconCash, IconFilter, IconDownload, IconPrint
 } from '../components/Icons';
 
 export default function Reports() {
     const { t, lang } = useLang();
 
     // --- State ---
-    const [dateRange, setDateRange] = useState('today'); // today, yesterday, week, month, custom
+    const [dateRange, setDateRange] = useState('today');
     const [customStart, setCustomStart] = useState('');
     const [customEnd, setCustomEnd] = useState('');
     const [selectedWaiter, setSelectedWaiter] = useState('all');
+    const [showPrintReport, setShowPrintReport] = useState(false);
 
     // --- Data Fetching ---
     const allOrders = useLiveQuery(() => db.orders.toArray()) || [];
-    const users = useLiveQuery(() => db.users.where('role').equals('waiter').or('role').equals('admin').uniqueKeys()) || [];
-    // We actually need full user objects
     const allUsers = useLiveQuery(() => db.users.toArray()) || [];
+    const settingsArr = useLiveQuery(() => db.settings.toArray()) || [];
+    const settings = Object.fromEntries(settingsArr.map(s => [s.key, s.value]));
+
+    // --- Smart Print ---
+    const smartPrint = async () => {
+        const printerName = settings.printerName;
+        if (printerName && window.electron?.silentPrint) {
+            try {
+                const result = await window.electron.silentPrint(printerName);
+                if (!result.success) {
+                    console.warn('Silent print failed, falling back:', result.error);
+                    window.print();
+                }
+            } catch (e) {
+                console.warn('Silent print error, falling back:', e);
+                window.print();
+            }
+        } else {
+            window.print();
+        }
+    };
 
     // --- Filtering Logic ---
     const filteredOrders = useMemo(() => {
@@ -37,7 +57,7 @@ export default function Reports() {
         } else if (dateRange === 'week') {
             start.setDate(start.getDate() - 7);
         } else if (dateRange === 'month') {
-            start.setDate(1); // 1st of current month
+            start.setDate(1);
         } else if (dateRange === 'custom' && customStart && customEnd) {
             start = new Date(customStart);
             start.setHours(0, 0, 0, 0);
@@ -48,7 +68,7 @@ export default function Reports() {
         return allOrders.filter(o => {
             const oDate = new Date(o.createdAt);
             const inDate = oDate >= start && oDate <= end;
-            const isPaid = o.status === 'paid'; // Only count paid orders
+            const isPaid = o.status === 'paid';
 
             let waiterMatch = true;
             if (selectedWaiter !== 'all') {
@@ -74,11 +94,9 @@ export default function Reports() {
 
     // --- Grouping for Table ---
     const groupedData = useMemo(() => {
-        // Group by Date -> Waiter
         const groups = {};
 
         filteredOrders.forEach(o => {
-            // Key by Date (YYYY-MM-DD)
             const dateKey = new Date(o.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-MA' : 'fr-FR');
 
             if (!groups[dateKey]) groups[dateKey] = { date: dateKey, total: 0, cash: 0, card: 0, waiters: {} };
@@ -88,7 +106,6 @@ export default function Reports() {
             if (o.paymentMethod === 'cash') g.cash += (o.total || 0);
             else g.card += (o.total || 0);
 
-            // Waiter grouping within date
             const wName = allUsers.find(u => u.id === o.waiterId)?.name || 'Unknown';
             if (!g.waiters[wName]) g.waiters[wName] = { name: wName, total: 0, cash: 0, card: 0, count: 0 };
 
@@ -98,22 +115,171 @@ export default function Reports() {
             g.waiters[wName].count++;
         });
 
-        // Convert to array and sort desc by date (string compare works for ISO, but local format varies. 
-        // Best to keep raw timestamp for sorting if needed, but simple reverse often mostly correct for recent)
         return Object.values(groups).reverse();
     }, [filteredOrders, allUsers, lang]);
 
+    // --- Period Label ---
+    const periodLabel = dateRange === 'today' ? "Aujourd'hui" :
+        dateRange === 'yesterday' ? "Hier" :
+            dateRange === 'week' ? "7 Derniers Jours" :
+                dateRange === 'month' ? "Ce Mois" :
+                    `${customStart} → ${customEnd}`;
+
+    // ==========================================
+    // PRINT REPORT VIEW (receipt-style ticket)
+    // ==========================================
+    if (showPrintReport) {
+        return (
+            <div className="receipt-card">
+                <div className="print-receipt" style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#000', background: '#fff', padding: '4mm' }}>
+                    {/* Header */}
+                    <div style={{ textAlign: 'center', marginBottom: 8 }}>
+                        <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{settings.storeName || 'MasterClass'}</div>
+                        <div style={{ fontSize: '0.65rem', color: '#666' }}>{settings.storeAddress || ''}</div>
+                        <div style={{ fontWeight: 700, fontSize: '0.9rem', marginTop: 6, borderBottom: '2px solid #000', paddingBottom: 4 }}>
+                            RAPPORT DE CAISSE
+                        </div>
+                        <div style={{ fontSize: '0.7rem', marginTop: 4 }}>
+                            Période: <strong>{periodLabel}</strong>
+                        </div>
+                        <div style={{ fontSize: '0.65rem', color: '#666' }}>
+                            Imprimé le {new Date().toLocaleString(lang === 'ar' ? 'ar-MA' : 'fr-FR')}
+                        </div>
+                    </div>
+
+                    {/* Summary Totals */}
+                    <div style={{ borderTop: '1px dashed #000', margin: '6px 0' }} />
+                    <div style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 4 }}>RÉSUMÉ</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                        <span>Commandes payées:</span>
+                        <span style={{ fontWeight: 700 }}>{filteredOrders.length}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                        <span>Total Espèces:</span>
+                        <span style={{ fontWeight: 700 }}>{totals.cash.toFixed(2)} DH</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                        <span>Total Carte:</span>
+                        <span style={{ fontWeight: 700 }}>{totals.card.toFixed(2)} DH</span>
+                    </div>
+                    <div style={{ borderTop: '1px solid #000', margin: '4px 0' }} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', fontWeight: 900 }}>
+                        <span>TOTAL CA:</span>
+                        <span>{totals.total.toFixed(2)} DH</span>
+                    </div>
+
+                    {/* Breakdown by Day */}
+                    <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
+                    <div style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 4 }}>DÉTAIL PAR JOUR</div>
+
+                    {groupedData.map((day, i) => (
+                        <div key={i} style={{ marginBottom: 8 }}>
+                            <div style={{ fontWeight: 700, fontSize: '0.75rem', borderBottom: '1px dotted #999', paddingBottom: 2, marginBottom: 3 }}>
+                                {day.date}
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem' }}>
+                                <span>Espèces: {day.cash.toFixed(2)}</span>
+                                <span>Carte: {day.card.toFixed(2)}</span>
+                                <span style={{ fontWeight: 700 }}>{day.total.toFixed(2)} DH</span>
+                            </div>
+
+                            {/* Waiters */}
+                            {Object.values(day.waiters).map((w, j) => (
+                                <div key={j} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', paddingLeft: 8, color: '#444' }}>
+                                    <span>- {w.name} ({w.count})</span>
+                                    <span>{w.total.toFixed(2)} DH</span>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+
+                    {/* Individual Orders */}
+                    <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
+                    <div style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 4 }}>LISTE DES COMMANDES</div>
+
+                    <div style={{ fontSize: '0.65rem' }}>
+                        {/* Header */}
+                        <div style={{ display: 'flex', fontWeight: 700, borderBottom: '1px solid #000', paddingBottom: 2, marginBottom: 3 }}>
+                            <span style={{ width: '22%' }}>Heure</span>
+                            <span style={{ width: '20%' }}>N°</span>
+                            <span style={{ flex: 1 }}>Serveur</span>
+                            <span style={{ width: '15%', textAlign: 'center' }}>Mode</span>
+                            <span style={{ width: '20%', textAlign: 'right' }}>Total</span>
+                        </div>
+
+                        {/* Orders sorted by time */}
+                        {[...filteredOrders]
+                            .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+                            .map((o, i) => {
+                                const time = new Date(o.createdAt).toLocaleTimeString(lang === 'ar' ? 'ar-MA' : 'fr-FR', { hour: '2-digit', minute: '2-digit' });
+                                const waiterName = allUsers.find(u => u.id === o.waiterId)?.name || '—';
+                                return (
+                                    <div key={i} style={{ display: 'flex', marginBottom: 1, borderBottom: '1px dotted #ddd', paddingBottom: 1 }}>
+                                        <span style={{ width: '22%' }}>{time}</span>
+                                        <span style={{ width: '20%' }}>#{o.id.slice(-4).toUpperCase()}</span>
+                                        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{waiterName}</span>
+                                        <span style={{ width: '15%', textAlign: 'center' }}>{o.paymentMethod === 'cash' ? 'ESP' : 'CB'}</span>
+                                        <span style={{ width: '20%', textAlign: 'right', fontWeight: 600 }}>{(o.total || 0).toFixed(2)}</span>
+                                    </div>
+                                );
+                            })}
+                    </div>
+
+                    {/* Footer */}
+                    <div style={{ borderTop: '1px dashed #000', margin: '10px 0' }} />
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontWeight: 800, fontSize: '0.85rem' }}>*** FIN DU RAPPORT ***</div>
+                        <div style={{ fontSize: '0.6rem', marginTop: 4 }}>Powered by Expndy</div>
+                    </div>
+                </div>
+
+                {/* Screen-only buttons */}
+                <div style={{ display: 'flex', gap: 8, marginTop: '1rem' }}>
+                    <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setShowPrintReport(false)}>
+                        ✕ Fermer
+                    </button>
+                    <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={async () => {
+                        await smartPrint();
+                        setShowPrintReport(false);
+                    }}>
+                        <IconPrint size={16} /> Imprimer
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // ==========================================
+    // NORMAL REPORTS VIEW
+    // ==========================================
     return (
         <div className="reports-page">
             {/* Header */}
             <div className="page-header" style={{ marginBottom: '2rem' }}>
-                <h1 style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <IconChart size={32} style={{ color: 'var(--brand)' }} />
-                    <span style={{ fontSize: '1.8rem', fontWeight: 800 }}>Rapports & Caisse</span>
-                </h1>
-                <p style={{ color: 'var(--text-muted)', marginTop: 4 }}>
-                    Suivi du chiffre d'affaires et de la caisse par jour et par serveur.
-                </p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                        <h1 style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <IconChart size={32} style={{ color: 'var(--brand)' }} />
+                            <span style={{ fontSize: '1.8rem', fontWeight: 800 }}>Rapports & Caisse</span>
+                        </h1>
+                        <p style={{ color: 'var(--text-muted)', marginTop: 4 }}>
+                            Suivi du chiffre d'affaires et de la caisse par jour et par serveur.
+                        </p>
+                    </div>
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => {
+                            setShowPrintReport(true);
+                            setTimeout(async () => {
+                                await smartPrint();
+                                setShowPrintReport(false);
+                            }, 800);
+                        }}
+                        style={{ gap: 8 }}
+                    >
+                        <IconPrint size={18} /> Imprimer Rapport
+                    </button>
+                </div>
             </div>
 
             {/* Filters Bar */}
@@ -257,9 +423,8 @@ export default function Reports() {
                             </tr>
                         ) : (
                             groupedData.map((day, i) => (
-                                <>
-                                    {/* Daily Header Row */}
-                                    <tr key={`day-${i}`} style={{ background: 'var(--bg-highlight)', fontWeight: 600 }}>
+                                <tbody key={`group-${i}`}>
+                                    <tr style={{ background: 'var(--bg-highlight)', fontWeight: 600 }}>
                                         <td style={{ padding: '12px 16px', fontSize: '1rem' }}>
                                             {day.date}
                                         </td>
@@ -269,10 +434,9 @@ export default function Reports() {
                                         <td style={{ textAlign: 'right', fontWeight: 700 }}>{day.total.toFixed(2)} DH</td>
                                     </tr>
 
-                                    {/* Waiter Rows */}
                                     {Object.values(day.waiters).map((w, j) => (
                                         <tr key={`waiter-${i}-${j}`} style={{ borderBottom: '1px solid var(--border)' }}>
-                                            <td></td> {/* Indent or empty for date */}
+                                            <td></td>
                                             <td style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px' }}>
                                                 <IconUsers size={14} style={{ color: 'var(--text-muted)' }} />
                                                 {w.name}
@@ -283,7 +447,7 @@ export default function Reports() {
                                             <td style={{ textAlign: 'right', fontWeight: 500 }}>{w.total.toFixed(2)} DH</td>
                                         </tr>
                                     ))}
-                                </>
+                                </tbody>
                             ))
                         )}
                     </tbody>
