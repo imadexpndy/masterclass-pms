@@ -68,14 +68,13 @@ export default function Reports() {
         return allOrders.filter(o => {
             const oDate = new Date(o.createdAt);
             const inDate = oDate >= start && oDate <= end;
-            const isPaid = o.status === 'paid';
 
             let waiterMatch = true;
             if (selectedWaiter !== 'all') {
                 waiterMatch = o.waiterId === selectedWaiter;
             }
 
-            return inDate && isPaid && waiterMatch;
+            return inDate && waiterMatch;
         });
     }, [allOrders, dateRange, customStart, customEnd, selectedWaiter]);
 
@@ -83,14 +82,22 @@ export default function Reports() {
     const totals = useMemo(() => {
         return filteredOrders.reduce((acc, o) => {
             acc.total += (o.total || 0);
-            if (o.paymentMethod === 'cash') {
-                acc.cash += (o.total || 0);
+            if (o.status === 'paid') {
+                acc.paid += (o.total || 0);
+                if (o.paymentMethod === 'cash') {
+                    acc.cash += (o.total || 0);
+                } else {
+                    acc.card += (o.total || 0);
+                }
             } else {
-                acc.card += (o.total || 0);
+                acc.unpaid += (o.total || 0);
             }
             return acc;
-        }, { total: 0, cash: 0, card: 0 });
+        }, { total: 0, paid: 0, unpaid: 0, cash: 0, card: 0 });
     }, [filteredOrders]);
+
+    const paidCount = filteredOrders.filter(o => o.status === 'paid').length;
+    const unpaidCount = filteredOrders.filter(o => o.status !== 'paid').length;
 
     // --- Grouping for Table ---
     const groupedData = useMemo(() => {
@@ -151,8 +158,8 @@ export default function Reports() {
                     <div style={{ borderTop: '1px dashed #000', margin: '6px 0' }} />
                     <div style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 4 }}>RÉSUMÉ</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                        <span>Commandes payées:</span>
-                        <span style={{ fontWeight: 700 }}>{filteredOrders.length}</span>
+                        <span>Commandes total:</span>
+                        <span style={{ fontWeight: 700 }}>{filteredOrders.length} ({paidCount} payées, {unpaidCount} en cours)</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
                         <span>Total Espèces:</span>
@@ -162,10 +169,14 @@ export default function Reports() {
                         <span>Total Carte:</span>
                         <span style={{ fontWeight: 700 }}>{totals.card.toFixed(2)} DH</span>
                     </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                        <span>Non encaissé:</span>
+                        <span style={{ fontWeight: 700, color: '#c00' }}>{totals.unpaid.toFixed(2)} DH</span>
+                    </div>
                     <div style={{ borderTop: '1px solid #000', margin: '4px 0' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', fontWeight: 900 }}>
-                        <span>TOTAL CA:</span>
-                        <span>{totals.total.toFixed(2)} DH</span>
+                        <span>TOTAL PAYÉ:</span>
+                        <span>{totals.paid.toFixed(2)} DH</span>
                     </div>
 
                     {/* Breakdown by Day */}
@@ -200,11 +211,12 @@ export default function Reports() {
                     <div style={{ fontSize: '0.65rem' }}>
                         {/* Header */}
                         <div style={{ display: 'flex', fontWeight: 700, borderBottom: '1px solid #000', paddingBottom: 2, marginBottom: 3 }}>
-                            <span style={{ width: '22%' }}>Heure</span>
-                            <span style={{ width: '20%' }}>N°</span>
+                            <span style={{ width: '20%' }}>Heure</span>
+                            <span style={{ width: '15%' }}>N°</span>
                             <span style={{ flex: 1 }}>Serveur</span>
-                            <span style={{ width: '15%', textAlign: 'center' }}>Mode</span>
-                            <span style={{ width: '20%', textAlign: 'right' }}>Total</span>
+                            <span style={{ width: '18%', textAlign: 'center' }}>Mode</span>
+                            <span style={{ width: '12%', textAlign: 'center' }}>Payé</span>
+                            <span style={{ width: '18%', textAlign: 'right' }}>Total</span>
                         </div>
 
                         {/* Orders sorted by time */}
@@ -215,11 +227,12 @@ export default function Reports() {
                                 const waiterName = allUsers.find(u => u.id === o.waiterId)?.name || '—';
                                 return (
                                     <div key={i} style={{ display: 'flex', marginBottom: 1, borderBottom: '1px dotted #ddd', paddingBottom: 1 }}>
-                                        <span style={{ width: '22%' }}>{time}</span>
-                                        <span style={{ width: '20%' }}>#{o.id.slice(-4).toUpperCase()}</span>
+                                        <span style={{ width: '20%' }}>{time}</span>
+                                        <span style={{ width: '15%' }}>#{o.id.slice(-4).toUpperCase()}</span>
                                         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{waiterName}</span>
-                                        <span style={{ width: '15%', textAlign: 'center' }}>{o.paymentMethod === 'cash' ? 'ESP' : 'CB'}</span>
-                                        <span style={{ width: '20%', textAlign: 'right', fontWeight: 600 }}>{(o.total || 0).toFixed(2)}</span>
+                                        <span style={{ width: '18%', textAlign: 'center' }}>{o.status === 'paid' ? (o.paymentMethod === 'cash' ? 'ESP' : 'CB') : '---'}</span>
+                                        <span style={{ width: '12%', textAlign: 'center', fontWeight: 600 }}>{o.status === 'paid' ? '✓' : '✗'}</span>
+                                        <span style={{ width: '18%', textAlign: 'right', fontWeight: 600 }}>{(o.total || 0).toFixed(2)}</span>
                                     </div>
                                 );
                             })}
@@ -371,9 +384,9 @@ export default function Reports() {
                         <IconCash size={28} />
                     </div>
                     <div className="stat-content">
-                        <div className="label">Total Espèces (Caisse)</div>
-                        <div className="value" style={{ color: 'var(--green)' }}>{totals.cash.toFixed(2)} DH</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>Attendu en caisse</div>
+                        <div className="label">Encaissé (Payé)</div>
+                        <div className="value" style={{ color: 'var(--green)' }}>{totals.paid.toFixed(2)} DH</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>{paidCount} commandes ({totals.cash.toFixed(0)} ESP / {totals.card.toFixed(0)} CB)</div>
                     </div>
                 </div>
 
@@ -382,8 +395,9 @@ export default function Reports() {
                         <IconCreditCard size={28} />
                     </div>
                     <div className="stat-content">
-                        <div className="label">Total Carte/Système</div>
-                        <div className="value" style={{ color: 'var(--orange)' }}>{totals.card.toFixed(2)} DH</div>
+                        <div className="label">Non Encaissé</div>
+                        <div className="value" style={{ color: 'var(--orange)' }}>{totals.unpaid.toFixed(2)} DH</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>{unpaidCount} commandes en cours</div>
                     </div>
                 </div>
 
@@ -392,7 +406,7 @@ export default function Reports() {
                         <IconMoney size={28} />
                     </div>
                     <div className="stat-content">
-                        <div className="label">Commandes Payées</div>
+                        <div className="label">Total Commandes</div>
                         <div className="value" style={{ color: 'var(--purple)' }}>{filteredOrders.length}</div>
                     </div>
                 </div>
