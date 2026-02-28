@@ -498,12 +498,12 @@ export default function POS() {
     // ===== KITCHEN TICKET VIEW (Used only during printing) =====
     if (kitchenPrintData) {
         return (
-            <div style={{ padding: '20px', background: '#fff', color: '#000', width: '100%', minHeight: '100vh', boxSizing: 'border-box' }}>
-                <h1 style={{ textAlign: 'center', fontSize: '2.5rem', margin: '0 0 10px 0', borderBottom: '3px solid #000', paddingBottom: '10px', textTransform: 'uppercase' }}>
+            <div style={{ padding: '10px 10px', background: '#fff', color: '#000', width: '100%', minHeight: '100vh', boxSizing: 'border-box' }}>
+                <h1 style={{ textAlign: 'center', fontSize: '1.5rem', margin: '0 0 5px 0', borderBottom: '2px solid #000', paddingBottom: '5px', textTransform: 'uppercase' }}>
                     {lang === 'fr' ? 'CUISINE' : 'KITCHEN'}
                 </h1>
 
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '20px', lineHeight: '1.5' }}>
+                <div style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '10px', lineHeight: '1.3' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span>Table: {kitchenPrintData.tableName || 'Takeaway'}</span>
                         <span>{new Date().toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</span>
@@ -511,16 +511,16 @@ export default function POS() {
                     <div>{lang === 'fr' ? 'Serveur' : 'Waiter'}: {kitchenPrintData.waiterName || '—'}</div>
                 </div>
 
-                <div style={{ borderTop: '3px dashed #000', margin: '20px 0' }} />
+                <div style={{ borderTop: '2px dashed #000', margin: '10px 0' }} />
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {kitchenPrintData.items.map(item => (
-                        <div key={item.id} style={{ display: 'flex', alignItems: 'flex-start', fontSize: '1.8rem', fontWeight: 900, lineHeight: '1.2' }}>
-                            <span style={{ minWidth: '50px', display: 'inline-block' }}>{item.quantity}x</span>
-                            <div style={{ flex: 1, paddingLeft: '10px' }}>
+                        <div key={item.id} style={{ display: 'flex', alignItems: 'flex-start', fontSize: '1.2rem', fontWeight: 900, lineHeight: '1.1' }}>
+                            <span style={{ minWidth: '35px', display: 'inline-block' }}>{item.quantity}x</span>
+                            <div style={{ flex: 1, paddingLeft: '5px' }}>
                                 <div>{item.itemName}</div>
                                 {item.notes && (
-                                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', fontStyle: 'italic', marginTop: '4px', textTransform: 'uppercase' }}>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: 'bold', fontStyle: 'italic', marginTop: '2px', textTransform: 'uppercase' }}>
                                         * {item.notes}
                                     </div>
                                 )}
@@ -536,17 +536,17 @@ export default function POS() {
     if (showBill && paidOrder) {
         return (
             <div className="receipt-card">
-                <div className="print-receipt receipt-inner" style={{ color: '#000' }}>
-                    <div className="receipt-header" style={{ marginBottom: '10px', textAlign: 'center' }}>
+                <div className="print-receipt receipt-inner" style={{ color: '#000', padding: '10px 10px' }}>
+                    <div className="receipt-header" style={{ marginBottom: '5px', textAlign: 'center' }}>
                         <img src={logoTicket} alt="Logo" style={{ width: 120, height: 'auto', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
-                        <div className="receipt-brand" style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2px', color: '#000' }}>{settings.storeName || 'RIAD AL MISK'}</div>
-                        <div className="receipt-sub" style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT'}</div>
-                        <div className="receipt-address" style={{ fontSize: '0.7rem', marginTop: '5px' }}>
+                        <div className="receipt-brand" style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '0px', color: '#000' }}>{settings.storeName || 'RIAD AL MISK'}</div>
+                        <div className="receipt-sub" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT'}</div>
+                        <div className="receipt-address" style={{ fontSize: '0.65rem', marginTop: '2px' }}>
                             {settings.storeAddress || '362 rue de la Kasbah, Médina - Marrakech'}<br />
                             Tel: {settings.storePhone || '05 24 44 08 71'}
                         </div>
 
-                        <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
+                        <div style={{ borderTop: '1px dashed #000', margin: '5px 0' }} />
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
                             <span>{new Date(paidOrder.createdAt).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US')}</span>
@@ -561,16 +561,16 @@ export default function POS() {
                         </div>
                     </div>
 
-                    <div style={{ borderTop: '1px dashed #000', margin: '5px 0' }} />
-                    <div style={{ display: 'flex', fontSize: '0.7rem', fontWeight: 700, marginBottom: '4px' }}>
+                    <div style={{ borderTop: '1px dashed #000', margin: '3px 0' }} />
+                    <div style={{ display: 'flex', fontSize: '0.7rem', fontWeight: 700, marginBottom: '2px' }}>
                         <span style={{ width: '10%', textAlign: 'left' }}>{t('qty') || 'Qty'}</span>
                         <span style={{ flex: 1, textAlign: 'left' }}>{t('item') || 'Item'}</span>
                         <span style={{ width: '25%', textAlign: 'right' }}>{t('total') || 'Total'}</span>
                     </div>
-                    <div style={{ borderTop: '1px solid #000', marginBottom: '5px' }} />
+                    <div style={{ borderTop: '1px solid #000', marginBottom: '3px' }} />
 
                     {paidOrder.items.map(item => (
-                        <div key={item.id} className="receipt-item" style={{ fontSize: '0.8rem', marginBottom: '4px', display: 'flex', alignItems: 'flex-start' }}>
+                        <div key={item.id} className="receipt-item" style={{ fontSize: '0.75rem', marginBottom: '1px', display: 'flex', alignItems: 'flex-start' }}>
                             <span style={{ width: '10%', textAlign: 'left' }}>{item.quantity}</span>
                             <span style={{ flex: 1, textAlign: 'left', padding: '0 4px', overflow: 'hidden', wordBreak: 'break-word' }}>
                                 {item.itemName}
@@ -581,9 +581,9 @@ export default function POS() {
                         </div>
                     ))}
 
-                    <div style={{ borderTop: '1px dashed #000', margin: '10px 0' }} />
+                    <div style={{ borderTop: '1px dashed #000', margin: '5px 0' }} />
 
-                    <div className="receipt-total" style={{ fontSize: '1.4rem', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="receipt-total" style={{ fontSize: '1.2rem', justifyContent: 'space-between', alignItems: 'center', margin: '2px 0' }}>
                         <span style={{ fontSize: '1rem', fontWeight: 700 }}>TOTAL</span>
                         <span>{paidOrder.total.toFixed(2)} <small style={{ fontSize: '0.8rem' }}>DH</small></span>
                     </div>
@@ -596,7 +596,7 @@ export default function POS() {
                     )}
 
                     {paidOrder.paymentMethod === 'cash' && paidOrder.amountReceived > 0 && (
-                        <div style={{ marginTop: '5px', fontSize: '0.8rem' }}>
+                        <div style={{ marginTop: '2px', fontSize: '0.75rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <span>{t('amountReceived')}:</span>
                                 <span>{paidOrder.amountReceived.toFixed(2)}</span>
@@ -608,11 +608,11 @@ export default function POS() {
                         </div>
                     )}
 
-                    <div style={{ borderTop: '1px dashed #000', margin: '15px 0' }} />
+                    <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
 
                     <div className="receipt-footer" style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem' }}>WiFi: {settings.wifiName || 'RiadAlMisk_Guest'} / {settings.wifiPassword || 'Password123'}</div>
-                        <div style={{ fontWeight: 800, fontSize: '0.9rem', margin: '10px 0' }}>*** {settings.receiptFooter || t('thankYou')} ***</div>
+                        <div style={{ fontSize: '0.65rem' }}>WiFi: {settings.wifiName || 'RiadAlMisk_Guest'} / {settings.wifiPassword || 'Password123'}</div>
+                        <div style={{ fontWeight: 800, fontSize: '0.8rem', margin: '5px 0' }}>*** {settings.receiptFooter || t('thankYou')} ***</div>
                         <div style={{ fontSize: '0.6rem' }}>{settings.receiptPoweredBy || 'Powered by Expndy'}</div>
                     </div>
                 </div>
