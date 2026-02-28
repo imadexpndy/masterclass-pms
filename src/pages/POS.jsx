@@ -42,12 +42,18 @@ export default function POS() {
     const [amountReceived, setAmountReceived] = useState('');
     const [paymentInfo, setPaymentInfo] = useState(null);
 
-    // Smart print: uses Electron silent print if a printer is configured, otherwise falls back to window.print()
-    const smartPrint = async () => {
+    // Smart print logic
+    const printCustomerTicket = async (alsoPrintToKitchen = false) => {
         const printerName = settings.printerName;
+        const kitchenPrinterName = settings.kitchenPrinterName;
         if (printerName && window.electron?.silentPrint) {
             try {
+                // By default electron prints the whole window, but CSS `@media print` 
+                // ensures only the `.print-receipt.customer-ticket` is visible.
                 const result = await window.electron.silentPrint(printerName);
+                if (alsoPrintToKitchen && kitchenPrinterName) {
+                    await window.electron.silentPrint(kitchenPrinterName);
+                }
                 if (!result.success) {
                     console.warn('Silent print failed, falling back:', result.error);
                     window.print();
@@ -60,6 +66,46 @@ export default function POS() {
             window.print();
         }
     };
+
+    const printKitchenTicket = async (orderData) => {
+        const kitchenPrinterName = settings.kitchenPrinterName;
+        if (!kitchenPrinterName || !window.electron?.silentPrint) {
+            console.log("No kitchen printer configured or not in electron. Skipping kitchen print.");
+            return;
+        }
+
+        try {
+            // We set a flag or let CSS handle visibility. In this case, we 
+            // trigger the silent print to the specified kitchen printer.
+            // Note: In complex Electron setups with 2 printers, we often need 
+            // an iframe or state flag `isPrintingKitchen` to toggle `@media print`.
+            // For now, we rely on the main process targeting the right printer.
+
+            // To be completely safe with standard `silentPrint` which grabs the window DOM, 
+            // we dispatch a custom event to tell React what is being printed, OR
+            // we set a temporary state `printingTarget` so React conditionally renders
+            // ONLY the kitchen slip for 1 frame.
+
+            // Setup for React state toggle:
+            setPrintingTarget('kitchen');
+            setKitchenPrintData(orderData);
+
+            // Allow React to re-render the DOM showing ONLY the kitchen ticket in print media
+            setTimeout(async () => {
+                await window.electron.silentPrint(kitchenPrinterName);
+                setPrintingTarget('customer'); // reset
+                setKitchenPrintData(null);
+            }, 150);
+
+        } catch (e) {
+            console.error('Kitchen print error:', e);
+            setPrintingTarget('customer');
+            setKitchenPrintData(null);
+        }
+    };
+
+    const [printingTarget, setPrintingTarget] = useState('customer');
+    const [kitchenPrintData, setKitchenPrintData] = useState(null);
 
     // URL params: pre-select table and optionally trigger payment
     useEffect(() => {
@@ -166,7 +212,7 @@ export default function POS() {
         // Auto-print receipt (if enabled in settings)
         if (settings.autoPrint !== 'off') {
             setTimeout(() => {
-                smartPrint();
+                printCustomerTicket(method === 'cash');
             }, 800);
         }
     };
@@ -224,7 +270,9 @@ export default function POS() {
 
                 // Auto-print for existing order payment
                 if (settings.autoPrint !== 'off') {
-                    setTimeout(() => smartPrint(), 800);
+                    setTimeout(() => {
+                        printCustomerTicket(paymentMethod === 'cash');
+                    }, 800);
                 }
             }
 
@@ -247,11 +295,23 @@ export default function POS() {
 
                 if (settings.autoPrint !== 'off') {
                     setTimeout(async () => {
-                        await smartPrint();
+                        await printCustomerTicket(true);
                         setShowBill(false);
                         setPaidOrder(null);
                     }, 800);
                 }
+            }
+
+            // 'pending' mode for existing order (Send)
+            if (paymentMethod === 'pending') {
+                const waiter = users.find(u => u.id === existingOrder.waiterId);
+                const table = tables.find(t => t.id === existingOrder.tableId);
+                printKitchenTicket({
+                    ...existingOrder,
+                    items: newOrderItems,
+                    waiterName: waiter?.name || user?.name || '—',
+                    tableName: table?.name || '',
+                });
             }
             return;
         }
@@ -324,6 +384,17 @@ export default function POS() {
                 amountReceived: 0,
             });
             setShowBill(true);
+        }
+
+        if (paymentMethod === 'pending') {
+            const waiter = users.find(u => u.id === user.id);
+            const table = tables.find(t => t.id === tableId);
+            printKitchenTicket({
+                ...order,
+                items: orderItems,
+                waiterName: waiter?.name || user?.name || '—',
+                tableName: table?.name || '',
+            });
         }
 
         if (paymentMethod !== 'print') {
@@ -412,7 +483,7 @@ export default function POS() {
         // Auto-print receipt (if enabled in settings)
         if (settings.autoPrint !== 'off') {
             setTimeout(() => {
-                smartPrint();
+                printCustomerTicket(true);
             }, 800);
         }
     };
@@ -423,6 +494,43 @@ export default function POS() {
         if (key === '.' && amountReceived.includes('.')) return;
         setAmountReceived(p => p + key);
     };
+
+    // ===== KITCHEN TICKET VIEW (Used only during printing) =====
+    if (kitchenPrintData) {
+        return (
+            <div style={{ padding: '20px', background: '#fff', color: '#000', width: '100%', minHeight: '100vh', boxSizing: 'border-box' }}>
+                <h1 style={{ textAlign: 'center', fontSize: '2.5rem', margin: '0 0 10px 0', borderBottom: '3px solid #000', paddingBottom: '10px', textTransform: 'uppercase' }}>
+                    {lang === 'fr' ? 'CUISINE' : 'KITCHEN'}
+                </h1>
+
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '20px', lineHeight: '1.5' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Table: {kitchenPrintData.tableName || 'Takeaway'}</span>
+                        <span>{new Date().toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <div>{lang === 'fr' ? 'Serveur' : 'Waiter'}: {kitchenPrintData.waiterName || '—'}</div>
+                </div>
+
+                <div style={{ borderTop: '3px dashed #000', margin: '20px 0' }} />
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    {kitchenPrintData.items.map(item => (
+                        <div key={item.id} style={{ display: 'flex', alignItems: 'flex-start', fontSize: '1.8rem', fontWeight: 900, lineHeight: '1.2' }}>
+                            <span style={{ minWidth: '50px', display: 'inline-block' }}>{item.quantity}x</span>
+                            <div style={{ flex: 1, paddingLeft: '10px' }}>
+                                <div>{item.itemName}</div>
+                                {item.notes && (
+                                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', fontStyle: 'italic', marginTop: '4px', textTransform: 'uppercase' }}>
+                                        * {item.notes}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     // ===== RECEIPT VIEW =====
     if (showBill && paidOrder) {
@@ -513,7 +621,7 @@ export default function POS() {
                     <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => { setShowBill(false); setPaidOrder(null); }}>
                         <IconX size={16} /> {t('close')}
                     </button>
-                    <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => smartPrint()}>
+                    <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => printCustomerTicket(true)}>
                         <IconPrint size={16} /> {t('printReceipt')}
                     </button>
                 </div>

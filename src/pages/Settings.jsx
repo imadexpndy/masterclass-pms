@@ -27,6 +27,7 @@ export default function Settings() {
     // Printer state
     const [printers, setPrinters] = useState([]);
     const [selectedPrinter, setSelectedPrinter] = useState('');
+    const [kitchenPrinter, setKitchenPrinter] = useState('');
     const [loadingPrinters, setLoadingPrinters] = useState(false);
     const isElectron = !!window.electron?.getPrinters;
 
@@ -36,9 +37,12 @@ export default function Settings() {
             const map = {};
             all.forEach(s => { map[s.key] = s.value; });
             setValues(map);
-            // Load saved printer
+            // Load saved printers
             if (map.printerName) {
                 setSelectedPrinter(map.printerName);
+            }
+            if (map.kitchenPrinterName) {
+                setKitchenPrinter(map.kitchenPrinterName);
             }
         })();
     }, []);
@@ -73,9 +77,10 @@ export default function Settings() {
         }
         // Save printer settings
         await db.settings.put({ key: 'printerName', value: selectedPrinter || '' });
+        await db.settings.put({ key: 'kitchenPrinterName', value: kitchenPrinter || '' });
         await db.settings.put({ key: 'autoPrint', value: values.autoPrint || 'on' });
 
-        logActivity(user?.id, user?.name, 'settings_save', '', { printer: selectedPrinter });
+        logActivity(user?.id, user?.name, 'settings_save', '', { printer: selectedPrinter, kitchen: kitchenPrinter });
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
     };
@@ -215,64 +220,112 @@ export default function Settings() {
                     </div>
                 </div>
 
-                {/* Electron: Printer selector */}
-                {isElectron ? (
-                    <div className="form-group" style={{ marginTop: '1rem' }}>
-                        <label className="form-label">
-                            {lang === 'fr' ? 'Sélectionner l\'imprimante (impression sans popup)' : 'Select printer (silent printing)'}
-                        </label>
-                        <div style={{ display: 'flex', gap: 8 }}>
-                            <select
-                                className="input"
-                                value={selectedPrinter}
-                                onChange={(e) => { setSelectedPrinter(e.target.value); setSaved(false); }}
-                                style={{ flex: 1 }}
-                            >
-                                <option value="">
-                                    {loadingPrinters
-                                        ? (lang === 'fr' ? 'Recherche...' : 'Searching...')
-                                        : (lang === 'fr' ? '-- Choisir une imprimante --' : '-- Select a printer --')
-                                    }
+                {/* Printer selectors: Visible to all, but silentPrint note shown for browser */}
+                <div className="form-group" style={{ marginTop: '1rem' }}>
+                    <label className="form-label">
+                        {lang === 'fr' ? 'Imprimante principale (Caisse)' : 'Main Printer (Front Desk)'}
+                    </label>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                        <select
+                            className="input"
+                            value={selectedPrinter}
+                            onChange={(e) => { setSelectedPrinter(e.target.value); setSaved(false); }}
+                            style={{ flex: 1 }}
+                        >
+                            <option value="">
+                                {loadingPrinters
+                                    ? (lang === 'fr' ? 'Recherche...' : 'Searching...')
+                                    : (lang === 'fr' ? '-- Choisir une imprimante --' : '-- Select a printer --')
+                                }
+                            </option>
+                            {printers.map(p => (
+                                <option key={p.name} value={p.name}>
+                                    {p.displayName} {p.isDefault ? '⭐' : ''}
                                 </option>
-                                {printers.map(p => (
-                                    <option key={p.name} value={p.name}>
-                                        {p.displayName} {p.isDefault ? '⭐' : ''}
-                                    </option>
-                                ))}
-                            </select>
-                            <button
-                                className="btn btn-ghost"
-                                onClick={refreshPrinters}
-                                disabled={loadingPrinters}
-                                style={{ border: '1px solid var(--border)', padding: '8px 12px' }}
-                                title={lang === 'fr' ? 'Rafraîchir' : 'Refresh'}
-                            >
-                                ↻
-                            </button>
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.5rem', lineHeight: '1.4' }}>
-                            {lang === 'fr'
-                                ? 'L\'impression se fera en silence, sans popup.'
-                                : 'Printing will be done silently, without popups.'}
-                        </div>
+                            ))}
+                        </select>
+                        <button
+                            className="btn btn-ghost"
+                            onClick={refreshPrinters}
+                            disabled={loadingPrinters || !isElectron}
+                            style={{ border: '1px solid var(--border)', padding: '8px 12px' }}
+                            title={lang === 'fr' ? 'Rafraîchir' : 'Refresh'}
+                        >
+                            ↻
+                        </button>
                     </div>
-                ) : (
+                </div>
+
+                <div className="form-group" style={{ marginTop: '1rem' }}>
+                    <label className="form-label">
+                        {lang === 'fr' ? 'Imprimante Cuisine (Bons de commande)' : 'Kitchen Printer (Order Tickets)'}
+                    </label>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                        <select
+                            className="input"
+                            value={kitchenPrinter}
+                            onChange={(e) => { setKitchenPrinter(e.target.value); setSaved(false); }}
+                            style={{ flex: 1 }}
+                        >
+                            <option value="">
+                                {loadingPrinters
+                                    ? (lang === 'fr' ? 'Recherche...' : 'Searching...')
+                                    : (lang === 'fr' ? '-- Choisir une imprimante --' : '-- Select a printer --')
+                                }
+                            </option>
+                            {printers.map(p => (
+                                <option key={p.name} value={p.name}>
+                                    {p.displayName} {p.isDefault ? '⭐' : ''}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.5rem', lineHeight: '1.4' }}>
+                        {lang === 'fr'
+                            ? 'Les commandes envoyées (Send) seront imprimées uniquement ici. Les paiements déclencheront une impression double (Caisse + Cuisine).'
+                            : 'Sent orders will print only here. Payments will trigger dual printing (Front Desk + Kitchen).'}
+                    </div>
+                </div>
+
+                {!isElectron && (
                     <div style={{ marginTop: '1rem', padding: '12px 14px', borderRadius: 10, background: 'var(--blue-bg)', border: '1px solid rgba(96,165,250,0.2)' }}>
                         <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--blue)', marginBottom: 6 }}>
                             {lang === 'fr' ? 'ℹ️ Mode navigateur' : 'ℹ️ Browser Mode'}
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                             {lang === 'fr'
-                                ? 'Dans le navigateur, la fenêtre d\'impression s\'affiche toujours (limitation Chrome). Pour l\'impression silencieuse, utilisez l\'application Electron.'
-                                : 'In the browser, the print dialog always shows (Chrome limitation). For silent printing, use the Electron app.'
+                                ? 'Dans le navigateur, la fenêtre d\'impression s\'affiche toujours (limitation Chrome). Pour configurer le nom exact de l\'imprimante, utilisez l\'application Electron.'
+                                : 'In the browser, the print dialog always shows (Chrome limitation). To configure exact printer names, use the Electron app.'
                             }
                             <br />
                             <strong style={{ color: 'var(--text)' }}>
                                 {lang === 'fr'
-                                    ? '💡 Astuce : Définissez votre imprimante ticket comme imprimante par défaut dans Chrome pour n\'avoir qu\'à cliquer "Imprimer".'
-                                    : '💡 Tip: Set your receipt printer as the default in Chrome so you just need to click "Print".'}
+                                    ? '💡 Astuce : Vous pouvez saisir le nom exact de l\'imprimante manuellement ci-dessous si vous ne voyez pas la liste.'
+                                    : '💡 Tip: You can manually type the exact printer name below if the list is empty.'}
                             </strong>
                         </div>
+
+                        {/* Fallback inputs for browser mode if `printers` list is empty because `getPrinters` isn't available */}
+                        {printers.length === 0 && (
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                <input
+                                    type="text"
+                                    placeholder={lang === 'fr' ? "Nom imprimante caisse" : "Main printer name"}
+                                    value={selectedPrinter}
+                                    onChange={e => { setSelectedPrinter(e.target.value); setSaved(false); }}
+                                    className="input"
+                                    style={{ flex: 1, padding: '4px 8px' }}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder={lang === 'fr' ? "Nom imprimante cuisine" : "Kitchen printer name"}
+                                    value={kitchenPrinter}
+                                    onChange={e => { setKitchenPrinter(e.target.value); setSaved(false); }}
+                                    className="input"
+                                    style={{ flex: 1, padding: '4px 8px' }}
+                                />
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
