@@ -1005,19 +1005,19 @@ a {
 }
 
 .pos-categories {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 10px;
-  padding: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 14px;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
+  max-height: 220px;
   overflow-y: auto;
-  max-height: 160px;
 }
 
 .cat-pill {
-  padding: 14px 16px;
-  font-size: 0.85rem;
+  padding: 8px 12px;
+  font-size: 0.8rem;
   font-weight: 500;
   white-space: nowrap;
   border-radius: 12px;
@@ -1027,8 +1027,10 @@ a {
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
+  flex: 1 1 auto;
+  max-width: 250px;
 }
 
 .cat-pill:hover {
@@ -1061,8 +1063,8 @@ a {
 }
 
 .cat-pill .cat-count {
-  font-size: 0.7rem;
-  opacity: 0.65;
+  font-size: 0.65rem;
+  opacity: 0.75;
   font-weight: 400;
 }
 
@@ -1071,13 +1073,81 @@ a {
   overflow-y: auto;
   padding: 1rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 10px;
   align-content: start;
 }
 
-/* pos-item styles are defined in the NEW LAYOUT section below */
+/* ===== NEW POS CARD STYLES ===== */
+.pos-item-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
 
+.pos-item-card:hover:not(.unavailable) {
+  border-color: var(--border-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.pos-item-card.unavailable {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(100%);
+}
+
+.pos-item-image {
+  height: 110px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-body);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.pos-item-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pos-item-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.pos-item-price {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+/* Compact layout for items without images */
+.pos-item-card.compact-card {
+  min-height: 70px;
+  justify-content: center;
+  border-left: 4px solid var(--gold);
+}
+
+.pos-item-card.compact-card .pos-item-content {
+  padding: 10px 12px;
+}
 
 /* ===== ORDER PANEL ===== */
 .order-panel {

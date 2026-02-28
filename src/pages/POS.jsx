@@ -535,7 +535,7 @@ export default function POS() {
                                 className={`cat-pill ${catId === cat.id ? 'active' : ''}`}
                                 onClick={() => setActiveCat(cat.id)}
                             >
-                                <CatIcon size={22} />
+                                <CatIcon size={18} />
                                 <div className="cat-info">
                                     <span style={{ fontWeight: 600 }}>{cat.name}</span>
                                     <span className="cat-count">{itemCount} {lang === 'fr' ? 'articles' : 'items'}</span>
@@ -549,16 +549,13 @@ export default function POS() {
                     {filteredItems.map(item => (
                         <button
                             key={item.id}
-                            className={`pos-item-card ${!item.available ? 'unavailable' : ''}`}
+                            className={`pos-item-card ${!item.available ? 'unavailable' : ''} ${!item.image ? 'compact-card' : ''}`}
                             onClick={() => item.available && addToCart(item)}
                         >
-                            {/* Image Section */}
-                            <div
-                                className={`pos-item-image ${!item.image ? 'no-image' : ''}`}
-                                style={item.image ? { backgroundImage: `url(${item.image})` } : {}}
-                            >
-                                {!item.image && <span>{item.name.charAt(0)}</span>}
-                            </div>
+                            {/* Render image container ONLY if an actual image exists */}
+                            {item.image && (
+                                <div className="pos-item-image" style={{ backgroundImage: `url(${item.image})` }} />
+                            )}
 
                             {/* Content Section */}
                             <div className="pos-item-content">
