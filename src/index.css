@@ -1050,6 +1050,14 @@ a {
   flex-direction: column;
   gap: 2px;
   text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.cat-pill .cat-info span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cat-pill .cat-count {
