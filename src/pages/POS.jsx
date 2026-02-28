@@ -588,22 +588,6 @@ export default function POS() {
                         <span>{paidOrder.total.toFixed(2)} <small style={{ fontSize: '0.8rem' }}>DH</small></span>
                     </div>
 
-                    {paidOrder.paymentMethod !== 'pending' && (
-                        <div style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', marginTop: '5px' }}>
-                            <span>{t('paymentMethod')}:</span>
-                            <span style={{ fontWeight: 700, textTransform: 'uppercase' }}>{paidOrder.paymentMethod === 'cash' ? t('cash') : t('card')}</span>
-                        </div>
-                    )}
-
-                    {paidOrder.paymentMethod === 'cash' && paidOrder.amountReceived > 0 && (
-                        <div style={{ marginTop: '2px', fontSize: '0.75rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
-                                <span>{t('change')}:</span>
-                                <span>{paidOrder.changeGiven.toFixed(2)} DH</span>
-                            </div>
-                        </div>
-                    )}
-
                     <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
 
                     <div className="receipt-footer" style={{ textAlign: 'center' }}>
