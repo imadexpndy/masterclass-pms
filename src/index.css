@@ -764,7 +764,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-base);
+  background: #f8f6f0;
   position: relative;
   overflow: hidden;
 }
@@ -774,19 +774,19 @@ a {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 30% 50%, rgba(201, 169, 110, 0.06) 0%, transparent 60%),
-    radial-gradient(ellipse at 70% 30%, rgba(201, 169, 110, 0.04) 0%, transparent 50%);
+    radial-gradient(ellipse at 30% 50%, rgba(201, 169, 110, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 30%, rgba(201, 169, 110, 0.08) 0%, transparent 50%);
 }
 
 .login-card-horizontal {
   position: relative;
   z-index: 1;
   display: flex;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
+  background: #ffffff;
+  border: 1px solid rgba(201, 169, 110, 0.3);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.15);
   max-width: 90vw;
   max-height: 90vh;
 }
@@ -796,8 +796,8 @@ a {
   align-items: center;
   justify-content: center;
   padding: 3rem 2.5rem;
-  background: linear-gradient(160deg, rgba(201, 169, 110, 0.08) 0%, rgba(201, 169, 110, 0.02) 100%);
-  border-right: 1px solid var(--border);
+  background: #ffffff;
+  border-right: 1px solid rgba(201, 169, 110, 0.2);
   min-width: 280px;
 }
 
@@ -849,8 +849,8 @@ a {
 
 .login-auth-title {
   font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-weight: 700;
+  color: #1a1a2e;
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 1.2rem;
@@ -865,17 +865,22 @@ a {
 }
 
 .user-select-btn {
-  padding: 14px 8px;
-  background: var(--bg-card);
-  border: 2px solid var(--border);
-  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem;
+  background: #ffffff;
+  border: 1px solid rgba(201, 169, 110, 0.2);
+  border-radius: 12px;
   text-align: center;
-  transition: var(--transition);
+  transition: all 0.2s ease;
 }
 
 .user-select-btn:hover {
-  border-color: var(--border-gold);
-  background: var(--bg-card-hover);
+  background: #faf8f5;
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(201, 169, 110, 0.15);
 }
 
 .user-select-btn.selected {
@@ -883,14 +888,23 @@ a {
   background: rgba(201, 169, 110, 0.08);
 }
 
+.user-select-btn .user-avatar {
+  background: linear-gradient(135deg, var(--gold), #a68940);
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+}
+
 .user-select-btn .user-btn-name {
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 2px;
+  color: #1a1a2e;
 }
 
 .user-select-btn .user-btn-role {
   font-size: 0.68rem;
-  color: var(--text-muted);
+  color: #64748b;
   text-transform: capitalize;
 }
 
@@ -900,14 +914,16 @@ a {
   gap: 12px;
   margin-bottom: 1.5rem;
   padding: 10px;
-  background: var(--bg-elevated);
+  background: #f8f6f0;
+  border: 1px solid rgba(201, 169, 110, 0.2);
   border-radius: 12px;
+  color: #1a1a2e;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.2s ease;
 }
 
 .selected-user-header:hover {
-  background: var(--bg-card-hover);
+  background: #faf8f5;
 }
 
 .pin-display {
@@ -921,8 +937,8 @@ a {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 2px solid var(--border);
-  transition: var(--transition);
+  border: 2px solid rgba(201, 169, 110, 0.4);
+  transition: all 0.2s ease;
 }
 
 .pin-dot.filled {
@@ -942,15 +958,16 @@ a {
   padding: 12px;
   font-size: 1.2rem;
   font-weight: 600;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  transition: var(--transition);
+  color: #1a1a2e;
+  background: #ffffff;
+  border: 1px solid rgba(201, 169, 110, 0.3);
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .pin-key:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--border-gold);
+  background: #faf8f5;
+  border-color: var(--gold);
 }
 
 .pin-key:active {
@@ -974,6 +991,7 @@ a {
   display: flex;
   height: 100%;
   gap: 0;
+  width: 100%;
 }
 
 .pos-menu {
@@ -982,15 +1000,19 @@ a {
   flex-direction: column;
   overflow: hidden;
   border-right: 1px solid var(--border);
+  min-width: 0;
+  /* Prevents flex children from stretching past viewport */
 }
 
 .pos-categories {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 10px;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
+  padding: 14px;
   background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  overflow-y: auto;
+  max-height: 160px;
 }
 
 .cat-pill {
@@ -1051,7 +1073,7 @@ a {
 
 /* ===== ORDER PANEL ===== */
 .order-panel {
-  width: 360px;
+  width: 320px;
   display: flex;
   flex-direction: column;
   background: var(--bg-surface);
@@ -1578,7 +1600,6 @@ a {
   padding: 20px;
   overflow-y: auto;
   align-content: start;
-
   background-image: radial-gradient(var(--border) 1px, transparent 1px);
   background-size: 20px 20px;
 }

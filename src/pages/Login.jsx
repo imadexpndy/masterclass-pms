@@ -6,7 +6,7 @@ import { useLang } from '../context/LangContext';
 import { IconX, IconLogout } from '../components/Icons';
 import { hashPassword, resetAllOrders, resetTodayOrders } from '../db/db_utils';
 import { logActivity, getRecentLogs, clearActivityLogs } from '../db/activityLog';
-import logo from '../assets/logo_masterclass.svg';
+import logo from '../assets/logo_almisk.jpg';
 
 const ACTION_COLORS = {
     login: '#22c55e', logout: '#94a3b8',
@@ -161,7 +161,7 @@ export default function Login() {
             <div className="login-card-horizontal">
                 <div className="login-brand-panel">
                     <div className="login-brand-inner">
-                        <img src={logo} alt="MasterClass" className="login-brand-logo" />
+                        <img src={logo} alt="Almisk" className="login-brand-logo" style={{ maxHeight: '180px', width: 'auto', objectFit: 'contain' }} />
                         <div className="login-brand-subtitle">{t('appSubtitle')}</div>
                         <div className="login-brand-decoration">
                             <div className="login-brand-line" />
