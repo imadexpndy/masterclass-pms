@@ -95,7 +95,7 @@ export default function AppShell() {
     useEffect(() => {
         const tick = () => {
             const now = new Date();
-            setClock(now.toLocaleTimeString(lang === 'ar' ? 'ar-MA' : 'fr-FR', { hour: '2-digit', minute: '2-digit' }));
+            setClock(now.toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' }));
         };
         tick();
         const id = setInterval(tick, 30000);
@@ -110,7 +110,7 @@ export default function AppShell() {
             {/* Sidebar */}
             <aside className="sidebar">
                 <div className="sidebar-brand">
-                    <img src={logo} alt="MasterClass Logo" style={{ width: '100%', maxWidth: 180, height: 'auto', marginBottom: 10 }} />
+                    <img src={logo} alt="Riad Al Misk" style={{ width: '100%', maxWidth: 180, height: 'auto', marginBottom: 10 }} />
                 </div>
 
                 <nav className="sidebar-nav">

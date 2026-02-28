@@ -104,7 +104,7 @@ export default function Reports() {
         const groups = {};
 
         filteredOrders.forEach(o => {
-            const dateKey = new Date(o.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-MA' : 'fr-FR');
+            const dateKey = new Date(o.createdAt).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US');
 
             if (!groups[dateKey]) groups[dateKey] = { date: dateKey, total: 0, cash: 0, card: 0, waiters: {} };
 
@@ -147,10 +147,10 @@ export default function Reports() {
                             {t('cashRegisterReport')}
                         </div>
                         <div style={{ fontSize: '0.7rem', marginTop: 4 }}>
-                            {lang === 'ar' ? 'الفترة' : 'Période'}: <strong>{periodLabel}</strong>
+                            {lang === 'fr' ? 'Période' : 'Period'}: <strong>{periodLabel}</strong>
                         </div>
                         <div style={{ fontSize: '0.65rem', color: '#666' }}>
-                            {t('printedOn')} {new Date().toLocaleString(lang === 'ar' ? 'ar-MA' : 'fr-FR')}
+                            {t('printedOn')} {new Date().toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US')}
                         </div>
                     </div>
 
@@ -223,7 +223,7 @@ export default function Reports() {
                         {[...filteredOrders]
                             .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
                             .map((o, i) => {
-                                const time = new Date(o.createdAt).toLocaleTimeString(lang === 'ar' ? 'ar-MA' : 'fr-FR', { hour: '2-digit', minute: '2-digit' });
+                                const time = new Date(o.createdAt).toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' });
                                 const waiterName = allUsers.find(u => u.id === o.waiterId)?.name || '—';
                                 return (
                                     <div key={i} style={{ display: 'flex', marginBottom: 1, borderBottom: '1px dotted #ddd', paddingBottom: 1 }}>
@@ -301,7 +301,7 @@ export default function Reports() {
 
                     {/* Period Filter */}
                     <div className="filter-group">
-                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: 8, color: 'var(--text-muted)' }}>{lang === 'ar' ? 'الفترة' : 'Période'}</label>
+                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: 8, color: 'var(--text-muted)' }}>{lang === 'fr' ? 'Période' : 'Period'}</label>
                         <div style={{ display: 'flex', gap: 8 }}>
                             {['today', 'yesterday', 'week', 'month'].map(period => (
                                 <button
@@ -333,7 +333,7 @@ export default function Reports() {
                                 value={customStart}
                                 onChange={e => setCustomStart(e.target.value)}
                             />
-                            <span style={{ color: 'var(--text-muted)' }}>{lang === 'ar' ? 'إلى' : 'à'}</span>
+                            <span style={{ color: 'var(--text-muted)' }}>{lang === 'fr' ? 'à' : 'to'}</span>
                             <input
                                 type="date"
                                 className="form-input"
@@ -356,7 +356,7 @@ export default function Reports() {
                                 value={selectedWaiter}
                                 onChange={e => setSelectedWaiter(e.target.value)}
                             >
-                                <option value="all">{lang === 'ar' ? 'كل النوادل' : 'Tous les serveurs'}</option>
+                                <option value="all">{lang === 'fr' ? 'Tous les serveurs' : 'All waiters'}</option>
                                 {allUsers.map(u => (
                                     <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
                                 ))}
@@ -442,10 +442,10 @@ export default function Reports() {
                                         <td style={{ padding: '12px 16px', fontSize: '1rem' }}>
                                             {day.date}
                                         </td>
-                                        <td>{lang === 'ar' ? 'إجمالي (الكل)' : 'Global (Tous)'}</td>
-                                        <td style={{ textAlign: 'right', color: 'var(--green)' }}>{day.cash.toFixed(2)} DH</td>
-                                        <td style={{ textAlign: 'right', color: 'var(--orange)' }}>{day.card.toFixed(2)} DH</td>
-                                        <td style={{ textAlign: 'right', fontWeight: 700 }}>{day.total.toFixed(2)} DH</td>
+                                        <td>{lang === 'fr' ? 'Global (Tous)' : 'Grand Total (All)'}</td>
+                                        <td style={{ textAlign: 'right', color: 'var(--green)' }}>{totals.cash.toFixed(2)}</td>
+                                        <td style={{ textAlign: 'right', color: 'var(--orange)' }}>{totals.card.toFixed(2)}</td>
+                                        <td style={{ textAlign: 'right', fontWeight: 700 }}>{totals.total.toFixed(2)}</td>
                                     </tr>
 
                                     {Object.values(day.waiters).map((w, j) => (

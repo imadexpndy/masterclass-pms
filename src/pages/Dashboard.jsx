@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import db from '../db/db';
 import { useLang } from '../context/LangContext';
 import { IconMoney, IconClipboard, IconTable, IconReceipt, IconCart, IconChef, IconChart, IconTarget, IconX, IconUsers, IconCreditCard, IconPrint } from '../components/Icons';
-import logo from '../assets/menu images/logo master classe ticket.svg';
+import logo from '../assets/logo_masterclass.svg';
 
 export default function Dashboard() {
     const { t, lang } = useLang();
@@ -158,7 +158,7 @@ export default function Dashboard() {
                                     </td>
                                     <td style={{ fontWeight: 600, color: 'var(--gold)' }}>{(order.total || 0).toFixed(2)} DH</td>
                                     <td style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                                        {new Date(order.createdAt).toLocaleTimeString(lang === 'ar' ? 'ar-MA' : 'fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                        {new Date(order.createdAt).toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                                     </td>
                                 </tr>
                             );
@@ -202,7 +202,7 @@ export default function Dashboard() {
                                 <div className="detail-item">
                                     <div className="detail-label" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>{t('date')}</div>
                                     <div className="detail-value" style={{ fontWeight: 500 }}>
-                                        {new Date(selectedOrder.createdAt).toLocaleString(lang === 'ar' ? 'ar-MA' : 'fr-FR')}
+                                        {new Date(selectedOrder.createdAt).toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US')}
                                     </div>
                                 </div>
                                 <div className="detail-item">
@@ -296,16 +296,16 @@ export default function Dashboard() {
                     <div className="print-receipt receipt-inner" style={{ color: '#000' }}>
                         <div className="receipt-header" style={{ marginBottom: '10px', textAlign: 'center' }}>
                             <img src={logo} alt="Logo" style={{ width: 120, height: 'auto', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
-                            <div style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2px', color: '#000' }}>{settings.storeName || 'MASTER CLASS'}</div>
-                            <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT & CAFÉ'}</div>
+                            <div style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2px', color: '#000' }}>{settings.storeName || 'RIAD AL MISK'}</div>
+                            <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT'}</div>
                             <div style={{ fontSize: '0.7rem', marginTop: '5px' }}>
-                                {settings.storeAddress || '123 Avenue Mohammed VI, Marrakech'}<br />
-                                Tel: {settings.storePhone || '05 24 00 00 00'}
+                                {settings.storeAddress || '362 rue de la Kasbah, Médina - Marrakech'}<br />
+                                Tel: {settings.storePhone || '05 24 44 08 71'}
                             </div>
                             <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                                <span>{new Date(selectedOrder.createdAt).toLocaleDateString('fr-FR')}</span>
-                                <span>{new Date(selectedOrder.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span>{new Date(selectedOrder.createdAt).toLocaleDateString('en-US')}</span>
+                                <span>{new Date(selectedOrder.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginTop: '2px' }}>
                                 <span>{t('orderNum')}: <strong>#{selectedOrder.id.slice(-6).toUpperCase()}</strong></span>
@@ -318,7 +318,7 @@ export default function Dashboard() {
 
                         <div style={{ borderTop: '1px dashed #000', margin: '5px 0' }} />
                         <div style={{ display: 'flex', fontSize: '0.7rem', fontWeight: 700, marginBottom: '4px' }}>
-                            <span style={{ width: '10%' }}>Qt</span>
+                            <span style={{ width: '10%' }}>Qty</span>
                             <span style={{ flex: 1 }}>{t('item') || 'Item'}</span>
                             <span style={{ width: '25%', textAlign: 'right' }}>{t('total') || 'Total'}</span>
                         </div>
@@ -347,13 +347,7 @@ export default function Dashboard() {
 
                         <div style={{ borderTop: '1px dashed #000', margin: '15px 0' }} />
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.7rem' }}>WiFi: {settings.wifiName || 'MasterClass_Guest'} / {settings.wifiPassword || 'Password123'}</div>
-                            {settings.ramadanMode === 'on' && (
-                                <div style={{ fontWeight: 900, fontSize: '1rem', margin: '8px 0', borderTop: '1px dashed #000', borderBottom: '1px dashed #000', padding: '6px 0' }}>
-                                    ☪ رمضان كريم ☪
-                                    <div style={{ fontSize: '0.7rem', fontWeight: 600 }}>Ramadan Karim</div>
-                                </div>
-                            )}
+                            <div style={{ fontSize: '0.7rem' }}>WiFi: {settings.wifiName || 'RiadAlMisk_Guest'} / {settings.wifiPassword || 'Password123'}</div>
                             <div style={{ fontWeight: 800, fontSize: '0.9rem', margin: '10px 0' }}>*** {settings.receiptFooter || t('thankYou')} ***</div>
                             <div style={{ fontSize: '0.6rem' }}>{settings.receiptPoweredBy || 'Powered by Expndy'}</div>
                         </div>

@@ -358,7 +358,7 @@ export default function Tables() {
                                 title="Ajouter un élément"
                             >
                                 <IconPlus size={16} />
-                                <span>{lang === 'ar' ? 'إضافة' : 'Ajouter'}</span>
+                                <span>{lang === 'fr' ? 'Ajouter' : 'Add'}</span>
                                 <IconChevronDown size={14} />
                             </button>
 
@@ -392,14 +392,14 @@ export default function Tables() {
                 <div className="floor-legend">
                     <div className="floor-legend-items">
                         <span className="floor-legend-item">
-                            <IconCircle filled size={10} color="var(--green)" /> {lang === 'ar' ? 'حرة' : 'Libre'} <strong>{freeCount}</strong>
+                            <IconCircle filled size={10} color="var(--green)" /> {lang === 'fr' ? 'Libre' : 'Free'} <strong>{freeCount}</strong>
                         </span>
                         <span className="floor-legend-item">
-                            <IconCircle filled size={10} color="var(--orange)" /> {lang === 'ar' ? 'مشغولة' : 'Occupée'} <strong>{occCount}</strong>
+                            <IconCircle filled size={10} color="var(--orange)" /> {lang === 'fr' ? 'Occupée' : 'Occupied'} <strong>{occCount}</strong>
                         </span>
                     </div>
                     <div className="floor-legend-hint">
-                        {lang === 'ar' ? 'اسحب للتحريك · انقر مرتين للتسمية' : 'Glisser pour déplacer · Double-clic pour renommer'}
+                        {lang === 'fr' ? 'Glisser pour déplacer · Double-clic pour renommer' : 'Drag to move · Double-click to rename'}
                     </div>
                 </div>
 

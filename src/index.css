@@ -5,9 +5,9 @@
   --bg-elevated: #1a1a25;
   --bg-card: rgba(255, 255, 255, 0.03);
   --bg-card-hover: rgba(255, 255, 255, 0.06);
-  --gold: #5D4037;
-  --gold-light: #795548;
-  --gold-dark: #3E2723;
+  --gold: #c9a96e;
+  --gold-light: #dbb878;
+  --gold-dark: #a68940;
   --green: #34d399;
   --green-bg: rgba(52, 211, 153, 0.1);
   --red: #f87171;
@@ -21,7 +21,7 @@
   --text-secondary: rgba(255, 255, 255, 0.65);
   --text-muted: rgba(255, 255, 255, 0.35);
   --border: rgba(255, 255, 255, 0.07);
-  --border-gold: rgba(93, 64, 55, 0.3);
+  --border-gold: rgba(201, 169, 110, 0.3);
   --radius: 14px;
   --radius-sm: 8px;
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
@@ -39,9 +39,9 @@
   --bg-elevated: #f0f0f4;
   --bg-card: rgba(0, 0, 0, 0.025);
   --bg-card-hover: rgba(0, 0, 0, 0.05);
-  --gold: #3E2723;
-  --gold-light: #5D4037;
-  --gold-dark: #1B0F0A;
+  --gold: #b8923d;
+  --gold-light: #c9a96e;
+  --gold-dark: #8a6d2b;
   --green: #16a34a;
   --green-bg: rgba(22, 163, 74, 0.08);
   --red: #dc2626;
@@ -55,7 +55,7 @@
   --text-secondary: rgba(26, 26, 46, 0.65);
   --text-muted: rgba(26, 26, 46, 0.38);
   --border: rgba(0, 0, 0, 0.08);
-  --border-gold: rgba(62, 39, 35, 0.2);
+  --border-gold: rgba(185, 146, 61, 0.25);
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
   --glass: rgba(255, 255, 255, 0.6);
   --glass-border: rgba(0, 0, 0, 0.06);

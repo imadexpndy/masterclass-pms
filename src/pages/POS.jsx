@@ -10,15 +10,14 @@ import {
     IconReceipt, IconCart, IconCash, IconCreditCard, IconPrint,
     IconX, IconSend, IconTrash, IconCheck,
     IconBreakfast, IconSalad, IconTagine, IconPizza, IconPasta,
-    IconSteak, IconWrap, IconSandwich, IconJuice, IconCoffee, IconDessert, IconRamadan
+    IconSteak, IconWrap, IconSandwich, IconJuice, IconCoffee, IconDessert
 } from '../components/Icons';
-import logo from '../assets/menu images/logo master classe ticket.svg';
+import logo from '../assets/logo_masterclass.svg';
 
 const CATEGORY_ICONS = {
     breakfast: IconBreakfast, salad: IconSalad, tagine: IconTagine,
     pizza: IconPizza, pasta: IconPasta, steak: IconSteak, wrap: IconWrap,
     sandwich: IconSandwich, juice: IconJuice, coffee: IconCoffee, dessert: IconDessert,
-    ramadan: IconRamadan,
 };
 
 export default function POS() {
@@ -432,18 +431,18 @@ export default function POS() {
                 <div className="print-receipt receipt-inner" style={{ color: '#000' }}>
                     <div className="receipt-header" style={{ marginBottom: '10px', textAlign: 'center' }}>
                         <img src={logo} alt="Logo" style={{ width: 120, height: 'auto', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
-                        <div className="receipt-brand" style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2px', color: '#000' }}>{settings.storeName || 'MASTER CLASS'}</div>
-                        <div className="receipt-sub" style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT & CAFÉ'}</div>
+                        <div className="receipt-brand" style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2px', color: '#000' }}>{settings.storeName || 'RIAD AL MISK'}</div>
+                        <div className="receipt-sub" style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT'}</div>
                         <div className="receipt-address" style={{ fontSize: '0.7rem', marginTop: '5px' }}>
-                            {settings.storeAddress || '123 Avenue Mohammed VI, Marrakech'}<br />
-                            Tel: {settings.storePhone || '05 24 00 00 00'}
+                            {settings.storeAddress || '362 rue de la Kasbah, Médina - Marrakech'}<br />
+                            Tel: {settings.storePhone || '05 24 44 08 71'}
                         </div>
 
                         <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                            <span>{new Date(paidOrder.createdAt).toLocaleDateString(lang === 'ar' ? 'fr-MA' : 'fr-FR')}</span>
-                            <span>{new Date(paidOrder.createdAt).toLocaleTimeString(lang === 'ar' ? 'fr-MA' : 'fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span>{new Date(paidOrder.createdAt).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US')}</span>
+                            <span>{new Date(paidOrder.createdAt).toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginTop: '2px' }}>
                             <span>{t('orderNum')}: <strong>#{paidOrder.id.slice(-6).toUpperCase()}</strong></span>
@@ -456,19 +455,19 @@ export default function POS() {
 
                     <div style={{ borderTop: '1px dashed #000', margin: '5px 0' }} />
                     <div style={{ display: 'flex', fontSize: '0.7rem', fontWeight: 700, marginBottom: '4px' }}>
-                        <span style={{ width: '10%', textAlign: lang === 'ar' ? 'right' : 'left' }}>{t('qty') || 'Qt'}</span>
-                        <span style={{ flex: 1, textAlign: lang === 'ar' ? 'right' : 'left' }}>{t('item') || 'Item'}</span>
-                        <span style={{ width: '25%', textAlign: lang === 'ar' ? 'left' : 'right' }}>{t('total') || 'Total'}</span>
+                        <span style={{ width: '10%', textAlign: 'left' }}>{t('qty') || 'Qty'}</span>
+                        <span style={{ flex: 1, textAlign: 'left' }}>{t('item') || 'Item'}</span>
+                        <span style={{ width: '25%', textAlign: 'right' }}>{t('total') || 'Total'}</span>
                     </div>
                     <div style={{ borderTop: '1px solid #000', marginBottom: '5px' }} />
 
                     {paidOrder.items.map(item => (
                         <div key={item.id} className="receipt-item" style={{ fontSize: '0.8rem', marginBottom: '4px', display: 'flex', alignItems: 'flex-start' }}>
-                            <span style={{ width: '10%', textAlign: lang === 'ar' ? 'right' : 'left' }}>{item.quantity}</span>
-                            <span style={{ flex: 1, textAlign: lang === 'ar' ? 'right' : 'left', padding: '0 4px', overflow: 'hidden', wordBreak: 'break-word' }}>
-                                {lang === 'ar' && item.nameAr ? item.nameAr : item.itemName}
+                            <span style={{ width: '10%', textAlign: 'left' }}>{item.quantity}</span>
+                            <span style={{ flex: 1, textAlign: 'left', padding: '0 4px', overflow: 'hidden', wordBreak: 'break-word' }}>
+                                {item.itemName}
                             </span>
-                            <span className="receipt-item-right" style={{ width: '25%', textAlign: lang === 'ar' ? 'left' : 'right', fontWeight: 600 }}>
+                            <span className="receipt-item-right" style={{ width: '25%', textAlign: 'right', fontWeight: 600 }}>
                                 {(item.unitPrice * item.quantity).toFixed(2)}
                             </span>
                         </div>
@@ -504,13 +503,7 @@ export default function POS() {
                     <div style={{ borderTop: '1px dashed #000', margin: '15px 0' }} />
 
                     <div className="receipt-footer" style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem' }}>WiFi: {settings.wifiName || 'MasterClass_Guest'} / {settings.wifiPassword || 'Password123'}</div>
-                        {settings.ramadanMode === 'on' && (
-                            <div style={{ fontWeight: 900, fontSize: '1rem', margin: '8px 0', borderTop: '1px dashed #000', borderBottom: '1px dashed #000', padding: '6px 0' }}>
-                                ☪ رمضان كريم ☪
-                                <div style={{ fontSize: '0.7rem', fontWeight: 600 }}>Ramadan Karim</div>
-                            </div>
-                        )}
+                        <div style={{ fontSize: '0.7rem' }}>WiFi: {settings.wifiName || 'RiadAlMisk_Guest'} / {settings.wifiPassword || 'Password123'}</div>
                         <div style={{ fontWeight: 800, fontSize: '0.9rem', margin: '10px 0' }}>*** {settings.receiptFooter || t('thankYou')} ***</div>
                         <div style={{ fontSize: '0.6rem' }}>{settings.receiptPoweredBy || 'Powered by Expndy'}</div>
                     </div>
@@ -544,8 +537,8 @@ export default function POS() {
                             >
                                 <CatIcon size={22} />
                                 <div className="cat-info">
-                                    <span style={{ fontWeight: 600 }}>{lang === 'ar' && cat.nameAr ? cat.nameAr : cat.name}</span>
-                                    <span className="cat-count">{itemCount} {lang === 'ar' ? 'عنصر' : 'articles'}</span>
+                                    <span style={{ fontWeight: 600 }}>{cat.name}</span>
+                                    <span className="cat-count">{itemCount} {lang === 'fr' ? 'articles' : 'items'}</span>
                                 </div>
                             </button>
                         );
@@ -564,13 +557,13 @@ export default function POS() {
                                 className={`pos-item-image ${!item.image ? 'no-image' : ''}`}
                                 style={item.image ? { backgroundImage: `url(${item.image})` } : {}}
                             >
-                                {!item.image && <span>{(lang === 'ar' && item.nameAr ? item.nameAr : item.name).charAt(0)}</span>}
+                                {!item.image && <span>{item.name.charAt(0)}</span>}
                             </div>
 
                             {/* Content Section */}
                             <div className="pos-item-content">
-                                <div className="pos-item-name">{lang === 'ar' && item.nameAr ? item.nameAr : item.name}</div>
-                                <div className="pos-item-price">{item.price.toFixed(2)} {lang === 'ar' ? 'د.م.' : 'DH'}</div>
+                                <div className="pos-item-name">{item.name}</div>
+                                <div className="pos-item-price">{item.price.toFixed(2)} DH</div>
                             </div>
 
                             {!item.available && <span className="badge badge-red" style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}>Indisponible</span>}
@@ -659,7 +652,7 @@ export default function POS() {
                                 setPaidOrder(null);
                             }, 800);
                         }} disabled={cart.length === 0}>
-                            <IconPrint size={14} /> {lang === 'ar' ? 'طبع' : 'Imprimer'}
+                            <IconPrint size={14} /> {lang === 'fr' ? 'Imprimer' : 'Print'}
                         </button>
                     </div>
                 </div>

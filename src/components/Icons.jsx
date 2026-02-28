@@ -1,4 +1,4 @@
-/* ===== Master Class POS — SVG Icon Library ===== */
+/* ===== Riad Al Misk POS — SVG Icon Library ===== */
 const I = ({ d, size = 20, color = 'currentColor', ...p }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color}
         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}>{d}</svg>
@@ -56,7 +56,7 @@ export const IconCircle = ({ filled, size = 10, color = 'currentColor', ...p }) 
     </svg>
 );
 
-// ===== Category Icons (replace emojis) =====
+// ===== Category Icons =====
 export const IconBreakfast = (p) => <I {...p} d={<><path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" /></>} />;
 export const IconSalad = (p) => <I {...p} d={<><path d="M7 21h10" /><path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9z" /><path d="M12 3c-1.5 0-2.9.5-4 1.5a6.96 6.96 0 0 0-2 5.5h12a6.96 6.96 0 0 0-2-5.5A5.96 5.96 0 0 0 12 3z" /></>} />;
 export const IconTagine = (p) => <I {...p} d={<><ellipse cx="12" cy="18" rx="9" ry="3" /><path d="M3 18c0-7 4-12 9-14c5 2 9 7 9 14" /><circle cx="12" cy="4" r="1" /></>} />;

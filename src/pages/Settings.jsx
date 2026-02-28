@@ -7,14 +7,14 @@ import { IconCheck, IconSettings, IconDownload, IconUpload, IconPrint } from '..
 import { downloadBackup, importData } from '../db/db_utils';
 
 const SETTINGS_KEYS = [
-    { key: 'storeName', labelFr: 'Nom du restaurant', labelAr: 'اسم المطعم', type: 'text' },
-    { key: 'storeSubtitle', labelFr: 'Sous-titre', labelAr: 'العنوان الفرعي', type: 'text' },
-    { key: 'storeAddress', labelFr: 'Adresse', labelAr: 'العنوان', type: 'text' },
-    { key: 'storePhone', labelFr: 'Téléphone', labelAr: 'الهاتف', type: 'text' },
-    { key: 'wifiName', labelFr: 'Nom WiFi', labelAr: 'اسم الواي فاي', type: 'text' },
-    { key: 'wifiPassword', labelFr: 'Mot de passe WiFi', labelAr: 'كلمة سر الواي فاي', type: 'text' },
-    { key: 'receiptFooter', labelFr: 'Message de bas de ticket', labelAr: 'رسالة أسفل الفاتورة', type: 'text' },
-    { key: 'receiptPoweredBy', labelFr: 'Powered by', labelAr: 'مدعوم من', type: 'text' },
+    { key: 'storeName', labelEn: 'Restaurant Name', labelFr: 'Nom du restaurant', type: 'text' },
+    { key: 'storeSubtitle', labelEn: 'Subtitle', labelFr: 'Sous-titre', type: 'text' },
+    { key: 'storeAddress', labelEn: 'Address', labelFr: 'Adresse', type: 'text' },
+    { key: 'storePhone', labelEn: 'Phone', labelFr: 'Téléphone', type: 'text' },
+    { key: 'wifiName', labelEn: 'WiFi Name', labelFr: 'Nom WiFi', type: 'text' },
+    { key: 'wifiPassword', labelEn: 'WiFi Password', labelFr: 'Mot de passe WiFi', type: 'text' },
+    { key: 'receiptFooter', labelEn: 'Receipt Footer Message', labelFr: 'Message de bas de ticket', type: 'text' },
+    { key: 'receiptPoweredBy', labelEn: 'Powered by', labelFr: 'Powered by', type: 'text' },
 ];
 
 export default function Settings() {
@@ -74,7 +74,7 @@ export default function Settings() {
         // Save printer settings
         await db.settings.put({ key: 'printerName', value: selectedPrinter || '' });
         await db.settings.put({ key: 'autoPrint', value: values.autoPrint || 'on' });
-        await db.settings.put({ key: 'ramadanMode', value: values.ramadanMode || 'off' });
+
         logActivity(user?.id, user?.name, 'settings_save', '', { printer: selectedPrinter });
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
@@ -122,23 +122,23 @@ export default function Settings() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                 <h2 style={{ fontSize: '1.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <IconSettings size={22} />
-                    {lang === 'ar' ? 'إعدادات الفاتورة' : 'Paramètres du Ticket'}
+                    {lang === 'fr' ? 'Paramètres du Ticket' : 'Receipt Settings'}
                 </h2>
             </div>
 
             <div className="card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
                 <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                    {lang === 'ar' ? 'معلومات المطعم' : 'Informations Restaurant'}
+                    {lang === 'fr' ? 'Informations Restaurant' : 'Restaurant Info'}
                 </h3>
                 {SETTINGS_KEYS.slice(0, 4).map(s => (
                     <div className="form-group" key={s.key}>
-                        <label className="form-label">{lang === 'ar' ? s.labelAr : s.labelFr}</label>
+                        <label className="form-label">{lang === 'fr' ? s.labelFr : s.labelEn}</label>
                         <input
                             className="input"
                             type={s.type}
                             value={values[s.key] || ''}
                             onChange={e => handleChange(s.key, e.target.value)}
-                            dir={lang === 'ar' ? 'rtl' : 'ltr'}
+                            dir="ltr"
                         />
                     </div>
                 ))}
@@ -146,17 +146,17 @@ export default function Settings() {
 
             <div className="card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
                 <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                    {lang === 'ar' ? 'واي فاي' : 'WiFi'}
+                    {lang === 'fr' ? 'WiFi' : 'WiFi'}
                 </h3>
                 {SETTINGS_KEYS.slice(4, 6).map(s => (
                     <div className="form-group" key={s.key}>
-                        <label className="form-label">{lang === 'ar' ? s.labelAr : s.labelFr}</label>
+                        <label className="form-label">{lang === 'fr' ? s.labelFr : s.labelEn}</label>
                         <input
                             className="input"
                             type={s.type}
                             value={values[s.key] || ''}
                             onChange={e => handleChange(s.key, e.target.value)}
-                            dir={lang === 'ar' ? 'rtl' : 'ltr'}
+                            dir="ltr"
                         />
                     </div>
                 ))}
@@ -164,57 +164,35 @@ export default function Settings() {
 
             <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
                 <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                    {lang === 'ar' ? 'أسفل الفاتورة' : 'Bas du Ticket'}
+                    {lang === 'fr' ? 'Bas du Ticket' : 'Receipt Footer'}
                 </h3>
                 {SETTINGS_KEYS.slice(6).map(s => (
                     <div className="form-group" key={s.key}>
-                        <label className="form-label">{lang === 'ar' ? s.labelAr : s.labelFr}</label>
+                        <label className="form-label">{lang === 'fr' ? s.labelFr : s.labelEn}</label>
                         <input
                             className="input"
                             type={s.type}
                             value={values[s.key] || ''}
                             onChange={e => handleChange(s.key, e.target.value)}
-                            dir={lang === 'ar' ? 'rtl' : 'ltr'}
+                            dir="ltr"
                         />
                     </div>
                 ))}
             </div>
 
-            {/* Ramadan Mode */}
-            <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem', border: values.ramadanMode === 'on' ? '2px solid #d4a843' : undefined, background: values.ramadanMode === 'on' ? 'linear-gradient(135deg, rgba(212,168,67,0.05), rgba(212,168,67,0.12))' : undefined }}>
-                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    ☪ {lang === 'ar' ? 'وضع رمضان' : 'Mode Ramadan'}
-                </h3>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                    <div>
-                        <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>
-                            {lang === 'ar' ? 'رمضان كريم على التذكرة' : 'Ramadan Karim sur le ticket'}
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                            {lang === 'ar' ? 'يظهر "رمضان كريم" على كل تذكرة' : 'Affiche "رمضان كريم" sur chaque ticket'}
-                        </div>
-                    </div>
-                    <button
-                        className={`btn ${values.ramadanMode === 'on' ? 'btn-primary' : 'btn-ghost'}`}
-                        onClick={() => handleChange('ramadanMode', values.ramadanMode === 'on' ? 'off' : 'on')}
-                        style={{ minWidth: 80, justifyContent: 'center', background: values.ramadanMode === 'on' ? '#d4a843' : undefined, borderColor: values.ramadanMode === 'on' ? '#d4a843' : undefined }}
-                    >
-                        {values.ramadanMode === 'on' ? (lang === 'ar' ? 'مفعّل ☪' : 'Activé ☪') : (lang === 'ar' ? 'معطّل' : 'Désactivé')}
-                    </button>
-                </div>
-            </div>
+
 
             {/* Printer Settings — Always visible */}
             <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
                 <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
                     <IconPrint size={16} />
-                    {lang === 'ar' ? 'الطابعة والطباعة' : 'Imprimante & Impression'}
+                    {lang === 'fr' ? 'Imprimante & Impression' : 'Printer & Printing'}
                 </h3>
 
                 {/* Auto-print toggle */}
                 <div className="form-group">
                     <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span>{lang === 'ar' ? 'طباعة تلقائية بعد الدفع' : 'Impression automatique après paiement'}</span>
+                        <span>{lang === 'fr' ? 'Impression automatique après paiement' : 'Auto-print after payment'}</span>
                         <button
                             type="button"
                             onClick={() => { handleChange('autoPrint', values.autoPrint === 'off' ? 'on' : 'off'); }}
@@ -231,9 +209,9 @@ export default function Settings() {
                         </button>
                     </label>
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                        {lang === 'ar'
-                            ? 'عند التفعيل، يتم طباعة الفاتورة تلقائياً بعد كل عملية دفع'
-                            : 'Le ticket s\'imprime automatiquement après chaque paiement'}
+                        {lang === 'fr'
+                            ? 'Le ticket s\'imprime automatiquement après chaque paiement'
+                            : 'Receipt prints automatically after each payment'}
                     </div>
                 </div>
 
@@ -241,7 +219,7 @@ export default function Settings() {
                 {isElectron ? (
                     <div className="form-group" style={{ marginTop: '1rem' }}>
                         <label className="form-label">
-                            {lang === 'ar' ? 'اختر الطابعة (طباعة بدون نافذة)' : 'Sélectionner l\'imprimante (impression sans popup)'}
+                            {lang === 'fr' ? 'Sélectionner l\'imprimante (impression sans popup)' : 'Select printer (silent printing)'}
                         </label>
                         <div style={{ display: 'flex', gap: 8 }}>
                             <select
@@ -252,8 +230,8 @@ export default function Settings() {
                             >
                                 <option value="">
                                     {loadingPrinters
-                                        ? (lang === 'ar' ? 'جاري البحث...' : 'Recherche...')
-                                        : (lang === 'ar' ? '-- اختر طابعة --' : '-- Choisir une imprimante --')
+                                        ? (lang === 'fr' ? 'Recherche...' : 'Searching...')
+                                        : (lang === 'fr' ? '-- Choisir une imprimante --' : '-- Select a printer --')
                                     }
                                 </option>
                                 {printers.map(p => (
@@ -267,32 +245,32 @@ export default function Settings() {
                                 onClick={refreshPrinters}
                                 disabled={loadingPrinters}
                                 style={{ border: '1px solid var(--border)', padding: '8px 12px' }}
-                                title={lang === 'ar' ? 'تحديث' : 'Rafraîchir'}
+                                title={lang === 'fr' ? 'Rafraîchir' : 'Refresh'}
                             >
                                 ↻
                             </button>
                         </div>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.5rem', lineHeight: '1.4' }}>
-                            {lang === 'ar'
-                                ? 'عند اختيار طابعة، ستتم الطباعة تلقائيًا بدون نافذة'
-                                : 'L\'impression se fera en silence, sans popup.'}
+                            {lang === 'fr'
+                                ? 'L\'impression se fera en silence, sans popup.'
+                                : 'Printing will be done silently, without popups.'}
                         </div>
                     </div>
                 ) : (
                     <div style={{ marginTop: '1rem', padding: '12px 14px', borderRadius: 10, background: 'var(--blue-bg)', border: '1px solid rgba(96,165,250,0.2)' }}>
                         <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--blue)', marginBottom: 6 }}>
-                            {lang === 'ar' ? 'ℹ️ وضع المتصفح' : 'ℹ️ Mode navigateur'}
+                            {lang === 'fr' ? 'ℹ️ Mode navigateur' : 'ℹ️ Browser Mode'}
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                            {lang === 'ar'
-                                ? 'في المتصفح، ستظهر نافذة الطباعة دائماً (قيود المتصفح). للطباعة الصامتة: استخدم تطبيق الإلكترون.'
-                                : 'Dans le navigateur, la fenêtre d\'impression s\'affiche toujours (limitation Chrome). Pour l\'impression silencieuse, utilisez l\'application Electron.'
+                            {lang === 'fr'
+                                ? 'Dans le navigateur, la fenêtre d\'impression s\'affiche toujours (limitation Chrome). Pour l\'impression silencieuse, utilisez l\'application Electron.'
+                                : 'In the browser, the print dialog always shows (Chrome limitation). For silent printing, use the Electron app.'
                             }
                             <br />
                             <strong style={{ color: 'var(--text)' }}>
-                                {lang === 'ar'
-                                    ? '💡 نصيحة: حدد الطابعة كطابعة افتراضية في Chrome حتى يكفي نقرة واحدة.'
-                                    : '💡 Astuce : Définissez votre imprimante ticket comme imprimante par défaut dans Chrome pour n\'avoir qu\'à cliquer "Imprimer".'}
+                                {lang === 'fr'
+                                    ? '💡 Astuce : Définissez votre imprimante ticket comme imprimante par défaut dans Chrome pour n\'avoir qu\'à cliquer "Imprimer".'
+                                    : '💡 Tip: Set your receipt printer as the default in Chrome so you just need to click "Print".'}
                             </strong>
                         </div>
                     </div>
@@ -301,16 +279,16 @@ export default function Settings() {
 
             <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
                 <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                    {lang === 'ar' ? 'إدارة البيانات' : 'Gestion des Données'}
+                    {lang === 'fr' ? 'Gestion des Données' : 'Data Management'}
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     <button className="btn btn-ghost" style={{ justifyContent: 'center', border: '1px solid var(--border)' }} onClick={handleExport}>
                         <IconDownload size={18} />
-                        {lang === 'ar' ? 'تصدير البيانات' : 'Exporter'}
+                        {lang === 'fr' ? 'Exporter' : 'Export'}
                     </button>
                     <button className="btn btn-ghost" style={{ justifyContent: 'center', border: '1px solid var(--border)' }} onClick={handleImportClick} disabled={importing}>
                         <IconUpload size={18} />
-                        {importing ? '...' : (lang === 'ar' ? 'استيراد البيانات' : 'Importer')}
+                        {importing ? '...' : (lang === 'fr' ? 'Importer' : 'Import')}
                     </button>
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem', lineHeight: '1.4' }}>
@@ -329,8 +307,8 @@ export default function Settings() {
             <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px' }} onClick={handleSave}>
                 <IconCheck size={18} />
                 {saved
-                    ? (lang === 'ar' ? '✓ تم الحفظ' : '✓ Enregistré')
-                    : (lang === 'ar' ? 'حفظ الإعدادات' : 'Enregistrer')
+                    ? (lang === 'fr' ? '✓ Enregistré' : '✓ Saved')
+                    : (lang === 'fr' ? 'Enregistrer' : 'Save Settings')
                 }
             </button>
         </div>
