@@ -2196,9 +2196,9 @@ hr {
     margin: 0;
     padding: 0;
     background: white;
-    width: 72mm;
-    min-width: 72mm;
-    max-width: 72mm;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
   }
 
   .login-page,
@@ -2214,8 +2214,8 @@ hr {
     display: block !important;
     height: auto !important;
     overflow: visible !important;
-    width: 72mm !important;
-    max-width: 72mm !important;
+    width: 100% !important;
+    max-width: 100% !important;
     position: static !important;
     margin: 0 auto !important;
     padding: 0 !important;

@@ -46,13 +46,15 @@ export default function POS() {
     const printCustomerTicket = async (alsoPrintToKitchen = false) => {
         const printerName = settings.printerName;
         const kitchenPrinterName = settings.kitchenPrinterName;
+        const printOptions = { paperWidth: settings.paperWidth || '80mm' };
+
         if (printerName && window.electron?.silentPrint) {
             try {
                 // By default electron prints the whole window, but CSS `@media print` 
                 // ensures only the `.print-receipt.customer-ticket` is visible.
-                const result = await window.electron.silentPrint(printerName);
+                const result = await window.electron.silentPrint(printerName, printOptions);
                 if (alsoPrintToKitchen && kitchenPrinterName) {
-                    await window.electron.silentPrint(kitchenPrinterName);
+                    await window.electron.silentPrint(kitchenPrinterName, printOptions);
                 }
                 if (!result.success) {
                     console.warn('Silent print failed, falling back:', result.error);
@@ -92,7 +94,7 @@ export default function POS() {
 
             // Allow React to re-render the DOM showing ONLY the kitchen ticket in print media
             setTimeout(async () => {
-                await window.electron.silentPrint(kitchenPrinterName);
+                await window.electron.silentPrint(kitchenPrinterName, { paperWidth: settings.paperWidth || '80mm' });
                 setPrintingTarget('customer'); // reset
                 setKitchenPrintData(null);
             }, 150);
@@ -497,8 +499,9 @@ export default function POS() {
 
     // ===== KITCHEN TICKET VIEW (Used only during printing) =====
     if (kitchenPrintData) {
+        const kScale = (Number(settings.kitchenTicketScale) || 100) / 100;
         return (
-            <div style={{ padding: '0 5px', background: '#fff', color: '#000', width: '100%', boxSizing: 'border-box' }}>
+            <div style={{ padding: '0 5px', background: '#fff', color: '#000', width: '100%', boxSizing: 'border-box', transform: `scale(${kScale})`, transformOrigin: 'top center' }}>
                 <h1 style={{ textAlign: 'center', fontSize: '1.1rem', margin: '0', borderBottom: '2px solid #000', paddingBottom: '2px', textTransform: 'uppercase' }}>
                     {lang === 'fr' ? 'CUISINE' : 'KITCHEN'}
                 </h1>
@@ -534,9 +537,10 @@ export default function POS() {
 
     // ===== RECEIPT VIEW =====
     if (showBill && paidOrder) {
+        const cScale = (Number(settings.customerTicketScale) || 100) / 100;
         return (
             <div className="receipt-card">
-                <div className="print-receipt receipt-inner" style={{ color: '#000', padding: '0' }}>
+                <div className="print-receipt receipt-inner" style={{ color: '#000', padding: '0', transform: `scale(${cScale})`, transformOrigin: 'top center' }}>
                     <div className="receipt-header" style={{ marginBottom: '2px', textAlign: 'center' }}>
                         <img src={logoTicket} alt="Logo" style={{ width: 45, height: 'auto', marginBottom: 2, display: 'block', margin: '0 auto 2px' }} />
                         <div className="receipt-brand" style={{ fontSize: '0.95rem', fontWeight: 900, marginBottom: '0px', color: '#000' }}>{settings.storeName || 'RIAD AL MISK'}</div>

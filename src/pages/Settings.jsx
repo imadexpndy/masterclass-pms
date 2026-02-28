@@ -28,6 +28,9 @@ export default function Settings() {
     const [printers, setPrinters] = useState([]);
     const [selectedPrinter, setSelectedPrinter] = useState('');
     const [kitchenPrinter, setKitchenPrinter] = useState('');
+    const [paperWidth, setPaperWidth] = useState('80mm');
+    const [customerTicketScale, setCustomerTicketScale] = useState(100);
+    const [kitchenTicketScale, setKitchenTicketScale] = useState(100);
     const [loadingPrinters, setLoadingPrinters] = useState(false);
     const isElectron = !!window.electron?.getPrinters;
 
@@ -44,6 +47,9 @@ export default function Settings() {
             if (map.kitchenPrinterName) {
                 setKitchenPrinter(map.kitchenPrinterName);
             }
+            if (map.paperWidth) setPaperWidth(map.paperWidth);
+            if (map.customerTicketScale) setCustomerTicketScale(Number(map.customerTicketScale));
+            if (map.kitchenTicketScale) setKitchenTicketScale(Number(map.kitchenTicketScale));
         })();
     }, []);
 
@@ -79,6 +85,9 @@ export default function Settings() {
         await db.settings.put({ key: 'printerName', value: selectedPrinter || '' });
         await db.settings.put({ key: 'kitchenPrinterName', value: kitchenPrinter || '' });
         await db.settings.put({ key: 'autoPrint', value: values.autoPrint || 'on' });
+        await db.settings.put({ key: 'paperWidth', value: paperWidth });
+        await db.settings.put({ key: 'customerTicketScale', value: customerTicketScale });
+        await db.settings.put({ key: 'kitchenTicketScale', value: kitchenTicketScale });
 
         logActivity(user?.id, user?.name, 'settings_save', '', { printer: selectedPrinter, kitchen: kitchenPrinter });
         setSaved(true);
@@ -284,6 +293,30 @@ export default function Settings() {
                         {lang === 'fr'
                             ? 'Les commandes envoyées (Send) seront imprimées uniquement ici. Les paiements déclencheront une impression double (Caisse + Cuisine).'
                             : 'Sent orders will print only here. Payments will trigger dual printing (Front Desk + Kitchen).'}
+                    </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--border)', margin: '1.5rem 0' }} />
+
+                <h4 style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '1rem' }}>
+                    {lang === 'fr' ? 'Configuration Papier & Zoom' : 'Paper & Scale Configuration'}
+                </h4>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="form-group">
+                        <label className="form-label">{lang === 'fr' ? 'Format Papier' : 'Paper Width'}</label>
+                        <select className="input" value={paperWidth} onChange={e => { setPaperWidth(e.target.value); setSaved(false); }}>
+                            <option value="80mm">80mm (Standard)</option>
+                            <option value="58mm">58mm (Small)</option>
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">{lang === 'fr' ? 'Zoom Ticket Caisse (%)' : 'Front Desk Scale (%)'}</label>
+                        <input type="number" className="input" value={customerTicketScale} onChange={e => { setCustomerTicketScale(e.target.value); setSaved(false); }} min="50" max="200" step="5" />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">{lang === 'fr' ? 'Zoom Ticket Cuisine (%)' : 'Kitchen Scale (%)'}</label>
+                        <input type="number" className="input" value={kitchenTicketScale} onChange={e => { setKitchenTicketScale(e.target.value); setSaved(false); }} min="50" max="200" step="5" />
                     </div>
                 </div>
 

@@ -63,20 +63,22 @@ ipcMain.handle('get-printers', async () => {
 });
 
 // Silent print to a specific printer (no dialog)
-ipcMain.handle('silent-print', async (event, printerName) => {
+ipcMain.handle('silent-print', async (event, printerName, optionsPayload = {}) => {
     return new Promise((resolve) => {
         if (!mainWindow) {
             resolve({ success: false, error: 'No window' });
             return;
         }
 
+        // Default to 80mm (72000 microns), fallback to 58mm (48000 microns)
+        const paperWidth = optionsPayload?.paperWidth === '58mm' ? 48000 : 72000;
+
         const options = {
             silent: true,
             printBackground: true,
             deviceName: printerName,
-            // 72mm × 200mm in microns — 72mm is the printable area of 80mm paper
-            // (thermal printers have ~4mm non-printable zone on each side)
-            pageSize: { width: 72000, height: 200000 },
+            // Height is arbitrarily long to accommodate any receipt length
+            pageSize: { width: paperWidth, height: 200000 },
             margins: { marginType: 'none' },
         };
 
