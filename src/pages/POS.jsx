@@ -597,10 +597,6 @@ export default function POS() {
 
                     {paidOrder.paymentMethod === 'cash' && paidOrder.amountReceived > 0 && (
                         <div style={{ marginTop: '2px', fontSize: '0.75rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span>{t('amountReceived')}:</span>
-                                <span>{paidOrder.amountReceived.toFixed(2)}</span>
-                            </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
                                 <span>{t('change')}:</span>
                                 <span>{paidOrder.changeGiven.toFixed(2)} DH</span>
@@ -611,7 +607,6 @@ export default function POS() {
                     <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
 
                     <div className="receipt-footer" style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.65rem' }}>WiFi: {settings.wifiName || 'RiadAlMisk_Guest'} / {settings.wifiPassword || 'Password123'}</div>
                         <div style={{ fontWeight: 800, fontSize: '0.8rem', margin: '5px 0' }}>*** {settings.receiptFooter || t('thankYou')} ***</div>
                         <div style={{ fontSize: '0.6rem' }}>{settings.receiptPoweredBy || 'Powered by Expndy'}</div>
                     </div>
