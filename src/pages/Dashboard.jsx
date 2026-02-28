@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import db from '../db/db';
 import { useLang } from '../context/LangContext';
 import { IconMoney, IconClipboard, IconTable, IconReceipt, IconCart, IconChef, IconChart, IconTarget, IconX, IconUsers, IconCreditCard, IconPrint } from '../components/Icons';
-import logo from '../assets/logo_masterclass.svg';
+import logoTicket from '../assets/logo_ticket.png';
 
 export default function Dashboard() {
     const { t, lang } = useLang();
@@ -295,7 +295,7 @@ export default function Dashboard() {
                 <div className="receipt-card">
                     <div className="print-receipt receipt-inner" style={{ color: '#000' }}>
                         <div className="receipt-header" style={{ marginBottom: '10px', textAlign: 'center' }}>
-                            <img src={logo} alt="Logo" style={{ width: 120, height: 'auto', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
+                            <img src={logoTicket} alt="Logo" style={{ width: 120, height: 'auto', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
                             <div style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2px', color: '#000' }}>{settings.storeName || 'RIAD AL MISK'}</div>
                             <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT'}</div>
                             <div style={{ fontSize: '0.7rem', marginTop: '5px' }}>

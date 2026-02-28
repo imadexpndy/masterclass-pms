@@ -12,7 +12,7 @@ import {
     IconBreakfast, IconSalad, IconTagine, IconPizza, IconPasta,
     IconSteak, IconWrap, IconSandwich, IconJuice, IconCoffee, IconDessert
 } from '../components/Icons';
-import logo from '../assets/logo_masterclass.svg';
+import logoTicket from '../assets/logo_ticket.png';
 
 const CATEGORY_ICONS = {
     breakfast: IconBreakfast, salad: IconSalad, tagine: IconTagine,
@@ -430,7 +430,7 @@ export default function POS() {
             <div className="receipt-card">
                 <div className="print-receipt receipt-inner" style={{ color: '#000' }}>
                     <div className="receipt-header" style={{ marginBottom: '10px', textAlign: 'center' }}>
-                        <img src={logo} alt="Logo" style={{ width: 120, height: 'auto', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
+                        <img src={logoTicket} alt="Logo" style={{ width: 120, height: 'auto', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
                         <div className="receipt-brand" style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2px', color: '#000' }}>{settings.storeName || 'RIAD AL MISK'}</div>
                         <div className="receipt-sub" style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT'}</div>
                         <div className="receipt-address" style={{ fontSize: '0.7rem', marginTop: '5px' }}>
