@@ -158,6 +158,9 @@ select,
 textarea {
   font-family: inherit;
   color: inherit;
+  user-select: auto !important;
+  -webkit-user-select: auto !important;
+  touch-action: manipulation;
 }
 
 a {
@@ -2183,7 +2186,8 @@ hr {
 /* ===== PRINT STYLES ===== */
 @media print {
   @page {
-    margin: 0;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   body {

@@ -12,6 +12,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <title>Riad Al Misk POS</title>
+
+  <!-- Mobile Drag & Drop Polyfill for iPad/Touch interactions (e.g. Tables.jsx) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/default.css">
+  <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js"></script>
+  <script>
+    MobileDragDrop.polyfill({
+      holdToDrag: 150
+    });
+    window.addEventListener('touchmove', function () { }, { passive: false });
+  </script>
 </head>
 
 <body>

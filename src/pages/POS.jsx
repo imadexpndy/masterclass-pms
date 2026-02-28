@@ -498,8 +498,8 @@ export default function POS() {
     // ===== KITCHEN TICKET VIEW (Used only during printing) =====
     if (kitchenPrintData) {
         return (
-            <div style={{ padding: '10px 10px', background: '#fff', color: '#000', width: '100%', minHeight: '100vh', boxSizing: 'border-box' }}>
-                <h1 style={{ textAlign: 'center', fontSize: '1.5rem', margin: '0 0 5px 0', borderBottom: '2px solid #000', paddingBottom: '5px', textTransform: 'uppercase' }}>
+            <div style={{ padding: '0 5px', background: '#fff', color: '#000', width: '100%', minHeight: '100vh', boxSizing: 'border-box' }}>
+                <h1 style={{ textAlign: 'center', fontSize: '1.3rem', margin: '0', borderBottom: '2px solid #000', paddingBottom: '2px', textTransform: 'uppercase' }}>
                     {lang === 'fr' ? 'CUISINE' : 'KITCHEN'}
                 </h1>
 
@@ -536,12 +536,12 @@ export default function POS() {
     if (showBill && paidOrder) {
         return (
             <div className="receipt-card">
-                <div className="print-receipt receipt-inner" style={{ color: '#000', padding: '10px 10px' }}>
-                    <div className="receipt-header" style={{ marginBottom: '5px', textAlign: 'center' }}>
-                        <img src={logoTicket} alt="Logo" style={{ width: 120, height: 'auto', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
-                        <div className="receipt-brand" style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '0px', color: '#000' }}>{settings.storeName || 'RIAD AL MISK'}</div>
-                        <div className="receipt-sub" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT'}</div>
-                        <div className="receipt-address" style={{ fontSize: '0.65rem', marginTop: '2px' }}>
+                <div className="print-receipt receipt-inner" style={{ color: '#000', padding: '0 5px' }}>
+                    <div className="receipt-header" style={{ marginBottom: '2px', textAlign: 'center' }}>
+                        <img src={logoTicket} alt="Logo" style={{ width: 70, height: 'auto', marginBottom: 4, display: 'block', margin: '0 auto 4px' }} />
+                        <div className="receipt-brand" style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '0px', color: '#000' }}>{settings.storeName || 'RIAD AL MISK'}</div>
+                        <div className="receipt-sub" style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT'}</div>
+                        <div className="receipt-address" style={{ fontSize: '0.55rem', marginTop: '2px', lineHeight: '1.2' }}>
                             {settings.storeAddress || '362 rue de la Kasbah, Médina - Marrakech'}<br />
                             Tel: {settings.storePhone || '05 24 44 08 71'}
                         </div>
