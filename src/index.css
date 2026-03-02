@@ -2087,63 +2087,48 @@ hr {
     margin: 0;
   }
 
+  /* Collapse page to content height — no phantom blank space */
+  html,
   body {
-    margin: 0;
-    padding: 0;
-    background: white;
-    width: 72mm;
-    min-width: 72mm;
-    max-width: 72mm;
-  }
-
-  .login-page,
-  .modal-overlay,
-  .sidebar,
-  .header-bar {
-    display: none !important;
-  }
-
-  .app-layout,
-  .main-content,
-  .page-body {
-    display: block !important;
     height: auto !important;
     overflow: visible !important;
-    width: 72mm !important;
-    max-width: 72mm !important;
-    position: static !important;
-    margin: 0 auto !important;
+    margin: 0 !important;
     padding: 0 !important;
+    background: white !important;
+    width: 72mm !important;
+    min-width: 72mm !important;
+    max-width: 72mm !important;
   }
 
-  .receipt-card {
-    position: static;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0;
-    background: white;
-    z-index: 9999;
+  /* Hide EVERYTHING by default */
+  body * {
+    visibility: hidden !important;
   }
 
+  /* Reveal ONLY the receipt content */
   .print-receipt,
-  .receipt-inner {
-    visibility: visible;
-    position: relative;
-    width: 100%;
-    margin: 0;
-    padding: 4mm;
-    /* Equal padding on all sides — pageSize in main.js accounts for non-printable zone */
-    box-sizing: border-box;
-    box-shadow: none;
-    border: none;
-    border-radius: 0;
+  .print-receipt * {
+    visibility: visible !important;
   }
 
-  .receipt-inner * {
-    visibility: visible;
+  /* Pin receipt tightly to the top of the page — no gap above or below */
+  .print-receipt {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 72mm !important;
+    margin: 0 !important;
+    padding: 4mm !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: white !important;
+  }
+
+  .print-receipt * {
     color: #000000 !important;
     font-family: 'Courier New', Courier, monospace !important;
-    /* Monospace often prints cleaner */
     font-weight: 700 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -2153,21 +2138,20 @@ hr {
   }
 
   /* Make headers extra bold and black */
-  .receipt-brand,
-  .receipt-total,
-  .receipt-total span,
-  .receipt-header,
-  h3 {
+  .print-receipt .receipt-brand,
+  .print-receipt .receipt-total,
+  .print-receipt .receipt-total span,
+  .print-receipt .receipt-header {
     font-weight: 900 !important;
     color: #000000 !important;
   }
 
-  /* Ensure small text is still readable and dark */
-  .receipt-sub,
-  .receipt-meta,
-  .receipt-address,
-  .receipt-footer,
-  .receipt-footer div {
+  /* Ensure small text is still readable */
+  .print-receipt .receipt-sub,
+  .print-receipt .receipt-meta,
+  .print-receipt .receipt-address,
+  .print-receipt .receipt-footer,
+  .print-receipt .receipt-footer div {
     font-size: 0.8rem !important;
     font-weight: 700 !important;
     color: #000000 !important;
@@ -2175,29 +2159,23 @@ hr {
   }
 
   /* Receipt items need to be clearly readable */
-  .receipt-item,
-  .receipt-item span {
+  .print-receipt .receipt-item,
+  .print-receipt .receipt-item span {
     font-size: 0.9rem !important;
-    /* Slightly larger */
     font-weight: 700 !important;
     color: #000000 !important;
   }
 
-  .receipt-item-right {
+  .print-receipt .receipt-item-right {
     font-weight: 800 !important;
   }
 
   /* Separators/Lines should be solid black */
-  .receipt-divider,
-  hr {
+  .print-receipt .receipt-divider,
+  .print-receipt hr {
     border-color: #000000 !important;
     border-top: 1px dashed #000000 !important;
     opacity: 1 !important;
-  }
-
-  button,
-  .btn {
-    display: none !important;
   }
 }
 

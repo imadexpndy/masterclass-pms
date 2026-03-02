@@ -74,9 +74,8 @@ ipcMain.handle('silent-print', async (event, printerName) => {
             silent: true,
             printBackground: true,
             deviceName: printerName,
-            // 72mm × 200mm in microns — 72mm is the printable area of 80mm paper
-            // (thermal printers have ~4mm non-printable zone on each side)
-            pageSize: { width: 72000, height: 200000 },
+            // 72mm wide — height is auto-calculated from content (no fixed height = no blank gap)
+            pageSize: { width: 72000 },
             margins: { marginType: 'none' },
         };
 
