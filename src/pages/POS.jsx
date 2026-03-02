@@ -576,9 +576,9 @@ export default function POS() {
                     <div style={{ borderTop: '1px solid #000', marginBottom: '2px' }} />
 
                     {paidOrder.items.map(item => (
-                        <div key={item.id} className="receipt-item" style={{ fontSize: '0.75rem', marginBottom: '1px', display: 'flex', alignItems: 'flex-start' }}>
+                        <div key={item.id} className="receipt-item" style={{ fontSize: '0.7rem', lineHeight: '1.1', marginBottom: '1px', display: 'flex', alignItems: 'flex-start' }}>
                             <span style={{ width: '10%', textAlign: 'left' }}>{item.quantity}</span>
-                            <span style={{ flex: 1, textAlign: 'left', padding: '0 4px', overflow: 'hidden', wordBreak: 'break-word' }}>
+                            <span style={{ flex: 1, textAlign: 'left', padding: '0 2px', overflow: 'hidden', wordBreak: 'break-word' }}>
                                 {item.itemName}
                             </span>
                             <span className="receipt-item-right" style={{ width: '25%', textAlign: 'right', fontWeight: 600 }}>
