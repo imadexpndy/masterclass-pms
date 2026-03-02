@@ -107,13 +107,13 @@ export default function AppShell() {
 
     return (
         <div className="app-layout">
-            {/* Sidebar */}
-            <aside className="sidebar">
-                <div className="sidebar-brand">
-                    <img src={logo} alt="Riad Al Misk" style={{ width: '100%', maxWidth: 180, height: 'auto', marginBottom: 10 }} />
+            {/* Top Navigation Bar */}
+            <header className="topbar">
+                <div className="topbar-brand">
+                    <img src={logo} alt="Riad Al Misk" style={{ height: 40, width: 'auto', borderRadius: '4px' }} />
                 </div>
 
-                <nav className="sidebar-nav">
+                <nav className="topbar-nav">
                     {visibleNav.map(item => {
                         const Icon = item.icon;
                         return (
@@ -122,82 +122,53 @@ export default function AppShell() {
                                 to={item.path}
                                 end={item.path === '/'}
                                 className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                                style={{ padding: '16px 20px', fontSize: '1.1rem' }}
+                                style={{ padding: '8px 12px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
-                                <span className="icon"><Icon size={24} /></span>
-                                <span className="label" style={{ fontWeight: 600 }}>{item.label}</span>
+                                <Icon size={18} />
+                                <span style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{item.label}</span>
                             </NavLink>
                         );
                     })}
                 </nav>
 
-                <div className="sidebar-footer">
-                    {/* Fullscreen & Install moved here */}
-                    <div style={{ display: 'flex', gap: 6, padding: '8px 16px', justifyContent: 'center' }}>
-                        <button
-                            className="theme-toggle"
-                            onClick={toggleFullscreen}
-                            title={isFullscreen ? t('exitFullscreen') : t('enterFullscreen')}
-                            style={{ width: 32, height: 32 }}
-                        >
-                            {isFullscreen ? <IconMinimize size={14} /> : <IconMaximize size={14} />}
-                        </button>
-                        {!window.matchMedia('(display-mode: standalone)').matches && (
-                            <button
-                                className="theme-toggle"
-                                onClick={handleInstall}
-                                title={t('installApp')}
-                                style={{ width: 32, height: 32 }}
-                            >
-                                <IconDownload size={14} />
-                            </button>
-                        )}
+                <div className="topbar-right">
+                    <span className="header-clock" style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)' }}>
+                        <IconClock size={13} style={{ marginRight: 4 }} />
+                        {clock}
+                    </span>
+                    <div className={`online-badge ${online ? 'online' : 'offline'}`} style={{ padding: '4px 8px' }}>
+                        {online ? <IconWifi size={12} /> : <IconWifiOff size={12} />}
                     </div>
-                    <div className="sidebar-user" onClick={logout} title={t('logout')}>
-                        <div className="user-avatar">{user?.name?.charAt(0)}</div>
-                        <div className="user-info">
-                            <div className="name">{user?.name}</div>
-                            <div className="role">{t(`role${user?.role.charAt(0).toUpperCase() + user?.role.slice(1)}`) || user?.role}</div>
-                        </div>
-                        <IconLogout size={16} style={{ opacity: 0.4, flexShrink: 0 }} />
+
+                    <button className="theme-toggle" onClick={toggleLang} title={lang === 'fr' ? 'English' : 'Français'} style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0 8px', width: 'auto' }}>
+                        {lang === 'fr' ? 'EN' : 'FR'}
+                    </button>
+                    <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? t('lightMode') : t('darkMode')}>
+                        {theme === 'dark' ? <IconSun size={15} /> : <IconMoon size={15} />}
+                    </button>
+                    <button className="theme-toggle" onClick={toggleFullscreen} title={isFullscreen ? t('exitFullscreen') : t('enterFullscreen')}>
+                        {isFullscreen ? <IconMinimize size={14} /> : <IconMaximize size={14} />}
+                    </button>
+                    {!window.matchMedia('(display-mode: standalone)').matches && (
+                        <button className="theme-toggle" onClick={handleInstall} title={t('installApp')}>
+                            <IconDownload size={14} />
+                        </button>
+                    )}
+
+                    <div className="topbar-user" onClick={logout} title={t('logout')}>
+                        <div className="user-avatar" style={{ width: 28, height: 28, fontSize: '0.7rem' }}>{user?.name?.charAt(0)}</div>
+                        <IconLogout size={16} style={{ opacity: 0.6 }} />
                     </div>
                 </div>
-            </aside>
+            </header>
 
             {/* Main */}
             <div className="main-content">
-                <header className="header-bar">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <h2 className="header-title">{pageTitle}</h2>
-                        <span className="header-clock">
-                            <IconClock size={13} />
-                            {clock}
-                        </span>
-                    </div>
-                    <div className="header-right">
-                        <div className={`online-badge ${online ? 'online' : 'offline'}`}>
-                            {online ? <IconWifi size={12} /> : <IconWifiOff size={12} />}
-                            {online ? t('online') : t('offline')}
-                        </div>
-                        <button
-                            className="theme-toggle"
-                            onClick={toggleLang}
-                            title={lang === 'fr' ? 'English' : 'Français'}
-                            style={{ fontSize: '0.75rem', fontWeight: 700, width: 'auto', padding: '0 10px', gap: 4 }}
-                        >
-                            <IconGlobe size={13} />
-                            {lang === 'fr' ? 'EN' : 'FR'}
-                        </button>
-                        <button
-                            className="theme-toggle"
-                            onClick={toggleTheme}
-                            title={theme === 'dark' ? t('lightMode') : t('darkMode')}
-                        >
-                            {theme === 'dark' ? <IconSun size={15} /> : <IconMoon size={15} />}
-                        </button>
-                    </div>
-                </header>
                 <div className="page-body">
+                    {/* We show the page title dynamically in the page headers themselves if needed, or rely on active tab */}
+                    <div className="page-title-banner" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <h2 className="header-title" style={{ fontSize: '1.4rem', fontWeight: 800 }}>{pageTitle}</h2>
+                    </div>
                     <Outlet />
                 </div>
             </div>
