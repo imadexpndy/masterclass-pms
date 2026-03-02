@@ -2223,12 +2223,16 @@ hr {
     left: 0 !important;
     width: 72mm !important;
     margin: 0 !important;
-    padding: 4mm !important;
+    padding: 0 4mm 2mm 4mm !important;
     box-sizing: border-box !important;
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
     background: white !important;
+  }
+
+  .no-print {
+    display: none !important;
   }
 
   .print-receipt * {

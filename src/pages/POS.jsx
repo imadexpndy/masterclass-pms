@@ -552,7 +552,7 @@ export default function POS() {
                             Tel: {settings.storePhone || '05 24 44 08 71'}
                         </div>
 
-                        <div style={{ borderTop: '1px dashed #000', margin: '5px 0' }} />
+                        <div style={{ borderTop: '1px dashed #000', margin: '2px 0' }} />
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
                             <span>{new Date(paidOrder.createdAt).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US')}</span>
@@ -567,13 +567,13 @@ export default function POS() {
                         </div>
                     </div>
 
-                    <div style={{ borderTop: '1px dashed #000', margin: '3px 0' }} />
+                    <div style={{ borderTop: '1px dashed #000', margin: '2px 0' }} />
                     <div style={{ display: 'flex', fontSize: '0.7rem', fontWeight: 700, marginBottom: '2px' }}>
                         <span style={{ width: '10%', textAlign: 'left' }}>{t('qty') || 'Qty'}</span>
                         <span style={{ flex: 1, textAlign: 'left' }}>{t('item') || 'Item'}</span>
                         <span style={{ width: '25%', textAlign: 'right' }}>{t('total') || 'Total'}</span>
                     </div>
-                    <div style={{ borderTop: '1px solid #000', marginBottom: '3px' }} />
+                    <div style={{ borderTop: '1px solid #000', marginBottom: '2px' }} />
 
                     {paidOrder.items.map(item => (
                         <div key={item.id} className="receipt-item" style={{ fontSize: '0.75rem', marginBottom: '1px', display: 'flex', alignItems: 'flex-start' }}>
@@ -587,22 +587,22 @@ export default function POS() {
                         </div>
                     ))}
 
-                    <div style={{ borderTop: '1px dashed #000', margin: '5px 0' }} />
+                    <div style={{ borderTop: '1px dashed #000', margin: '2px 0' }} />
 
                     <div className="receipt-total" style={{ fontSize: '1.2rem', justifyContent: 'space-between', alignItems: 'center', margin: '2px 0' }}>
                         <span style={{ fontSize: '1rem', fontWeight: 700 }}>TOTAL</span>
                         <span>{paidOrder.total.toFixed(2)} <small style={{ fontSize: '0.8rem' }}>DH</small></span>
                     </div>
 
-                    <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
+                    <div style={{ borderTop: '1px dashed #000', margin: '2px 0' }} />
 
                     <div className="receipt-footer" style={{ textAlign: 'center' }}>
-                        <div style={{ fontWeight: 800, fontSize: '0.8rem', margin: '5px 0' }}>*** {settings.receiptFooter || t('thankYou')} ***</div>
+                        <div style={{ fontWeight: 800, fontSize: '0.8rem', margin: '2px 0' }}>*** {settings.receiptFooter || t('thankYou')} ***</div>
                         <div style={{ fontSize: '0.6rem' }}>{settings.receiptPoweredBy || 'Powered by Expndy'}</div>
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: 8, marginTop: '1rem' }}>
+                <div className="no-print" style={{ display: 'flex', gap: 8, marginTop: '1rem' }}>
                     <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => { setShowBill(false); setPaidOrder(null); }}>
                         <IconX size={16} /> {t('close')}
                     </button>
