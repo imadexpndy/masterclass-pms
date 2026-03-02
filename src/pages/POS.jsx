@@ -503,7 +503,7 @@ export default function POS() {
     if (kitchenPrintData) {
         const kScale = (Number(settings.kitchenTicketScale) || 100) / 100;
         return (
-            <div style={{ padding: '0 5px', background: '#fff', color: '#000', width: '100%', boxSizing: 'border-box', transform: `scale(${kScale})`, transformOrigin: 'top center' }}>
+            <div className="print-receipt" style={{ padding: '0 5px', background: '#fff', color: '#000', width: '100%', boxSizing: 'border-box', transform: `scale(${kScale})`, transformOrigin: 'top center' }}>
                 <h1 style={{ textAlign: 'center', fontSize: '1.1rem', margin: '0', borderBottom: '2px solid #000', paddingBottom: '2px', textTransform: 'uppercase' }}>
                     {lang === 'fr' ? 'CUISINE' : 'KITCHEN'}
                 </h1>

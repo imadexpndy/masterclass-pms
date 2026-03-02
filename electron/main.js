@@ -77,8 +77,10 @@ ipcMain.handle('silent-print', async (event, printerName, optionsPayload = {}) =
             silent: true,
             printBackground: true,
             deviceName: printerName,
-            // width from settings (80mm or 58mm), height auto-calculated from content (no blank gap)
-            pageSize: { width: paperWidth },
+            // Electron requires both width and height. 
+            // We set height large to accommodate any receipt length. 
+            // The tight CSS @media print (height: auto, top: 0) ensures the physical printer cuts at the content end.
+            pageSize: { width: paperWidth, height: 500000 },
             margins: { marginType: 'none' },
         };
 
