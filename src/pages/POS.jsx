@@ -518,7 +518,7 @@ export default function POS() {
 
                 <div style={{ borderTop: '2px dashed #000', margin: '10px 0' }} />
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                     {kitchenPrintData.items.map(item => (
                         <div key={item.id} style={{ display: 'flex', alignItems: 'flex-start', fontSize: '1.2rem', fontWeight: 900, lineHeight: '1.1' }}>
                             <span style={{ minWidth: '35px', display: 'inline-block' }}>{item.quantity}x</span>
