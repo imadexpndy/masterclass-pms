@@ -58,10 +58,12 @@ export default function POS() {
                 }
                 if (!result.success) {
                     console.warn('Silent print failed, falling back:', result.error);
+                    alert("Silent Print Failed: " + result.error + "\nPrinter: " + printerName);
                     window.print();
                 }
             } catch (e) {
                 console.warn('Silent print error, falling back:', e);
+                alert("Silent Print Error Exception: " + e.message);
                 window.print();
             }
         } else {
