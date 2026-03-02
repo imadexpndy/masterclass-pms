@@ -10,15 +10,14 @@ import {
     IconReceipt, IconCart, IconCash, IconCreditCard, IconPrint,
     IconX, IconSend, IconTrash, IconCheck,
     IconBreakfast, IconSalad, IconTagine, IconPizza, IconPasta,
-    IconSteak, IconWrap, IconSandwich, IconJuice, IconCoffee, IconDessert, IconRamadan
+    IconSteak, IconWrap, IconSandwich, IconJuice, IconCoffee, IconDessert
 } from '../components/Icons';
-import logo from '../assets/menu images/logo master classe ticket.svg';
+import logoTicket from '../assets/logo_ticket.png';
 
 const CATEGORY_ICONS = {
     breakfast: IconBreakfast, salad: IconSalad, tagine: IconTagine,
     pizza: IconPizza, pasta: IconPasta, steak: IconSteak, wrap: IconWrap,
     sandwich: IconSandwich, juice: IconJuice, coffee: IconCoffee, dessert: IconDessert,
-    ramadan: IconRamadan,
 };
 
 export default function POS() {
@@ -43,12 +42,20 @@ export default function POS() {
     const [amountReceived, setAmountReceived] = useState('');
     const [paymentInfo, setPaymentInfo] = useState(null);
 
-    // Smart print: uses Electron silent print if a printer is configured, otherwise falls back to window.print()
-    const smartPrint = async () => {
+    // Smart print logic
+    const printCustomerTicket = async (alsoPrintToKitchen = false) => {
         const printerName = settings.printerName;
+        const kitchenPrinterName = settings.kitchenPrinterName;
+        const printOptions = { paperWidth: settings.paperWidth || '80mm' };
+
         if (printerName && window.electron?.silentPrint) {
             try {
-                const result = await window.electron.silentPrint(printerName);
+                // By default electron prints the whole window, but CSS `@media print` 
+                // ensures only the `.print-receipt.customer-ticket` is visible.
+                const result = await window.electron.silentPrint(printerName, printOptions);
+                if (alsoPrintToKitchen && kitchenPrinterName) {
+                    await window.electron.silentPrint(kitchenPrinterName, printOptions);
+                }
                 if (!result.success) {
                     console.warn('Silent print failed, falling back:', result.error);
                     window.print();
@@ -61,6 +68,46 @@ export default function POS() {
             window.print();
         }
     };
+
+    const printKitchenTicket = async (orderData) => {
+        const kitchenPrinterName = settings.kitchenPrinterName;
+        if (!kitchenPrinterName || !window.electron?.silentPrint) {
+            console.log("No kitchen printer configured or not in electron. Skipping kitchen print.");
+            return;
+        }
+
+        try {
+            // We set a flag or let CSS handle visibility. In this case, we 
+            // trigger the silent print to the specified kitchen printer.
+            // Note: In complex Electron setups with 2 printers, we often need 
+            // an iframe or state flag `isPrintingKitchen` to toggle `@media print`.
+            // For now, we rely on the main process targeting the right printer.
+
+            // To be completely safe with standard `silentPrint` which grabs the window DOM, 
+            // we dispatch a custom event to tell React what is being printed, OR
+            // we set a temporary state `printingTarget` so React conditionally renders
+            // ONLY the kitchen slip for 1 frame.
+
+            // Setup for React state toggle:
+            setPrintingTarget('kitchen');
+            setKitchenPrintData(orderData);
+
+            // Allow React to re-render the DOM showing ONLY the kitchen ticket in print media
+            setTimeout(async () => {
+                await window.electron.silentPrint(kitchenPrinterName, { paperWidth: settings.paperWidth || '80mm' });
+                setPrintingTarget('customer'); // reset
+                setKitchenPrintData(null);
+            }, 150);
+
+        } catch (e) {
+            console.error('Kitchen print error:', e);
+            setPrintingTarget('customer');
+            setKitchenPrintData(null);
+        }
+    };
+
+    const [printingTarget, setPrintingTarget] = useState('customer');
+    const [kitchenPrintData, setKitchenPrintData] = useState(null);
 
     // URL params: pre-select table and optionally trigger payment
     useEffect(() => {
@@ -167,7 +214,7 @@ export default function POS() {
         // Auto-print receipt (if enabled in settings)
         if (settings.autoPrint !== 'off') {
             setTimeout(() => {
-                smartPrint();
+                printCustomerTicket(method === 'cash');
             }, 800);
         }
     };
@@ -225,7 +272,9 @@ export default function POS() {
 
                 // Auto-print for existing order payment
                 if (settings.autoPrint !== 'off') {
-                    setTimeout(() => smartPrint(), 800);
+                    setTimeout(() => {
+                        printCustomerTicket(paymentMethod === 'cash');
+                    }, 800);
                 }
             }
 
@@ -248,11 +297,23 @@ export default function POS() {
 
                 if (settings.autoPrint !== 'off') {
                     setTimeout(async () => {
-                        await smartPrint();
+                        await printCustomerTicket(true);
                         setShowBill(false);
                         setPaidOrder(null);
                     }, 800);
                 }
+            }
+
+            // 'pending' mode for existing order (Send)
+            if (paymentMethod === 'pending') {
+                const waiter = users.find(u => u.id === existingOrder.waiterId);
+                const table = tables.find(t => t.id === existingOrder.tableId);
+                printKitchenTicket({
+                    ...existingOrder,
+                    items: newOrderItems,
+                    waiterName: waiter?.name || user?.name || '—',
+                    tableName: table?.name || '',
+                });
             }
             return;
         }
@@ -325,6 +386,17 @@ export default function POS() {
                 amountReceived: 0,
             });
             setShowBill(true);
+        }
+
+        if (paymentMethod === 'pending') {
+            const waiter = users.find(u => u.id === user.id);
+            const table = tables.find(t => t.id === tableId);
+            printKitchenTicket({
+                ...order,
+                items: orderItems,
+                waiterName: waiter?.name || user?.name || '—',
+                tableName: table?.name || '',
+            });
         }
 
         if (paymentMethod !== 'print') {
@@ -413,7 +485,7 @@ export default function POS() {
         // Auto-print receipt (if enabled in settings)
         if (settings.autoPrint !== 'off') {
             setTimeout(() => {
-                smartPrint();
+                printCustomerTicket(true);
             }, 800);
         }
     };
@@ -425,25 +497,64 @@ export default function POS() {
         setAmountReceived(p => p + key);
     };
 
+    // ===== KITCHEN TICKET VIEW (Used only during printing) =====
+    if (kitchenPrintData) {
+        const kScale = (Number(settings.kitchenTicketScale) || 100) / 100;
+        return (
+            <div style={{ padding: '0 5px', background: '#fff', color: '#000', width: '100%', boxSizing: 'border-box', transform: `scale(${kScale})`, transformOrigin: 'top center' }}>
+                <h1 style={{ textAlign: 'center', fontSize: '1.1rem', margin: '0', borderBottom: '2px solid #000', paddingBottom: '2px', textTransform: 'uppercase' }}>
+                    {lang === 'fr' ? 'CUISINE' : 'KITCHEN'}
+                </h1>
+
+                <div style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '10px', lineHeight: '1.3' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Table: {kitchenPrintData.tableName || 'Takeaway'}</span>
+                        <span>{new Date().toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <div>{lang === 'fr' ? 'Serveur' : 'Waiter'}: {kitchenPrintData.waiterName || '—'}</div>
+                </div>
+
+                <div style={{ borderTop: '2px dashed #000', margin: '10px 0' }} />
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {kitchenPrintData.items.map(item => (
+                        <div key={item.id} style={{ display: 'flex', alignItems: 'flex-start', fontSize: '1.2rem', fontWeight: 900, lineHeight: '1.1' }}>
+                            <span style={{ minWidth: '35px', display: 'inline-block' }}>{item.quantity}x</span>
+                            <div style={{ flex: 1, paddingLeft: '5px' }}>
+                                <div>{item.itemName}</div>
+                                {item.notes && (
+                                    <div style={{ fontSize: '0.9rem', fontWeight: 'bold', fontStyle: 'italic', marginTop: '2px', textTransform: 'uppercase' }}>
+                                        * {item.notes}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
     // ===== RECEIPT VIEW =====
     if (showBill && paidOrder) {
+        const cScale = (Number(settings.customerTicketScale) || 100) / 100;
         return (
             <div className="receipt-card">
-                <div className="print-receipt receipt-inner" style={{ color: '#000' }}>
-                    <div className="receipt-header" style={{ marginBottom: '10px', textAlign: 'center' }}>
-                        <img src={logo} alt="Logo" style={{ width: 120, height: 'auto', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
-                        <div className="receipt-brand" style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2px', color: '#000' }}>{settings.storeName || 'MASTER CLASS'}</div>
-                        <div className="receipt-sub" style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT & CAFÉ'}</div>
-                        <div className="receipt-address" style={{ fontSize: '0.7rem', marginTop: '5px' }}>
-                            {settings.storeAddress || '123 Avenue Mohammed VI, Marrakech'}<br />
-                            Tel: {settings.storePhone || '05 24 00 00 00'}
+                <div className="print-receipt receipt-inner" style={{ color: '#000', padding: '0', transform: `scale(${cScale})`, transformOrigin: 'top center' }}>
+                    <div className="receipt-header" style={{ marginBottom: '2px', textAlign: 'center' }}>
+                        <img src={logoTicket} alt="Logo" style={{ width: 45, height: 'auto', marginBottom: 2, display: 'block', margin: '0 auto 2px' }} />
+                        <div className="receipt-brand" style={{ fontSize: '0.95rem', fontWeight: 900, marginBottom: '0px', color: '#000' }}>{settings.storeName || 'RIAD AL MISK'}</div>
+                        <div className="receipt-sub" style={{ fontSize: '0.55rem', textTransform: 'uppercase', color: '#000' }}>{settings.storeSubtitle || 'RESTAURANT'}</div>
+                        <div className="receipt-address" style={{ fontSize: '0.5rem', marginTop: '1px', lineHeight: '1.1' }}>
+                            {settings.storeAddress || '362 rue de la Kasbah, Médina - Marrakech'}<br />
+                            Tel: {settings.storePhone || '05 24 44 08 71'}
                         </div>
 
-                        <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
+                        <div style={{ borderTop: '1px dashed #000', margin: '5px 0' }} />
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                            <span>{new Date(paidOrder.createdAt).toLocaleDateString(lang === 'ar' ? 'fr-MA' : 'fr-FR')}</span>
-                            <span>{new Date(paidOrder.createdAt).toLocaleTimeString(lang === 'ar' ? 'fr-MA' : 'fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span>{new Date(paidOrder.createdAt).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US')}</span>
+                            <span>{new Date(paidOrder.createdAt).toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginTop: '2px' }}>
                             <span>{t('orderNum')}: <strong>#{paidOrder.id.slice(-6).toUpperCase()}</strong></span>
@@ -454,64 +565,37 @@ export default function POS() {
                         </div>
                     </div>
 
-                    <div style={{ borderTop: '1px dashed #000', margin: '5px 0' }} />
-                    <div style={{ display: 'flex', fontSize: '0.7rem', fontWeight: 700, marginBottom: '4px' }}>
-                        <span style={{ width: '10%', textAlign: lang === 'ar' ? 'right' : 'left' }}>{t('qty') || 'Qt'}</span>
-                        <span style={{ flex: 1, textAlign: lang === 'ar' ? 'right' : 'left' }}>{t('item') || 'Item'}</span>
-                        <span style={{ width: '25%', textAlign: lang === 'ar' ? 'left' : 'right' }}>{t('total') || 'Total'}</span>
+                    <div style={{ borderTop: '1px dashed #000', margin: '3px 0' }} />
+                    <div style={{ display: 'flex', fontSize: '0.7rem', fontWeight: 700, marginBottom: '2px' }}>
+                        <span style={{ width: '10%', textAlign: 'left' }}>{t('qty') || 'Qty'}</span>
+                        <span style={{ flex: 1, textAlign: 'left' }}>{t('item') || 'Item'}</span>
+                        <span style={{ width: '25%', textAlign: 'right' }}>{t('total') || 'Total'}</span>
                     </div>
-                    <div style={{ borderTop: '1px solid #000', marginBottom: '5px' }} />
+                    <div style={{ borderTop: '1px solid #000', marginBottom: '3px' }} />
 
                     {paidOrder.items.map(item => (
-                        <div key={item.id} className="receipt-item" style={{ fontSize: '0.8rem', marginBottom: '4px', display: 'flex', alignItems: 'flex-start' }}>
-                            <span style={{ width: '10%', textAlign: lang === 'ar' ? 'right' : 'left' }}>{item.quantity}</span>
-                            <span style={{ flex: 1, textAlign: lang === 'ar' ? 'right' : 'left', padding: '0 4px', overflow: 'hidden', wordBreak: 'break-word' }}>
-                                {lang === 'ar' && item.nameAr ? item.nameAr : item.itemName}
+                        <div key={item.id} className="receipt-item" style={{ fontSize: '0.75rem', marginBottom: '1px', display: 'flex', alignItems: 'flex-start' }}>
+                            <span style={{ width: '10%', textAlign: 'left' }}>{item.quantity}</span>
+                            <span style={{ flex: 1, textAlign: 'left', padding: '0 4px', overflow: 'hidden', wordBreak: 'break-word' }}>
+                                {item.itemName}
                             </span>
-                            <span className="receipt-item-right" style={{ width: '25%', textAlign: lang === 'ar' ? 'left' : 'right', fontWeight: 600 }}>
+                            <span className="receipt-item-right" style={{ width: '25%', textAlign: 'right', fontWeight: 600 }}>
                                 {(item.unitPrice * item.quantity).toFixed(2)}
                             </span>
                         </div>
                     ))}
 
-                    <div style={{ borderTop: '1px dashed #000', margin: '10px 0' }} />
+                    <div style={{ borderTop: '1px dashed #000', margin: '5px 0' }} />
 
-                    <div className="receipt-total" style={{ fontSize: '1.4rem', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="receipt-total" style={{ fontSize: '1.2rem', justifyContent: 'space-between', alignItems: 'center', margin: '2px 0' }}>
                         <span style={{ fontSize: '1rem', fontWeight: 700 }}>TOTAL</span>
                         <span>{paidOrder.total.toFixed(2)} <small style={{ fontSize: '0.8rem' }}>DH</small></span>
                     </div>
 
-                    {paidOrder.paymentMethod !== 'pending' && (
-                        <div style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', marginTop: '5px' }}>
-                            <span>{t('paymentMethod')}:</span>
-                            <span style={{ fontWeight: 700, textTransform: 'uppercase' }}>{paidOrder.paymentMethod === 'cash' ? t('cash') : t('card')}</span>
-                        </div>
-                    )}
-
-                    {paidOrder.paymentMethod === 'cash' && paidOrder.amountReceived > 0 && (
-                        <div style={{ marginTop: '5px', fontSize: '0.8rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span>{t('amountReceived')}:</span>
-                                <span>{paidOrder.amountReceived.toFixed(2)}</span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
-                                <span>{t('change')}:</span>
-                                <span>{paidOrder.changeGiven.toFixed(2)} DH</span>
-                            </div>
-                        </div>
-                    )}
-
-                    <div style={{ borderTop: '1px dashed #000', margin: '15px 0' }} />
+                    <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
 
                     <div className="receipt-footer" style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem' }}>WiFi: {settings.wifiName || 'MasterClass_Guest'} / {settings.wifiPassword || 'Password123'}</div>
-                        {settings.ramadanMode === 'on' && (
-                            <div style={{ fontWeight: 900, fontSize: '1rem', margin: '8px 0', borderTop: '1px dashed #000', borderBottom: '1px dashed #000', padding: '6px 0' }}>
-                                ☪ رمضان كريم ☪
-                                <div style={{ fontSize: '0.7rem', fontWeight: 600 }}>Ramadan Karim</div>
-                            </div>
-                        )}
-                        <div style={{ fontWeight: 800, fontSize: '0.9rem', margin: '10px 0' }}>*** {settings.receiptFooter || t('thankYou')} ***</div>
+                        <div style={{ fontWeight: 800, fontSize: '0.8rem', margin: '5px 0' }}>*** {settings.receiptFooter || t('thankYou')} ***</div>
                         <div style={{ fontSize: '0.6rem' }}>{settings.receiptPoweredBy || 'Powered by Expndy'}</div>
                     </div>
                 </div>
@@ -520,7 +604,7 @@ export default function POS() {
                     <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => { setShowBill(false); setPaidOrder(null); }}>
                         <IconX size={16} /> {t('close')}
                     </button>
-                    <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => smartPrint()}>
+                    <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => printCustomerTicket(true)}>
                         <IconPrint size={16} /> {t('printReceipt')}
                     </button>
                 </div>
@@ -542,10 +626,10 @@ export default function POS() {
                                 className={`cat-pill ${catId === cat.id ? 'active' : ''}`}
                                 onClick={() => setActiveCat(cat.id)}
                             >
-                                <CatIcon size={22} />
+                                <CatIcon size={18} />
                                 <div className="cat-info">
-                                    <span style={{ fontWeight: 600 }}>{lang === 'ar' && cat.nameAr ? cat.nameAr : cat.name}</span>
-                                    <span className="cat-count">{itemCount} {lang === 'ar' ? 'عنصر' : 'articles'}</span>
+                                    <span style={{ fontWeight: 600 }}>{cat.name}</span>
+                                    <span className="cat-count">{itemCount} {lang === 'fr' ? 'articles' : 'items'}</span>
                                 </div>
                             </button>
                         );
@@ -556,21 +640,18 @@ export default function POS() {
                     {filteredItems.map(item => (
                         <button
                             key={item.id}
-                            className={`pos-item-card ${!item.available ? 'unavailable' : ''}`}
+                            className={`pos-item-card ${!item.available ? 'unavailable' : ''} ${!item.image ? 'compact-card' : ''}`}
                             onClick={() => item.available && addToCart(item)}
                         >
-                            {/* Image Section */}
-                            <div
-                                className={`pos-item-image ${!item.image ? 'no-image' : ''}`}
-                                style={item.image ? { backgroundImage: `url(${item.image})` } : {}}
-                            >
-                                {!item.image && <span>{(lang === 'ar' && item.nameAr ? item.nameAr : item.name).charAt(0)}</span>}
-                            </div>
+                            {/* Render image container ONLY if an actual image exists */}
+                            {item.image && (
+                                <div className="pos-item-image" style={{ backgroundImage: `url(${item.image})` }} />
+                            )}
 
                             {/* Content Section */}
                             <div className="pos-item-content">
-                                <div className="pos-item-name">{lang === 'ar' && item.nameAr ? item.nameAr : item.name}</div>
-                                <div className="pos-item-price">{item.price.toFixed(2)} {lang === 'ar' ? 'د.م.' : 'DH'}</div>
+                                <div className="pos-item-name">{item.name}</div>
+                                <div className="pos-item-price">{item.price.toFixed(2)} DH</div>
                             </div>
 
                             {!item.available && <span className="badge badge-red" style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}>Indisponible</span>}
@@ -659,7 +740,7 @@ export default function POS() {
                                 setPaidOrder(null);
                             }, 800);
                         }} disabled={cart.length === 0}>
-                            <IconPrint size={14} /> {lang === 'ar' ? 'طبع' : 'Imprimer'}
+                            <IconPrint size={14} /> {lang === 'fr' ? 'Imprimer' : 'Print'}
                         </button>
                     </div>
                 </div>

@@ -63,19 +63,22 @@ ipcMain.handle('get-printers', async () => {
 });
 
 // Silent print to a specific printer (no dialog)
-ipcMain.handle('silent-print', async (event, printerName) => {
+ipcMain.handle('silent-print', async (event, printerName, optionsPayload = {}) => {
     return new Promise((resolve) => {
         if (!mainWindow) {
             resolve({ success: false, error: 'No window' });
             return;
         }
 
+        // Default to 80mm (72000 microns), fallback to 58mm (48000 microns)
+        const paperWidth = optionsPayload?.paperWidth === '58mm' ? 48000 : 72000;
+
         const options = {
             silent: true,
             printBackground: true,
             deviceName: printerName,
-            // 72mm wide — height is auto-calculated from content (no fixed height = no blank gap)
-            pageSize: { width: 72000 },
+            // width from settings (80mm or 58mm), height auto-calculated from content (no blank gap)
+            pageSize: { width: paperWidth },
             margins: { marginType: 'none' },
         };
 

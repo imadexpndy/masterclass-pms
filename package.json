@@ -1,7 +1,9 @@
 {
-  "name": "master-pos",
+  "name": "riad-almisk-pos",
   "private": true,
-  "version": "0.0.0",
+  "description": "Point of Sale software for Riad Al Misk Restaurant",
+  "author": "Imad Expndy",
+  "version": "1.0.0",
   "type": "module",
   "main": "electron/main.js",
   "scripts": {
@@ -14,8 +16,8 @@
     "electron:build": "vite build && electron-builder"
   },
   "build": {
-    "appId": "com.masterclass.pos",
-    "productName": "MasterClassPOS",
+    "appId": "com.riadalmisk.pos",
+    "productName": "RiadAlMiskPOS",
     "files": [
       "dist/**/*",
       "electron/**/*",

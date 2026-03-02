@@ -9,7 +9,7 @@ import {
     IconLogout, IconWifi, IconWifiOff, IconClock, IconGlobe,
     IconMaximize, IconMinimize, IconDownload, IconSettings
 } from './Icons';
-import logo from '../assets/logo_masterclass.svg';
+import logo from '../assets/logo_almisk.jpg';
 
 export default function AppShell() {
     const { user, logout } = useAuth();
@@ -95,7 +95,7 @@ export default function AppShell() {
     useEffect(() => {
         const tick = () => {
             const now = new Date();
-            setClock(now.toLocaleTimeString(lang === 'ar' ? 'ar-MA' : 'fr-FR', { hour: '2-digit', minute: '2-digit' }));
+            setClock(now.toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' }));
         };
         tick();
         const id = setInterval(tick, 30000);
@@ -110,7 +110,7 @@ export default function AppShell() {
             {/* Sidebar */}
             <aside className="sidebar">
                 <div className="sidebar-brand">
-                    <img src={logo} alt="MasterClass Logo" style={{ width: '100%', maxWidth: 180, height: 'auto', marginBottom: 10 }} />
+                    <img src={logo} alt="Riad Al Misk" style={{ width: '100%', maxWidth: 180, height: 'auto', marginBottom: 10 }} />
                 </div>
 
                 <nav className="sidebar-nav">
@@ -182,11 +182,11 @@ export default function AppShell() {
                         <button
                             className="theme-toggle"
                             onClick={toggleLang}
-                            title={lang === 'fr' ? 'العربية' : 'Français'}
+                            title={lang === 'fr' ? 'English' : 'Français'}
                             style={{ fontSize: '0.75rem', fontWeight: 700, width: 'auto', padding: '0 10px', gap: 4 }}
                         >
                             <IconGlobe size={13} />
-                            {lang === 'fr' ? 'AR' : 'FR'}
+                            {lang === 'fr' ? 'EN' : 'FR'}
                         </button>
                         <button
                             className="theme-toggle"

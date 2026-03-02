@@ -3,5 +3,5 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electron', {
     // Printer APIs
     getPrinters: () => ipcRenderer.invoke('get-printers'),
-    silentPrint: (printerName) => ipcRenderer.invoke('silent-print', printerName),
+    silentPrint: (printerName, options) => ipcRenderer.invoke('silent-print', printerName, options),
 });

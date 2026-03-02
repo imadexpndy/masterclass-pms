@@ -1,10 +1,16 @@
-import imgOrangina from '../assets/orangina.png';
-import imgSidiAli from '../assets/sidi_ali.png';
 import db from './db';
 
 const uid = () => crypto.randomUUID();
 
 export async function seedDatabase() {
+    // ===== FORCE RESET FOR NEW MENU =====
+    if (window.localStorage.getItem('almisk_menu_reset_v3') !== 'true') {
+        console.log("Forcing menu reset for new Almisk menu...");
+        await db.categories.clear();
+        await db.menuItems.clear();
+        window.localStorage.setItem('almisk_menu_reset_v3', 'true');
+    }
+
     const count = await db.categories.count();
     const tableCount = await db.diningTables.count();
 
@@ -19,18 +25,16 @@ export async function seedDatabase() {
 
         // ===== CATEGORIES & MENU ITEMS =====
         const cats = [
-            { id: 'cat-breakfast', name: 'Petit Déjeuner', nameAr: 'فطور', iconKey: 'breakfast', sortOrder: 1 },
-            { id: 'cat-salads', name: 'Salades', nameAr: 'سلطات', iconKey: 'salad', sortOrder: 2 },
-            { id: 'cat-moroccan', name: 'Marocaine', nameAr: 'أطباق مغربية', iconKey: 'tagine', sortOrder: 3 },
-            { id: 'cat-pizza', name: 'Pizza', nameAr: 'بيتزا', iconKey: 'pizza', sortOrder: 4 },
-            { id: 'cat-pasta', name: 'Pâtes', nameAr: 'معجنات', iconKey: 'pasta', sortOrder: 5 },
-            { id: 'cat-mains', name: 'Plats', nameAr: 'أطباق رئيسية', iconKey: 'steak', sortOrder: 6 },
-            { id: 'cat-ofandue', name: 'Ôfandue', nameAr: 'أوفوندو', iconKey: 'wrap', sortOrder: 7 },
-            { id: 'cat-sandwich', name: 'Sandwichs', nameAr: 'سندويشات', iconKey: 'sandwich', sortOrder: 8 },
-            { id: 'cat-juices', name: 'Jus & Smoothies', nameAr: 'عصائر', iconKey: 'juice', sortOrder: 9 },
-            { id: 'cat-drinks', name: 'Boissons', nameAr: 'مشروبات', iconKey: 'coffee', sortOrder: 10 },
-            { id: 'cat-desserts', name: 'Desserts', nameAr: 'تحليات', iconKey: 'dessert', sortOrder: 11 },
-            { id: 'cat-ramadan', name: 'Ramadan', nameAr: 'رمضان', iconKey: 'ramadan', sortOrder: 0 },
+            { id: 'cat-entrees-marocaines', name: 'Entrées Marocaines', nameAr: 'مقبلات مغربية', iconKey: 'tagine', sortOrder: 1 },
+            { id: 'cat-entrees-internationales', name: 'Entrées Internationales', nameAr: 'مقبلات عالمية', iconKey: 'salad', sortOrder: 2 },
+            { id: 'cat-table-marocaine', name: 'Table Marocaine', nameAr: 'المائدة المغربية', iconKey: 'tagine', sortOrder: 3 },
+            { id: 'cat-table-internationale', name: 'Table Internationale', nameAr: 'المائدة العالمية', iconKey: 'steak', sortOrder: 4 },
+            { id: 'cat-desserts', name: 'Desserts', nameAr: 'تحليات', iconKey: 'dessert', sortOrder: 5 },
+            { id: 'cat-menus', name: 'Menus / Set Menus', nameAr: 'قوائم', iconKey: 'pasta', sortOrder: 6 },
+            { id: 'cat-boissons-chaudes', name: 'Boissons Chaudes', nameAr: 'مشروبات ساخنة', iconKey: 'coffee', sortOrder: 7 },
+            { id: 'cat-boissons', name: 'Boissons', nameAr: 'مشروبات', iconKey: 'juice', sortOrder: 8 },
+            { id: 'cat-jus', name: 'Jus de Fruits Frais', nameAr: 'عصائر طازجة', iconKey: 'juice', sortOrder: 9 },
+            { id: 'cat-cocktails', name: 'Cocktails & Vitamines', nameAr: 'كوكتيلات وفيتامينات', iconKey: 'juice', sortOrder: 10 },
         ];
         await db.categories.bulkAdd(cats);
     }
@@ -43,27 +47,19 @@ export async function seedDatabase() {
         const tables = [];
 
         // --- Custom Elements ---
-        // Caisse (Bottom-Left: 5,0)
         tables.push({ id: uid(), name: 'Caisse', type: 'caisse', row: 5, col: 0, status: 'active', zone: 'salle' });
-        // Door (Bottom-Right: 5,7) - Sortie
         tables.push({ id: uid(), name: 'Sortie', type: 'door', row: 5, col: 7, status: 'active', zone: 'salle' });
-        // Door (Top-Right: 0,7) - Entrée
         tables.push({ id: uid(), name: 'Entrée', type: 'door', row: 0, col: 7, status: 'active', zone: 'salle' });
-        // Bases (Pillars) - e.g. (2,3) & (2,4)
         tables.push({ id: uid(), name: 'Base', type: 'base', row: 2, col: 3, status: 'active', zone: 'salle' });
         tables.push({ id: uid(), name: 'Base', type: 'base', row: 2, col: 4, status: 'active', zone: 'salle' });
-        // TV (Top-Center)
         tables.push({ id: uid(), name: 'TV 1', type: 'tv', row: 0, col: 3, status: 'active', zone: 'salle' });
 
         // --- Grid Tables ---
         let tableNum = 1;
         for (let r = 0; r < 6; r++) {
             for (let c = 0; c < 8; c++) {
-                // Skip if occupied by custom elements
                 const isOccupied = tables.find(t => t.row === r && t.col === c);
                 if (isOccupied) continue;
-
-                // Skip some to make it look realistic (aisles)
                 if (c === 2 || c === 5) continue;
 
                 tables.push({
@@ -79,7 +75,7 @@ export async function seedDatabase() {
             }
         }
 
-        // --- Terrasse Tables (List) ---
+        // --- Terrasse Tables ---
         for (let i = 1; i <= 20; i++) {
             tables.push({
                 id: uid(),
@@ -95,232 +91,111 @@ export async function seedDatabase() {
     }
 
     const items = [
-        // ===== BREAKFAST =====
-        { id: uid(), categoryId: 'cat-breakfast', name: 'Baldi', nameAr: 'بلدي', price: 30, description: 'Msemen, Harcha, mini batbota, Miel, Huile, amlou, olives. Boisson chaude, jus d\'orange.', available: true, stockQty: 999, image: '/menu/petit_dej_traditionnel.jpg' },
-        { id: uid(), categoryId: 'cat-breakfast', name: 'Ftourii', nameAr: 'فطوري', price: 30, description: 'Pain grillé, viennoiseries, Beurre, Confiture, Fromage. Boisson chaude, jus d\'orange.', available: true, stockQty: 999, image: '/menu/petit_dej_croissant.jpg' },
-        { id: uid(), categoryId: 'cat-breakfast', name: 'Fasi', nameAr: 'فاسي', price: 35, description: 'Batbota, Oeuf au khlii, Olives, huile. Boisson chaude, jus d\'orange.', available: true, stockQty: 999, image: '/menu/petit dej fasi.jpg' },
-        { id: uid(), categoryId: 'cat-breakfast', name: 'Master Class', nameAr: 'ماستر كلاس', price: 40, description: 'Omelette au Khlii, Fromage, beurre, Miel, Amlou, confiture. Batbota, Msemen, viennoiseries, Raib.', available: true, stockQty: 999, image: '/menu/petit_dej_traditionnel.jpg' },
-        { id: uid(), categoryId: 'cat-breakfast', name: 'Enfants Ftour', nameAr: 'فطور أطفال', price: 25, description: 'Pain grillé, fromage, Jambo ou omelette. Salade, tomate, jus d\'orange.', available: true, stockQty: 999, image: '/menu/petit_dej_croissant.jpg' },
-        { id: uid(), categoryId: 'cat-breakfast', name: 'Omini Ftour', nameAr: 'أوميني فطور', price: 25, description: 'Omelette nature, fromage. Salade, tomate, Concombre. Jus d\'orange.', available: true, stockQty: 999, image: '/menu/petit_dej_healthy.jpg' },
-        { id: uid(), categoryId: 'cat-breakfast', name: 'Mkilats Nature', nameAr: 'مقيلات طبيعية', price: 10, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1590412200988-a436970781fa?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-breakfast', name: 'Mkilats Tomate', nameAr: 'مقيلات طماطم', price: 12, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1590412200988-a436970781fa?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-breakfast', name: 'Mkilats Fromage', nameAr: 'مقيلات جبن', price: 12, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1590412200988-a436970781fa?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-breakfast', name: 'Mkilats Jambo', nameAr: 'مقيلات جامبون', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1590412200988-a436970781fa?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-breakfast', name: 'Mkilats Khlii', nameAr: 'مقيلات خليع', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1590412200988-a436970781fa?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-breakfast', name: 'Extra Petit Déj', nameAr: 'إضافات فطور', price: 5, description: 'Batbot, msamen, huile, olive, beurre, miel, fromage, amlou...', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1590412200988-a436970781fa?auto=format&fit=crop&w=500&q=60' },
+        // ===== ENTRÉES MAROCAINES / MOROCCAN STARTERS =====
+        { id: uid(), categoryId: 'cat-entrees-marocaines', name: 'Harira Marocaine - Soupe', nameAr: 'حريرة مغربية - حساء', price: 50, description: 'Dattes et chbbakiya, œuf dur / Dattes, chbbakiya and boiled Egg', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-entrees-marocaines', name: 'Assortiment de salades marocaines', nameAr: 'تشكيلة سلطات مغربية', price: 70, description: 'Courgettes / Tomates poivron / Taktouka / Hommous / Zaalouk / Carottes marinées aux herbes et ail / Tomates confites / Carottes confites / Potiron confit / Oignons confits au raisin / Houmous / Poivrons marinés à l\'huile d\'olive et ails / Epinards', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-entrees-marocaines', name: 'Assortiment de 6 Briwates', nameAr: 'تشكيلة 6 بريوات', price: 90, description: 'Epinards, poulet, légumes et viande hachée / Chicken briwat, Spinach and cheese briwat, Vegetables and minced meat', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-entrees-marocaines', name: 'Assortiment de 6 cigares', nameAr: 'تشكيلة 6 سيكار', price: 90, description: 'Épinards, poulet, légumes / Chicken, Spinach & Vegetables', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-entrees-marocaines', name: 'Pastilla royale de poulet aux amandes', nameAr: 'بسطيلة ملكية بالدجاج واللوز', price: 90, description: 'Royal chicken pastilla with almonds', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-entrees-marocaines', name: 'Pastilla fruits de mer', nameAr: 'بسطيلة فواكه البحر', price: 110, description: 'Pastilla farcie aux fruits de mer, poisson blanc et vermicelles / Sea food pastilla with Vermicelli', available: true, stockQty: 999, image: '' },
 
-        // ===== SALADS =====
-        { id: uid(), categoryId: 'cat-salads', name: 'Salade Composée S', price: 30, description: 'Small — Base + topping + supplement + extra + sauce', available: true, stockQty: 999, image: '/menu/salade.jpg' },
-        { id: uid(), categoryId: 'cat-salads', name: 'Salade Composée M', price: 40, description: 'Medium', available: true, stockQty: 999, image: '/menu/salade.jpg' },
-        { id: uid(), categoryId: 'cat-salads', name: 'Salade Composée L', price: 50, description: 'Large', available: true, stockQty: 999, image: '/menu/salade.jpg' },
-        { id: uid(), categoryId: 'cat-salads', name: 'Marocaine', price: 15, description: 'Tomate, oignons, poivrons, sauce vinaigrette', available: true, stockQty: 999, image: '/menu/salade_marocaine.jpg' },
-        { id: uid(), categoryId: 'cat-salads', name: 'Niçoise', price: 25, description: 'Riz, oeuf, thon, pomme de terre, haricots vert, Betrave, cerise', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-salads', name: 'César', price: 30, description: 'Laitue, tomate cerise, poulet, Croûtons, parmesan, oeuf', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-salads', name: 'Pêcheur', price: 40, description: 'Laitue, avocat, crevette, Calamar, surimi, cerise', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=60' },
+        // ===== ENTRÉES INTERNATIONALES / INTERNATIONAL STARTERS =====
+        { id: uid(), categoryId: 'cat-entrees-internationales', name: 'Salades Niçoise', nameAr: 'سلطة نيسواز', price: 60, description: 'Salade verte, poivron, tomate, thon, œufs, olives noires, carotte, pomme de terre / Green salad, pepper, tomato, tuna, eggs, black olives, carrot, potato', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-entrees-internationales', name: 'Avocado Salad', nameAr: 'سلطة أفوكادو', price: 70, description: 'Avocat, concombre, ognon, tomate, salade verte sauce pesto / Avocado, cucumber, onion, tomato, green salad with pesto sauce', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-entrees-internationales', name: 'Quinoa Salad', nameAr: 'سلطة كينوا', price: 80, description: 'Quinoa, poivron, mangue, maïs, thon, ognon, avocat / Quinoa, sweet pepper, mango, corn, onion, avocado, tuna', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-entrees-internationales', name: 'Quinoa aux légumes grillés', nameAr: 'كينوا بالخضر المشوية', price: 85, description: 'Quinoa, aubergine, carottes, courgettes, poivrons, sauce pesto, tomates cerises / Quinoa, eggplant, carrots, zucchini, peppers, Pesto sauce, cherry tomatoes', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-entrees-internationales', name: 'Salade Royale Almisk', nameAr: 'سلطة رويال المسك', price: 95, description: 'Salade verte, tomates cerises confites, concombre, maïs, avocat, gambas, poivron, croutons à l\'ail, noix, amandes, raisins secs, cœur de palmier, haricots rouges, ognon caramélisé', available: true, stockQty: 999, image: '' },
 
-        // ===== MOROCCAN =====
-        { id: uid(), categoryId: 'cat-moroccan', name: 'Couscous Poulet', price: 20, description: '', available: true, stockQty: 999, image: '/menu/couscous.jpg' },
-        { id: uid(), categoryId: 'cat-moroccan', name: 'Couscous Boeuf', price: 25, description: '', available: true, stockQty: 999, image: '/menu/couscous.jpg' },
-        { id: uid(), categoryId: 'cat-moroccan', name: 'Couscous Royal', price: 40, description: '', available: true, stockQty: 999, image: '/menu/couscous.jpg' },
-        { id: uid(), categoryId: 'cat-moroccan', name: 'Tajine Poulet Citron', price: 35, description: '', available: true, stockQty: 999, image: '/menu/tajine_poulet_citron.jpg' },
-        { id: uid(), categoryId: 'cat-moroccan', name: 'Tajine Boeuf Fruits', price: 45, description: '', available: true, stockQty: 999, image: '/menu/tajine_boeuf.jpg' },
-        { id: uid(), categoryId: 'cat-moroccan', name: 'Tajine Kefta Oeufs', price: 25, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-moroccan', name: 'Harira', price: 20, description: 'Accompagnons: Oeuf, Date, Chabakia', available: true, stockQty: 999, image: '/menu/harira.jpg' },
-        { id: uid(), categoryId: 'cat-moroccan', name: 'Pastilla Poulet', price: 30, description: '', available: true, stockQty: 999, image: '/menu/pastilla.jpg' },
-        { id: uid(), categoryId: 'cat-moroccan', name: 'Pastilla Fruit de Mer', price: 40, description: '', available: true, stockQty: 999, image: '/menu/pastilla.jpg' },
-        { id: uid(), categoryId: 'cat-moroccan', name: 'Tanjia (1 pers)', price: 30, description: '', available: true, stockQty: 999, image: '/menu/tajine_boeuf.jpg' },
-        { id: uid(), categoryId: 'cat-moroccan', name: 'Tanjia (2 pers)', price: 60, description: '', available: true, stockQty: 999, image: '/menu/tajine_boeuf.jpg' },
-        { id: uid(), categoryId: 'cat-moroccan', name: 'Nems Poulet', price: 30, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1548559239-5a8286f0144f?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-moroccan', name: 'Nems Viande Hachée', price: 35, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1548559239-5a8286f0144f?auto=format&fit=crop&w=500&q=60' },
+        // ===== TABLE MAROCAINE / MOROCCAN TABLE =====
+        { id: uid(), categoryId: 'cat-table-marocaine', name: 'Tagine berbère aux légumes', nameAr: 'طاجين بربري بالخضر', price: 90, description: 'Tagine berbère aux légumes de l\'atlas et l\'huile d\'argan', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-table-marocaine', name: 'Tagine poulet olives citrons confits', nameAr: 'طاجين دجاج بالزيتون والحامض', price: 100, description: 'Tagine de poulet aux olives, citrons confits et frites', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-table-marocaine', name: 'Tajine kefta traditionnel aux œufs', nameAr: 'طاجين كفتة بالبيض', price: 120, description: 'Traditional Kefta tagine with eggs', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-table-marocaine', name: 'Seffa Medfouna', nameAr: 'سفة مدفونة', price: 140, description: 'Seffa Medfouna aux amandes et Poulet parfumé à la cannelle', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-table-marocaine', name: 'Couscous végétarien', nameAr: 'كسكس نباتي', price: 150, description: 'Vegetarian couscous', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-table-marocaine', name: 'Tajine d\'agneau ou bœuf pruneaux', nameAr: 'طاجين لحم بالبرقوق', price: 150, description: 'Tajine d\'agneau ou bœuf amandes grilles, pruneaux, sésame', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-table-marocaine', name: 'Tanjia marrakchia', nameAr: 'طنجية مراكشية', price: 175, description: 'Tanjia marrakchia de jarret de veau au citron confit', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-table-marocaine', name: 'Couscous Royal aux légumes', nameAr: 'كسكس رويال', price: 180, description: 'au poulet ou agneau ou bœuf avec raisins sec, amandes grillées et ognon caramélisés', available: true, stockQty: 999, image: '' },
 
-        // ===== PIZZA =====
-        // ===== PIZZA =====
-        { id: uid(), categoryId: 'cat-pizza', name: 'Margarita', nameAr: 'مارغريتا', price: 25, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-pizza', name: 'Végétarien', nameAr: 'نباتية', price: 30, description: '', available: true, stockQty: 999, image: '/menu/pizza_vegetarienne.jpg' },
-        { id: uid(), categoryId: 'cat-pizza', name: 'Thon', nameAr: 'تونة', price: 30, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-pizza', name: 'Poulet', nameAr: 'دجاج', price: 40, description: '', available: true, stockQty: 999, image: '/menu/pizza poulet.jpg' },
-        { id: uid(), categoryId: 'cat-pizza', name: 'Viande Hachée', nameAr: 'لحم مفروم', price: 40, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-pizza', name: 'Quatre Saisons', nameAr: 'أربعة فصول', price: 45, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-pizza', name: 'Quatre Fromage', nameAr: 'أربعة أجبان', price: 45, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-pizza', name: 'Fruits de Mer', nameAr: 'فواكه البحر', price: 45, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-pizza', name: 'Pizza Master Class', nameAr: 'ماستر كلاس', price: 60, description: 'Poulet, viande, jombo, crevette, calamar, champignons, basilic', available: true, stockQty: 999, image: '/menu/pizza poulet.jpg' },
+        // ===== TABLE INTERNATIONALE / INTERNATIONAL TABLE =====
+        { id: uid(), categoryId: 'cat-table-internationale', name: 'Sandwich, Panini, Tacos', nameAr: 'سندويتش، بانيني، تاكوس', price: 85, description: 'Poulet, nuggets, viande hachée, mixte avec frites', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-table-internationale', name: 'Spaghetti, Penné ou tagliatelle', nameAr: 'سباغيتي، بيني، تالياتيلي', price: 90, description: 'Bolognaise, tomates cerises, herbes, ail et fromage, Champignon, poulet sauce blanche', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-table-internationale', name: 'Emincé de poulet / bœuf sauce blanche', nameAr: 'شرائح دجاج/لحم بالصلصة البيضاء', price: 120, description: 'à la sauce blanche et champignons. Accompagnement : purée, Légumes, frites, riz', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-table-internationale', name: 'Grillade poulet, kefta, côtelettes', nameAr: 'مشويات', price: 160, description: 'ou mixte. Accompagnement : purée de pomme de terre ou légumes sautés', available: true, stockQty: 999, image: '' },
 
-        // ===== PASTA =====
-        { id: uid(), categoryId: 'cat-pasta', name: 'Napolitaine', price: 25, description: 'Sauce Tomate, basilic, cerise, Olive noir', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-pasta', name: 'Bolognaise', price: 30, description: 'Sauce Tomate, viande, basilic', available: true, stockQty: 999, image: '/menu/spaghetti_bolognaise.jpg' },
-        { id: uid(), categoryId: 'cat-pasta', name: 'Pâtes Thon', price: 25, description: 'Sauce Tomate, thon, basilic', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1608219992759-8d74ed8d76eb?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-pasta', name: 'Pâtes Fruits de Mer', price: 40, description: 'Sauce, fruits de Mer', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-pasta', name: 'Pâtes Végétarien', price: 25, description: 'Aubergine, Oignon, cerise, Courgette', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-pasta', name: 'Carbonara', price: 30, description: 'Sauce blanche, jombo, Champignons', available: true, stockQty: 999, image: '/menu/penne_jambon_champignon.jpg' },
-        { id: uid(), categoryId: 'cat-pasta', name: 'Poulet Champignons', price: 30, description: 'Sauce blanche, Champignons, poulet, Oignon', available: true, stockQty: 999, image: '/menu/tagliatelle_poulet_champignon.jpg' },
-        { id: uid(), categoryId: 'cat-pasta', name: 'Saumon', price: 50, description: 'Sauce blanche, Saumon', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=60' },
+        // ===== DESSERTS / DESSERTS =====
+        { id: uid(), categoryId: 'cat-desserts', name: 'Boule de glace', nameAr: 'كرة مثلجات', price: 20, description: 'Pistache, chocolat, vanille, mangue, fraise, nougat, straciatella', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-desserts', name: 'Oranges à la cannelle', nameAr: 'برتقال بالقرفة', price: 40, description: 'Oranges à la cannelle et eau de fleur d\'oranger', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-desserts', name: 'Salade de fruits de saison', nameAr: 'سلطة فواكه الموسم', price: 50, description: 'Seasonal fruit salad', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-desserts', name: 'Crêpes au Nutella', nameAr: 'كريب نوتيلا', price: 50, description: 'banane ou fruits rouge', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-desserts', name: 'Poire à la cannelle', nameAr: 'إجاص بالقرفة', price: 60, description: 'Poire à la cannelle caramélisée et à la fleur d\'oranger', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-desserts', name: 'Tarte de fruits', nameAr: 'تارت الفواكه', price: 60, description: 'Fruit tart', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-desserts', name: 'Crème brûlée', nameAr: 'كريم بروليه', price: 60, description: 'Cream brulee', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-desserts', name: 'Gâteaux marocains aux amandes', nameAr: 'حلويات مغربية باللوز', price: 60, description: 'Sélection de gâteaux marocains aux amandes', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-desserts', name: 'Panna cotta au coulis à l\'orange', nameAr: 'بنا كوتا بالبرتقال', price: 60, description: 'Panna cotta with orange coulis', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-desserts', name: 'Fondant au chocolat', nameAr: 'فوندان شوكولا', price: 70, description: 'Avec boule de glace vanille', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-desserts', name: 'Pastilla au lait (Jawhara)', nameAr: 'بسطيلة بالحليب (جوهرة)', price: 75, description: 'Pastilla with milk cream', available: true, stockQty: 999, image: '' },
 
-        // ===== MAIN DISHES =====
-        { id: uid(), categoryId: 'cat-mains', name: 'Cordon Blue', price: 35, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-mains', name: 'Emincés de Poulet', price: 35, description: '', available: true, stockQty: 999, image: '/menu/emince_poulet.jpg' },
-        { id: uid(), categoryId: 'cat-mains', name: 'Brochette Boeuf', price: 40, description: '', available: true, stockQty: 999, image: '/menu/brochette_viande.jpg' },
-        { id: uid(), categoryId: 'cat-mains', name: 'Brochette Poulet', price: 40, description: '', available: true, stockQty: 999, image: '/menu/brochette_poulet.jpg' },
-        { id: uid(), categoryId: 'cat-mains', name: 'Mix Grille', price: 50, description: '2 brochette poulet + 2 boeuf + 2 viande haché', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-mains', name: 'Accompagnement', price: 10, description: 'Frite, pâte, riz, légumes, Purée', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-mains', name: 'Sauce Fromage', price: 10, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1472476443507-c7a392dd12c7?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-mains', name: 'Sauce Champignons', price: 10, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1472476443507-c7a392dd12c7?auto=format&fit=crop&w=500&q=60' },
+        // ===== MENUS / SET MENUS =====
+        { id: uid(), categoryId: 'cat-menus', name: 'Le Traditionnel', nameAr: 'التقليدي', price: 250, description: 'Zaalouk, Caviar d\'aubergine, Salade tomate / Tagine poulet citrons confits / Oranges ou Salade de fruits', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-menus', name: 'La Kasbah', nameAr: 'القصبة', price: 300, description: '3 salade Marocaines / Seffa Medfouna ou Tride poulet / Gâteaux marocains ou Poire à la cannelle', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-menus', name: 'Le Marrakchi', nameAr: 'المراكشي', price: 350, description: 'Briouates variés / Tangia Marrakchia boeuf ou Makfoul d\'Agneau / Oranges ou Pastilla au lait', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-menus', name: 'Royal Almisk', nameAr: 'رويال المسك', price: 400, description: 'Pastilla royale poulet / Tajine agneau/bœuf ou Couscous Royal / Tarte de fruits ou Panna cotta', available: true, stockQty: 999, image: '' },
 
-        // ===== OFANDUE =====
-        { id: uid(), categoryId: 'cat-ofandue', name: 'Bowritoo Poulet', price: 30, description: 'Pâte à pizza', available: true, stockQty: 999, image: '/menu/bowritoo.jpg' },
-        { id: uid(), categoryId: 'cat-ofandue', name: 'Bowritoo Viande', price: 30, description: 'Pâte à pizza', available: true, stockQty: 999, image: '/menu/bowritoo.jpg' },
-        { id: uid(), categoryId: 'cat-ofandue', name: 'Bowritoo Mix', price: 35, description: 'Pâte à pizza', available: true, stockQty: 999, image: '/menu/bowritoo.jpg' },
-        { id: uid(), categoryId: 'cat-ofandue', name: 'Bowghroom', price: 30, description: 'Poulet panné, cordon bleu, cheddar, frite, sauce fromagère', available: true, stockQty: 999, image: '/menu/bowghroom.jpg' },
-        { id: uid(), categoryId: 'cat-ofandue', name: 'Pasticcio Poulet', price: 35, description: 'Base au choix: pâte ou frite', available: true, stockQty: 999, image: '/menu/gratin.jpg' },
-        { id: uid(), categoryId: 'cat-ofandue', name: 'Pasticcio Viande', price: 35, description: 'Base au choix: pâte ou frite', available: true, stockQty: 999, image: '/menu/gratin.jpg' },
-        { id: uid(), categoryId: 'cat-ofandue', name: 'Pasticcio Fruit de Mer', price: 40, description: 'Base au choix: pâte ou frite', available: true, stockQty: 999, image: '/menu/gratin.jpg' },
-        { id: uid(), categoryId: 'cat-ofandue', name: 'Lasagne Bolognaise', price: 35, description: 'Sauce bolognaise, béchamel, pâte lasagne, fromage', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1619895092538-128341789043?auto=format&fit=crop&w=500&q=60' },
+        // ===== BOISSONS CHAUDES =====
+        { id: uid(), categoryId: 'cat-boissons-chaudes', name: 'Nespresso', nameAr: 'نسبريسو', price: 25, description: 'Avec gâteaux marocains', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-boissons-chaudes', name: 'Chocolat chaud', nameAr: 'شوكولا ساخنة', price: 25, description: 'Avec gâteaux marocains', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-boissons-chaudes', name: 'Café aux épices', nameAr: 'قهوة بالتوابل', price: 25, description: 'Avec gâteaux marocains', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-boissons-chaudes', name: 'Café au lait', nameAr: 'قهوة بالحليب', price: 25, description: 'Avec gâteaux marocains', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-boissons-chaudes', name: 'Lait à la verveine', nameAr: 'حليب بالويزة', price: 25, description: 'Avec gâteaux marocains', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-boissons-chaudes', name: 'Tisane relaxante', nameAr: 'تيزانة', price: 25, description: 'Avec gâteaux marocains', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-boissons-chaudes', name: 'Thé Lipton', nameAr: 'شاي ليبتون', price: 25, description: 'Avec gâteaux marocains', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-boissons-chaudes', name: 'Thé à la menthe', nameAr: 'أتاي بالنعناع', price: 25, description: 'Avec gâteaux marocains', available: true, stockQty: 999, image: '' },
 
-        // ===== SANDWICHES =====
-        // ===== SANDWICHES =====
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Tacos Poulet', nameAr: 'تاكوس دجاج', price: 30, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1624300603538-1207400f1807?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Tacos Viande', nameAr: 'تاكوس لحم', price: 30, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1624300603538-1207400f1807?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Tacos Mix', nameAr: 'تاكوس ميكس', price: 35, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1624300603538-1207400f1807?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Burger Chicken', nameAr: 'برجر دجاج', price: 30, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Burger Cheese', nameAr: 'تشيز برجر', price: 30, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Burger Master Class', nameAr: 'ماستر برجر', price: 40, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Sandwich Thon', nameAr: 'سندويش تونة', price: 25, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1624300603538-1207400f1807?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Sandwich Viande', nameAr: 'سندويش لحم', price: 30, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1624300603538-1207400f1807?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Sandwich Poulet', nameAr: 'سندويش دجاج', price: 30, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1624300603538-1207400f1807?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Chawarma Normale', nameAr: 'شاورما عادية', price: 30, description: 'Shawarma poulet, salade, tomate, sauce', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1624300603538-1207400f1807?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Chawarma Fromage', nameAr: 'شاورما جبن', price: 30, description: 'Chawarma poulet, salade, tomate, fromage, sauce', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1624300603538-1207400f1807?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Panini Poulet', nameAr: 'بانيني دجاج', price: 25, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1624300603538-1207400f1807?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Panini Viande', nameAr: 'بانيني لحم', price: 25, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1624300603538-1207400f1807?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Panini Thon', nameAr: 'بانيني تونة', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1624300603538-1207400f1807?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-sandwich', name: 'Panini Fromage', nameAr: 'بانيني جبن', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1624300603538-1207400f1807?auto=format&fit=crop&w=500&q=60' },
+        // ===== BOISSONS =====
+        { id: uid(), categoryId: 'cat-boissons', name: 'Eau minérale 50cl / Oulmes 50cl', nameAr: 'ماء معدني 50سل / أولماس 50سل', price: 10, description: 'Eau mineral 50cl / Oulmes 50cl', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-boissons', name: 'Sodas assortis', nameAr: 'مشروب غازي', price: 20, description: 'Coca, coca zero - Diet coke, Sprite, Hawai, Pom\'s, Schweppes – Schweppes citron, Fanta orange, Fanta citron', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-boissons', name: 'Eau minérale 1L / Oulmes 75cl', nameAr: 'ماء معدني 1 لتر / أولماس 75سل', price: 20, description: 'Eau mineral 1L / Oulmes 75cl', available: true, stockQty: 999, image: '' },
 
-        // ===== JUICES & SMOOTHIES =====
-        { id: uid(), categoryId: 'cat-juices', name: 'Jus Orange', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Jus Fraise', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Jus Mangue', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Jus Ananas', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Jus Avocat', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Jus Pomme', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Jus Pêche', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Jus Banane', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Jus Betterave', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Jus Concombre', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Jus Carotte', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Mojito', price: 20, description: '', available: true, stockQty: 999, image: '/menu/mojito.jpg' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Mojito Fruit Rouge', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Smoothie Panché', price: 15, description: 'Jus au choix 4 fruits', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Smoothie Tropical', price: 20, description: 'Mangue, Ananas, Passion', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Smoothie Red', price: 20, description: 'Betterave, Banane, Fraise, Carotte', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-juices', name: 'Smoothie Détox', price: 20, description: 'Concombre, Citron, Gingembre, Menthe', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=500&q=60' },
+        // ===== JUS DE FRUITS FRAIS =====
+        { id: uid(), categoryId: 'cat-jus', name: 'Jus d\'Orange', nameAr: 'عصير برتقال', price: 35, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-jus', name: 'Jus de citron', nameAr: 'عصير ليمون', price: 35, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-jus', name: 'Jus de banane', nameAr: 'عصير موز', price: 35, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-jus', name: 'Jus de fraise', nameAr: 'عصير فراولة', price: 40, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-jus', name: 'Jus de pamplemousse', nameAr: 'عصير كريفون', price: 40, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-jus', name: 'Jus de pêche', nameAr: 'عصير خوخ', price: 40, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-jus', name: 'Jus d\'avocat', nameAr: 'عصير أفوكادو', price: 50, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-jus', name: 'Jus de mangue', nameAr: 'عصير مانجو', price: 50, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-jus', name: 'Jus d\'ananas', nameAr: 'عصير أناناس', price: 50, description: '', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-jus', name: 'Jus de carotte', nameAr: 'عصير جزر', price: 50, description: '', available: true, stockQty: 999, image: '' },
 
-        // ===== DRINKS =====
-        { id: uid(), categoryId: 'cat-drinks', name: 'Café Noir', price: 12, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Nexpresso', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Americano', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Cappuccino', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Nas Nas', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1605942002814-b852b0873304?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Café Crème', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1605942002814-b852b0873304?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Ice Café', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1517701550927-30cf4bb1dba5?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Chocolat Chaud', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1637572815755-c4b80092dce1?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Lait Chaud', price: 12, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1576186726115-4d51596775d1?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Thé à la Menthe', price: 12, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Verveine', price: 12, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1504382103100-db7e92322d39?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Infusions', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1504382103100-db7e92322d39?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Soda', price: 10, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1592253167780-ff4439df5fcc?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Orangina', price: 12, description: '', available: true, stockQty: 999, image: imgOrangina },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Eau 33cl', price: 5, description: '', available: true, stockQty: 999, image: imgSidiAli },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Eau 50cl', price: 8, description: '', available: true, stockQty: 999, image: imgSidiAli },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Eau 1.5L', price: 12, description: '', available: true, stockQty: 999, image: imgSidiAli },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Oulmes 50cl', price: 10, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1517093911940-08cb5b3952e7?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-drinks', name: 'Oulmes 1.5L', price: 12, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1517093911940-08cb5b3952e7?auto=format&fit=crop&w=500&q=60' },
-
-        // ===== DESSERTS =====
-        { id: uid(), categoryId: 'cat-desserts', name: 'Salade de Fruits', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1519996529931-28324d5a630e?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Tiramisu', price: 25, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Cheesecake', price: 25, description: 'Fraise ou Citron', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1533139502658-afee996175a9?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Panna Cotta', price: 25, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1488477181946-6428a029177b?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Mousse Chocolat', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Tarte', price: 25, description: 'Citron / Fruits / Amandes', available: true, stockQty: 999, image: '/menu/tarte.jpg' },
-        { id: uid(), categoryId: 'cat-desserts', name: '1 Boule Glace', price: 10, description: 'Chocolat, Fraise, Vanille', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: '2 Boules Glace', price: 15, description: 'Chocolat, Fraise, Vanille', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: '3 Boules Glace', price: 20, description: 'Chocolat, Fraise, Vanille', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Crêpe Sucre/Miel', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1519676867240-f03562e64548?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Crêpe Nutella', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1519676867240-f03562e64548?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Crêpe Nutella Banane', price: 23, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1519676867240-f03562e64548?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Crêpe Nutella Fruits', price: 25, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1519676867240-f03562e64548?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Gaufre Sucre', price: 15, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Gaufre Chocolat', price: 23, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Gaufre Fruits', price: 20, description: '', available: true, stockQty: 999, image: 'https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=500&q=60' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Pancake Miel', price: 15, description: '', available: true, stockQty: 999, image: '/menu/pancake.jpg' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Pancake Chocolat', price: 20, description: '', available: true, stockQty: 999, image: '/menu/pancake.jpg' },
-        { id: uid(), categoryId: 'cat-desserts', name: 'Pancake Fruits', price: 20, description: '', available: true, stockQty: 999, image: '/menu/pancake.jpg' },
-
-        // ===== RAMADAN =====
-        { id: uid(), categoryId: 'cat-ramadan', name: 'Formule MasterClass Ftour', nameAr: 'فطور ماستركلاس', price: 90, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Kefta ou Crevettes. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
-        { id: uid(), categoryId: 'cat-ramadan', name: 'Ftour Traditionnel', nameAr: 'فطور تقليدي', price: 70, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Khlii. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
-        { id: uid(), categoryId: 'cat-ramadan', name: 'Tajine Poulet Citronné + Frites', nameAr: 'طاجين دجاج بالحامض + فريت', price: 40, description: '', available: true, stockQty: 999, image: '' },
-        { id: uid(), categoryId: 'cat-ramadan', name: 'Tajine de Kefta', nameAr: 'طاجين كفتة', price: 40, description: '', available: true, stockQty: 999, image: '' },
-        { id: uid(), categoryId: 'cat-ramadan', name: 'Rfissa au Poulet', nameAr: 'رفيسة بالدجاج', price: 40, description: '', available: true, stockQty: 999, image: '' },
-        { id: uid(), categoryId: 'cat-ramadan', name: 'Friture de Poisson', nameAr: 'مقلي سمك', price: 60, description: '', available: true, stockQty: 999, image: '' },
-        { id: uid(), categoryId: 'cat-ramadan', name: 'Plat de Crevettes', nameAr: 'طبق كريفيت', price: 45, description: '', available: true, stockQty: 999, image: '' },
-        { id: uid(), categoryId: 'cat-ramadan', name: 'Plat de Sardines (4 pcs)', nameAr: 'طبق سردين (4 قطع)', price: 30, description: '', available: true, stockQty: 999, image: '' },
+        // ===== COCKTAILS & VITAMINES =====
+        { id: uid(), categoryId: 'cat-cocktails', name: 'Signature AL MISK', nameAr: 'سيكناتور المسك', price: 75, description: 'Carotte, cannelle, citron, mangue, orange, gingembre, fruit de passion', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-cocktails', name: 'Signature LA KASBAH', nameAr: 'سيكناتور القصبة', price: 75, description: 'Betterave, pomme verte, gingembre, orange', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-cocktails', name: 'Signature LA MENARA', nameAr: 'سيكناتور المنارة', price: 75, description: 'Concombre, kiwi, pomme verte, gingembre, citron, yaourt', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-cocktails', name: 'Mocktail BAHJA', nameAr: 'موكتيل البهجة', price: 50, description: 'Pamplemousse, citron, fruit de passion', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-cocktails', name: 'Mocktail MAMOUNIA', nameAr: 'موكتيل المامونية', price: 50, description: 'Pamplemousse, citron, fruit de passion', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-cocktails', name: 'Mocktail MAJORELLE', nameAr: 'موكتيل ماجوريل', price: 50, description: 'Concombre, feuille de menthe, citron, fleur d\'oranger, Sprite, gingembre', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-cocktails', name: 'Mocktail MACHWAR', nameAr: 'موكتيل المشور', price: 50, description: 'Citron, feuille de menthe, citron, sirop de fraise, Sprite', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-cocktails', name: 'Mocktail LA MEDINA', nameAr: 'موكتيل المدينة', price: 50, description: 'Citron, feuille de menthe, sirop de menthe, Sprite', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-cocktails', name: 'Mocktail BAB AGNAOU', nameAr: 'موكتيل باب أكناو', price: 50, description: 'Jus d\'ananas, lait de coco', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-cocktails', name: 'Mocktail KOUTOUBIA', nameAr: 'موكتيل الكتبية', price: 50, description: 'Jus de citron, jus d\'ananas, blanc d\'œuf, fleur d\'oranger, sirop de fraise', available: true, stockQty: 999, image: '' },
+        { id: uid(), categoryId: 'cat-cocktails', name: 'Mocktail MY ELYAZID', nameAr: 'موكتيل مولاي اليزيد', price: 50, description: 'Jus de citron, tranche de citron, gingembre, eau gazeuse', available: true, stockQty: 999, image: '' },
     ];
 
     if (count === 0) {
         await db.menuItems.bulkAdd(items);
     }
 
-    // Check if we need to migrate existing data (add nameAr)
-    const existingCats = await db.categories.toArray();
-    for (const cat of existingCats) {
-        if (!cat.nameAr) {
-            const seedCat = cats.find(c => c.id === cat.id);
-            if (seedCat && seedCat.nameAr) {
-                await db.categories.update(cat.id, { nameAr: seedCat.nameAr });
-            }
-        }
-    }
-
-    const existingItems = await db.menuItems.toArray();
-    for (const item of existingItems) {
-        const seedItem = items.find(i => i.name === item.name);
-        if (seedItem) {
-            const updates = {};
-            if (seedItem.nameAr && item.nameAr !== seedItem.nameAr) updates.nameAr = seedItem.nameAr;
-            if (seedItem.image && item.image !== seedItem.image) updates.image = seedItem.image;
-            if (Object.keys(updates).length > 0) {
-                await db.menuItems.update(item.id, updates);
-            }
-        }
-    }
-
-    // ===== RAMADAN MIGRATION (for existing DBs) =====
-    const ramadanCat = await db.categories.get('cat-ramadan');
-    if (!ramadanCat) {
-        await db.categories.add({ id: 'cat-ramadan', name: 'Ramadan', nameAr: 'رمضان', iconKey: 'ramadan', sortOrder: 0 });
-        await db.menuItems.bulkAdd([
-            { id: uid(), categoryId: 'cat-ramadan', name: 'Formule MasterClass Ftour', nameAr: 'فطور ماستركلاس', price: 90, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Kefta ou Crevettes. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
-            { id: uid(), categoryId: 'cat-ramadan', name: 'Ftour Traditionnel', nameAr: 'فطور تقليدي', price: 70, description: 'Harira, Dattes, Chebakia, Œufs, Olives. Batbout, Harcha, Msemmen, Briouates. Mkila Khlii. Jus d\'orange + Boisson chaude.', available: true, stockQty: 999, image: '' },
-            { id: uid(), categoryId: 'cat-ramadan', name: 'Tajine Poulet Citronné + Frites', nameAr: 'طاجين دجاج بالحامض + فريت', price: 40, description: '', available: true, stockQty: 999, image: '' },
-            { id: uid(), categoryId: 'cat-ramadan', name: 'Tajine de Kefta', nameAr: 'طاجين كفتة', price: 40, description: '', available: true, stockQty: 999, image: '' },
-            { id: uid(), categoryId: 'cat-ramadan', name: 'Rfissa au Poulet', nameAr: 'رفيسة بالدجاج', price: 40, description: '', available: true, stockQty: 999, image: '' },
-            { id: uid(), categoryId: 'cat-ramadan', name: 'Friture de Poisson', nameAr: 'مقلي سمك', price: 60, description: '', available: true, stockQty: 999, image: '' },
-            { id: uid(), categoryId: 'cat-ramadan', name: 'Plat de Crevettes', nameAr: 'طبق كريفيت', price: 45, description: '', available: true, stockQty: 999, image: '' },
-            { id: uid(), categoryId: 'cat-ramadan', name: 'Plat de Sardines (4 pcs)', nameAr: 'طبق سردين (4 قطع)', price: 30, description: '', available: true, stockQty: 999, image: '' },
-        ]);
-        console.log('Ramadan menu added!');
-    }
-
     // ===== SEED DEFAULT SETTINGS =====
     const defaultSettings = [
-        { key: 'storeName', value: 'MASTER CLASS' },
-        { key: 'storeSubtitle', value: 'RESTAURANT & CAFÉ' },
-        { key: 'storeAddress', value: '123 Avenue Mohammed VI, Marrakech' },
-        { key: 'storePhone', value: '05 24 00 00 00' },
-        { key: 'wifiName', value: 'MasterClass_Guest' },
+        { key: 'storeName', value: 'RIAD AL MISK' },
+        { key: 'storeSubtitle', value: 'RESTAURANT' },
+        { key: 'storeAddress', value: '362 rue de la Kasbah, Médina - Marrakech' },
+        { key: 'storePhone', value: '05 24 44 08 71' },
+        { key: 'wifiName', value: 'RiadAlMisk_Guest' },
         { key: 'wifiPassword', value: 'Password123' },
-        { key: 'receiptFooter', value: 'Merci de votre visite!' },
+        { key: 'receiptFooter', value: 'Thank you for your visit!' },
         { key: 'receiptPoweredBy', value: 'Powered by Expndy' },
-        { key: 'ramadanMode', value: 'on' },
     ];
     for (const s of defaultSettings) {
         const existing = await db.settings.get(s.key);
@@ -334,19 +209,12 @@ export async function seedDatabase() {
     const needsGridUpdate = salleTables.some(t => t.row === undefined);
 
     if (needsGridUpdate && salleTables.length > 0) {
-        // Grid positions: [row, col] — 0-indexed. 8 cols (0-7), 6 rows (0-5)
         const gridLayout = [
-            // Row 0: S1, S2, S3 (top-left cluster) + S4 (top-right)
             { row: 0, col: 0 }, { row: 0, col: 1 }, { row: 0, col: 2 }, { row: 0, col: 6 },
-            // Row 1: S5, S6
             { row: 1, col: 0 }, { row: 1, col: 1 },
-            // Row 2: S7 (left) + S8-S11 (center-right block)
             { row: 2, col: 0 }, { row: 2, col: 3 }, { row: 2, col: 4 }, { row: 2, col: 5 }, { row: 2, col: 6 },
-            // Row 3: S12-S15 (center-right block)
             { row: 3, col: 3 }, { row: 3, col: 4 }, { row: 3, col: 5 }, { row: 3, col: 6 },
-            // Row 4: S16, S17
             { row: 4, col: 0 }, { row: 4, col: 2 },
-            // Row 5: S18-S24 (bottom row, 7 tables)
             { row: 5, col: 1 }, { row: 5, col: 2 }, { row: 5, col: 3 }, { row: 5, col: 4 }, { row: 5, col: 5 }, { row: 5, col: 6 }, { row: 5, col: 7 },
         ];
 
@@ -387,15 +255,15 @@ export async function seedDatabase() {
     const doors = await db.diningTables.where('type').equals('door').toArray();
     if (doors.length === 0) {
         await db.diningTables.bulkAdd([
-            { id: 'door-1', name: 'Entrée', status: 'free', zone: 'salle', seats: 0, row: 0, col: 3, type: 'door' }, // Top middle
-            { id: 'door-2', name: 'Sortie', status: 'free', zone: 'salle', seats: 0, row: 5, col: 0, type: 'door' }, // Bottom left
+            { id: 'door-1', name: 'Entrée', status: 'free', zone: 'salle', seats: 0, row: 0, col: 3, type: 'door' },
+            { id: 'door-2', name: 'Sortie', status: 'free', zone: 'salle', seats: 0, row: 5, col: 0, type: 'door' },
         ]);
     }
 
     const caisse = await db.diningTables.where('type').equals('caisse').toArray();
     if (caisse.length === 0) {
         await db.diningTables.add(
-            { id: 'caisse-1', name: 'Caisse', status: 'free', zone: 'salle', seats: 0, row: 5, col: 1, type: 'caisse' } // Bottom left next to door
+            { id: 'caisse-1', name: 'Caisse', status: 'free', zone: 'salle', seats: 0, row: 5, col: 1, type: 'caisse' }
         );
     }
 
