@@ -945,8 +945,8 @@ a {
   border-bottom: 1px solid var(--border);
   overflow: hidden;
   flex-shrink: 0;
-  /* Exactly 2 rows: 2 × 48px chip height + 10px gap + 24px padding top+bottom */
-  max-height: 130px;
+  /* Exactly 2 rows: 2 × ~65px chip height (2 text lines) + 10px gap + 24px padding */
+  max-height: 170px;
   align-content: flex-start;
 }
 
