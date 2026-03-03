@@ -94,6 +94,38 @@ ipcMain.handle('silent-print', async (event, printerName, optionsPayload = {}) =
     });
 });
 
+// Open cash drawer — silently prints a blank page (triggers ESC/POS kick relay on thermal printers)
+ipcMain.handle('open-cash-drawer', async (event, printerName) => {
+    return new Promise((resolve) => {
+        if (!mainWindow || !printerName) {
+            resolve({ success: false, error: 'No printer configured' });
+            return;
+        }
+
+        // A hidden window that loads a blank data URL to trigger the print (and cash drawer kick)
+        const kickWin = new BrowserWindow({
+            show: false,
+            webPreferences: { nodeIntegration: false, contextIsolation: true },
+        });
+
+        kickWin.loadURL('data:text/html,<html><body></body></html>');
+
+        kickWin.webContents.once('did-finish-load', () => {
+            const opts = {
+                silent: true,
+                printBackground: false,
+                deviceName: printerName,
+                pageSize: { width: 72000, height: 1000 },
+                margins: { marginType: 'none' },
+            };
+            kickWin.webContents.print(opts, (success, failureReason) => {
+                kickWin.destroy();
+                resolve(success ? { success: true } : { success: false, error: failureReason });
+            });
+        });
+    });
+});
+
 // ===== APP LIFECYCLE =====
 
 app.on('ready', createWindow);

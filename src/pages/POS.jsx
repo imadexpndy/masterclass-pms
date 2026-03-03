@@ -750,6 +750,27 @@ export default function POS() {
                                 {lang === 'fr' ? 'Imprimer' : 'Print'}
                             </button>
                         </div>
+
+                        {/* Row 3: Open Cash Drawer */}
+                        <div className="pos-action-row">
+                            <button className="pos-btn pos-btn-drawer" onClick={async () => {
+                                const printerName = settings.printerName;
+                                if (!printerName) {
+                                    alert(lang === 'fr' ? 'Aucune imprimante configurée. Allez dans Paramètres.' : 'No printer configured. Go to Settings.');
+                                    return;
+                                }
+                                if (window.electron?.openCashDrawer) {
+                                    const result = await window.electron.openCashDrawer(printerName);
+                                    if (!result?.success) {
+                                        alert(lang === 'fr' ? `Erreur: ${result?.error || 'inconnu'}` : `Error: ${result?.error || 'unknown'}`);
+                                    }
+                                } else {
+                                    alert(lang === 'fr' ? 'Disponible uniquement dans l\'application Electron.' : 'Only available in the Electron app.');
+                                }
+                            }}>
+                                💵 {lang === 'fr' ? 'Ouvrir la Caisse' : 'Open Cash Drawer'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

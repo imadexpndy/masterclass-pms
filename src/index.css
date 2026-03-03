@@ -1366,6 +1366,19 @@ a {
   background: var(--red-bg);
 }
 
+.pos-btn-drawer {
+  background: var(--bg-card);
+  color: var(--text);
+  border: 2px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.pos-btn-drawer:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: var(--bg-card-hover);
+  color: var(--gold);
+}
+
 /* ===== ORDER ACTIONS (old compatibility) ===== */
 .order-actions {
   display: flex;
