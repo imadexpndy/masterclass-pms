@@ -62,10 +62,8 @@ export default function AppShell() {
     const navItems = [
         { path: '/', icon: IconTable, label: t('navTables'), roles: ['admin', 'waiter', 'cashier'] },
         { path: '/pos', icon: IconCart, label: t('navPOS'), roles: ['admin', 'waiter', 'cashier'] },
-        { path: '/dashboard', icon: IconDashboard, label: t('navDashboard'), roles: ['admin'] },
         { path: '/kitchen', icon: IconChef, label: t('navKitchen'), roles: ['admin', 'kitchen'] },
         { path: '/reports', icon: IconChart, label: t('navReports'), roles: ['admin', 'cashier'] },
-        { path: '/inventory', icon: IconBox, label: t('navInventory'), roles: ['admin'] },
         { path: '/users', icon: IconUsers, label: t('navUsers'), roles: ['admin'] },
         { path: '/menu', icon: IconMenuBoard, label: t('navMenu'), roles: ['admin'] },
         { path: '/settings', icon: IconSettings, label: t('navSettings'), roles: ['admin'] },
@@ -74,11 +72,9 @@ export default function AppShell() {
     const pageTitles = {
         '/': t('tableManagement'),
         '/pos': t('loginTitle'),
-        '/dashboard': t('navDashboard'),
         '/tables': t('tableManagement'),
         '/kitchen': t('kitchenDisplay'),
         '/reports': t('viewReports'),
-        '/inventory': t('navInventory'),
         '/users': t('navUsers'),
         '/menu': t('navMenu'),
         '/settings': t('navSettings'),
