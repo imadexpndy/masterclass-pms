@@ -938,22 +938,16 @@ a {
 .pos-categories {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 10px;
   padding: 12px 16px;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   flex-shrink: 0;
-  scrollbar-width: none;
-  /* Firefox */
-  -ms-overflow-style: none;
-  /* IE */
-}
-
-.pos-categories::-webkit-scrollbar {
-  display: none;
+  /* Exactly 2 rows: 2 × 48px chip height + 10px gap + 24px padding top+bottom */
+  max-height: 130px;
+  align-content: flex-start;
 }
 
 /* ===== CATEGORY CHIP ===== */
