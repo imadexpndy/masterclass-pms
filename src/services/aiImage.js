@@ -10,7 +10,8 @@ export async function generateImageFromText(itemName, category, apiKey) {
     // We use FLUX.1-schnell or stable-diffusion-xl-base-1.0
     // FLUX is very fast and high quality for free tier
     const MODEL_ID = 'black-forest-labs/FLUX.1-schnell';
-    const API_URL = `https://api-inference.huggingface.co/models/${MODEL_ID}`;
+    // The new HuggingFace inference endpoint structure
+    const API_URL = `https://router.huggingface.co/hf-inference/models/${MODEL_ID}`;
 
     // Prompt Engineering for food photography
     const prompt = `Professional food photography of ${itemName} ${category ? `(${category})` : ''}, high resolution, 4k, restaurant lighting, appetizing, centered on a clean plate or suitable background, photorealistic`;
