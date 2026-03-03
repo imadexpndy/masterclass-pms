@@ -1378,6 +1378,12 @@ a {
   overflow: hidden;
 }
 
+/* Remove page-body padding for the POS layout — it handles its own spacing */
+.page-body:has(.pos-layout) {
+  padding: 0;
+  overflow: hidden;
+}
+
 .tables-layout {
   display: flex;
   flex-direction: column;

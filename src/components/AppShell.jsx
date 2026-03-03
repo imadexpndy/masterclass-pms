@@ -161,10 +161,6 @@ export default function AppShell() {
             {/* Main */}
             <div className="main-content">
                 <div className="page-body">
-                    {/* We show the page title dynamically in the page headers themselves if needed, or rely on active tab */}
-                    <div className="page-title-banner" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <h2 className="header-title" style={{ fontSize: '1.4rem', fontWeight: 800 }}>{pageTitle}</h2>
-                    </div>
                     <Outlet />
                 </div>
             </div>
