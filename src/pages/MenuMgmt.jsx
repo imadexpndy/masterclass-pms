@@ -114,6 +114,49 @@ export default function MenuMgmt() {
         }
     };
 
+    const handleGenerateAllMissingImages = async () => {
+        const apiKey = settings.huggingFaceApiKey;
+        if (!apiKey) {
+            alert(lang === 'fr' ? 'Clé API HuggingFace manquante. Veuillez l\'ajouter dans les Paramètres.' : 'HuggingFace API Key missing. Please add it in Settings.');
+            return;
+        }
+
+        const itemsWithoutImages = items.filter(i => !i.image);
+        if (itemsWithoutImages.length === 0) {
+            alert(lang === 'fr' ? 'Tous les articles ont déjà une image !' : 'All items already have an image!');
+            return;
+        }
+
+        if (!window.confirm(lang === 'fr' ? `Générer ${itemsWithoutImages.length} images manquantes ? Cela peut prendre du temps.` : `Generate ${itemsWithoutImages.length} missing images? This may take a while.`)) {
+            return;
+        }
+
+        setIsGenerating(true);
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const item of itemsWithoutImages) {
+            const catName = categories.find(c => c.id === item.categoryId)?.name || '';
+            try {
+                // Add a small delay between requests to respect free tier rate limits
+                await new Promise(r => setTimeout(r, 2000));
+
+                const base64Image = await generateImageFromText(item.name, catName, apiKey);
+                await db.menuItems.update(item.id, { image: base64Image });
+                successCount++;
+            } catch (err) {
+                console.error(`Failed to generate image for ${item.name}:`, err);
+                failCount++;
+            }
+        }
+
+        setIsGenerating(false);
+        alert(lang === 'fr'
+            ? `Terminé ! Succès: ${successCount}, Échecs: ${failCount}`
+            : `Done! Success: ${successCount}, Failed: ${failCount}`
+        );
+    };
+
     const deleteItem = async (item) => {
         await db.menuItems.delete(item.id);
         logActivity(user?.id, user?.name, 'menu_delete', item.name);
@@ -158,7 +201,12 @@ export default function MenuMgmt() {
                                 {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                             </select>
                         </div>
-                        <button className="btn btn-primary" onClick={openAddItem} style={{ fontSize: '1.1rem', padding: '16px 24px' }}>+ {t('item')}</button>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            <button className="btn btn-outline" onClick={handleGenerateAllMissingImages} disabled={isGenerating} style={{ fontSize: '1.1rem', padding: '16px 24px', opacity: isGenerating ? 0.7 : 1 }}>
+                                ✨ {isGenerating ? (lang === 'fr' ? 'Génération en cours...' : 'Generating...') : (lang === 'fr' ? 'Générer Images Manquantes' : 'Generate Missing Images')}
+                            </button>
+                            <button className="btn btn-primary" onClick={openAddItem} style={{ fontSize: '1.1rem', padding: '16px 24px' }}>+ {t('item')}</button>
+                        </div>
                     </div>
 
                     <div className="card" style={{ overflow: 'auto' }}>
