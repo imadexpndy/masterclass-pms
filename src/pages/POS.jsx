@@ -688,7 +688,7 @@ export default function POS() {
                 <div className="order-items-list">
                     {cart.length === 0 ? (
                         <div className="order-empty">
-                            <div className="empty-icon"><IconCart size={32} /></div>
+                            <div className="empty-icon"><IconCart size={48} /></div>
                             <p>{t('addItemsToStart')}</p>
                         </div>
                     ) : (
@@ -699,9 +699,9 @@ export default function POS() {
                                     <div className="order-line-price">{item.price.toFixed(2)} DH</div>
                                 </div>
                                 <div className="qty-controls">
-                                    <button className="qty-btn" onClick={() => updateQty(item.itemId, -1)} style={{ width: 40, height: 40, fontSize: '1.5rem' }}>−</button>
-                                    <span className="qty-value" style={{ fontSize: '1.2rem', minWidth: 40, textAlign: 'center' }}>{item.qty}</span>
-                                    <button className="qty-btn" onClick={() => updateQty(item.itemId, 1)} style={{ width: 40, height: 40, fontSize: '1.5rem' }}>+</button>
+                                    <button className="qty-btn" onClick={() => updateQty(item.itemId, -1)}>−</button>
+                                    <span className="qty-value">{item.qty}</span>
+                                    <button className="qty-btn" onClick={() => updateQty(item.itemId, 1)}>+</button>
                                 </div>
                                 <div className="order-line-total">{(item.price * item.qty).toFixed(2)}</div>
                             </div>
@@ -713,37 +713,43 @@ export default function POS() {
                     <div className="order-totals">
                         <div className="order-total-row">
                             <span>{t('items')}</span>
-                            <span>{cart.reduce((s, c) => s + c.qty, 0)}</span>
+                            <span style={{ fontWeight: 700 }}>{cart.reduce((s, c) => s + c.qty, 0)}</span>
                         </div>
                         <div className="order-total-row grand">
                             <span>{t('total')}</span>
                             <span>{total.toFixed(2)} DH</span>
                         </div>
                     </div>
-                    <div className="order-actions">
-                        <button className="btn btn-ghost" onClick={() => setCart([])} disabled={cart.length === 0}>
-                            <IconTrash size={14} /> {t('cancel')}
-                        </button>
-                        <button className="btn btn-primary" onClick={() => sendOrder('pending')} disabled={cart.length === 0}>
-                            <IconSend size={14} /> {t('sendOrder')}
-                        </button>
-                    </div>
-                    <div className="order-actions" style={{ marginTop: 8 }}>
-                        <button className="btn btn-success btn-sm" style={{ flex: 1 }} onClick={() => sendOrder('cash')} disabled={cart.length === 0}>
-                            <IconCash size={14} /> {t('cash')}
-                        </button>
-                        <button className="btn btn-success btn-sm" style={{ flex: 1 }} onClick={async () => {
-                            await sendOrder('print');
-                            // Brief delay for receipt to render, then print and auto-close
-                            setTimeout(async () => {
-                                await smartPrint();
-                                // Auto-close receipt and return to POS
-                                setShowBill(false);
-                                setPaidOrder(null);
-                            }, 800);
-                        }} disabled={cart.length === 0}>
-                            <IconPrint size={14} /> {lang === 'fr' ? 'Imprimer' : 'Print'}
-                        </button>
+
+                    <div className="pos-actions">
+                        {/* Row 1: Send to Kitchen */}
+                        <div className="pos-action-row">
+                            <button className="pos-btn pos-btn-send" onClick={() => sendOrder('pending')} disabled={cart.length === 0}>
+                                <IconSend size={20} />
+                                {lang === 'fr' ? 'Envoyer en cuisine' : 'Send to Kitchen'}
+                            </button>
+                            <button className="pos-btn pos-btn-clear" onClick={() => setCart([])} disabled={cart.length === 0} title={t('cancel')}>
+                                <IconTrash size={18} />
+                            </button>
+                        </div>
+
+                        {/* Row 2: Payment */}
+                        <div className="pos-action-row">
+                            <button className="pos-btn pos-btn-cash" onClick={() => sendOrder('cash')} disabled={cart.length === 0}>
+                                <IconCash size={20} />
+                                {lang === 'fr' ? 'Espèces' : 'Cash'}
+                            </button>
+                            <button className="pos-btn pos-btn-print" onClick={async () => {
+                                await sendOrder('print');
+                                setTimeout(async () => {
+                                    setShowBill(false);
+                                    setPaidOrder(null);
+                                }, 800);
+                            }} disabled={cart.length === 0}>
+                                <IconPrint size={20} />
+                                {lang === 'fr' ? 'Imprimer' : 'Print'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
