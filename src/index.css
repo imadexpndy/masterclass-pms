@@ -1048,11 +1048,29 @@ a {
 }
 
 .pos-item-image {
-  height: 110px;
+  height: 120px;
+  min-height: 120px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.pos-item-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: inherit;
   background-size: cover;
   background-position: center;
   background-color: var(--bg-body);
-  border-bottom: 1px solid var(--border);
+  transition: transform 0.4s ease;
+}
+
+.pos-item-card:hover:not(.unavailable) .pos-item-image::before {
+  transform: scale(1.08);
+  /* Nice subtle zoom on hover */
 }
 
 .pos-item-content {
@@ -2562,14 +2580,28 @@ hr {
 }
 
 .pos-item-image {
-  height: 110px;
-  min-height: 110px;
+  height: 120px;
+  min-height: 120px;
   width: 100%;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.pos-item-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: inherit;
   background-size: cover;
   background-position: center;
-  background-color: var(--bg-elevated);
-  position: relative;
-  flex-shrink: 0;
+  background-color: var(--bg-body);
+  transition: transform 0.4s ease;
+}
+
+.pos-item-card:hover:not(.unavailable) .pos-item-image::before {
+  transform: scale(1.08);
 }
 
 .pos-item-content {

@@ -15,6 +15,7 @@ const SETTINGS_KEYS = [
     { key: 'wifiPassword', labelEn: 'WiFi Password', labelFr: 'Mot de passe WiFi', type: 'text' },
     { key: 'receiptFooter', labelEn: 'Receipt Footer Message', labelFr: 'Message de bas de ticket', type: 'text' },
     { key: 'receiptPoweredBy', labelEn: 'Powered by', labelFr: 'Powered by', type: 'text' },
+    { key: 'huggingFaceApiKey', labelEn: 'HuggingFace API Key (for AI Images)', labelFr: 'Clé API HuggingFace (pour Images IA)', type: 'password' },
 ];
 
 export default function Settings() {

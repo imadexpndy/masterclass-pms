@@ -5,12 +5,16 @@ import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
 import { logActivity } from '../db/activityLog';
 import { IconPlus, IconTrash, IconSettings, IconX, IconMenuBoard, IconBox, IconSearch } from '../components/Icons';
+import { generateImageFromText } from '../services/aiImage';
 
 export default function MenuMgmt() {
     const { t } = useLang();
     const { user } = useAuth();
     const categories = useLiveQuery(() => db.categories.orderBy('sortOrder').toArray()) || [];
     const items = useLiveQuery(() => db.menuItems.toArray()) || [];
+    const settingsArr = useLiveQuery(() => db.settings.toArray()) || [];
+    const settings = Object.fromEntries(settingsArr.map(s => [s.key, s.value]));
+
     const [activeTab, setActiveTab] = useState('items');
     const [showModal, setShowModal] = useState(false);
     const [editing, setEditing] = useState(null);
@@ -19,6 +23,7 @@ export default function MenuMgmt() {
     const [showCatModal, setShowCatModal] = useState(false);
     const [filter, setFilter] = useState('all');
     const [search, setSearch] = useState('');
+    const [isGenerating, setIsGenerating] = useState(false);
 
     // Inventory functions
     const toggleAvailable = async (item) => {
@@ -52,16 +57,61 @@ export default function MenuMgmt() {
     };
 
     const saveItem = async () => {
-        if (!form.name || !form.price) return;
+        if (!form.name || !form.price || !form.categoryId) {
+            alert(t('errorFields'));
+            return;
+        }
         if (editing) {
-            await db.menuItems.update(editing.id, { ...form, price: parseFloat(form.price) });
-            logActivity(user?.id, user?.name, 'menu_edit', form.name, { price: form.price });
+            await db.menuItems.update(editing.id, {
+                name: form.name.trim(),
+                nameAr: form.nameAr.trim(),
+                price: parseFloat(form.price),
+                categoryId: form.categoryId,
+                description: form.description.trim(),
+                image: form.image
+            });
+            logActivity(user?.id, user?.name, 'item_edit', form.name);
         } else {
-            await db.menuItems.add({ id: crypto.randomUUID(), ...form, price: parseFloat(form.price), available: true, stockQty: 100 });
-            logActivity(user?.id, user?.name, 'menu_add', form.name, { price: form.price });
+            await db.menuItems.add({
+                id: crypto.randomUUID(),
+                name: form.name.trim(),
+                nameAr: form.nameAr.trim(),
+                price: parseFloat(form.price),
+                categoryId: form.categoryId,
+                description: form.description.trim(),
+                image: form.image,
+                available: true,
+                stockQty: 0
+            });
+            logActivity(user?.id, user?.name, 'item_add', form.name);
         }
         setShowModal(false);
         setEditing(null);
+    };
+
+    const handleGenerateImage = async () => {
+        if (!form.name) {
+            alert(lang === 'fr' ? 'Veuillez d\'abord entrer un nom pour générer l\'image.' : 'Please enter a name first to generate an image.');
+            return;
+        }
+
+        const apiKey = settings.huggingFaceApiKey;
+        if (!apiKey) {
+            alert(lang === 'fr' ? 'Clé API HuggingFace manquante. Veuillez l\'ajouter dans les Paramètres.' : 'HuggingFace API Key missing. Please add it in Settings.');
+            return;
+        }
+
+        const catName = categories.find(c => c.id === form.categoryId)?.name || '';
+
+        try {
+            setIsGenerating(true);
+            const base64Image = await generateImageFromText(form.name, catName, apiKey);
+            setForm(f => ({ ...f, image: base64Image }));
+        } catch (err) {
+            alert((lang === 'fr' ? 'Erreur de génération IA: ' : 'AI Generation Error: ') + err.message);
+        } finally {
+            setIsGenerating(false);
+        }
     };
 
     const deleteItem = async (item) => {
@@ -251,8 +301,16 @@ export default function MenuMgmt() {
                             <input className="input" type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} />
                         </div>
                         <div className="form-group">
-                            <label className="form-label">Image URL</label>
-                            <input className="input" value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} placeholder="https://..." />
+                            <label className="form-label">{lang === 'fr' ? 'Image URL ou Image IA' : 'Image URL or AI Image'}</label>
+                            <div style={{ display: 'flex', gap: 10, width: '100%', alignItems: 'center' }}>
+                                <input className="input" value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} placeholder="https://... ou base64" style={{ flex: 1 }} />
+                                <button className="btn btn-primary" style={{ padding: '0 15px', height: '42px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 6, opacity: isGenerating ? 0.7 : 1 }} onClick={handleGenerateImage} disabled={isGenerating}>
+                                    ✨ {isGenerating ? (lang === 'fr' ? 'Génération...' : 'Generating...') : 'IA'}
+                                </button>
+                            </div>
+                            {form.image && form.image.startsWith('data:') && (
+                                <img src={form.image} alt="Preview" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, marginTop: 10, border: '2px solid var(--border)' }} />
+                            )}
                         </div>
                         <div className="form-group">
                             <label className="form-label">{t('category')}</label>
