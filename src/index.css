@@ -996,8 +996,11 @@ a {
 }
 
 .cat-pill .cat-info {
-  display: none;
-  /* hide item count — space is precious */
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  text-align: left;
+  line-height: 1.2;
 }
 
 /* ===== ITEMS GRID ===== */
@@ -1075,11 +1078,15 @@ a {
 
 /* Compact card (no image) */
 .pos-item-card.compact-card {
-  border-left: 4px solid var(--gold);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.pos-item-card.compact-card:hover:not(.unavailable) {
+  box-shadow: 0 6px 20px rgba(201, 169, 110, 0.25);
 }
 
 .pos-item-card.compact-card .pos-item-content {
-  padding: 12px 14px;
+  padding: 14px 16px;
 }
 
 /* ===== ORDER PANEL (Right Panel) ===== */
