@@ -60,7 +60,7 @@ export default function AppShell() {
 
     // Tables first, then POS, Dashboard (admin only), rest
     const navItems = [
-        { path: '/', icon: IconTable, label: t('navTables'), roles: ['admin', 'waiter', 'cashier'] },
+        { path: '/tables', icon: IconTable, label: t('navTables'), roles: ['admin', 'waiter', 'cashier'] },
         { path: '/pos', icon: IconCart, label: t('navPOS'), roles: ['admin', 'waiter', 'cashier'] },
         { path: '/kitchen', icon: IconChef, label: t('navKitchen'), roles: ['admin', 'kitchen'] },
         { path: '/reports', icon: IconChart, label: t('navReports'), roles: ['admin', 'cashier'] },

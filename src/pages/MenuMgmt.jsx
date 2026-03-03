@@ -47,21 +47,21 @@ export default function MenuMgmt() {
     };
     const openEditItem = (item) => {
         setEditing(item);
-        setEditingItem(item);
-        setItemForm({ name: item.name, nameAr: item.nameAr || '', price: String(item.price), categoryId: item.categoryId, description: item.description || '', image: item.image || '' });
-        setShowItemModal(true);
+        setForm({ name: item.name, nameAr: item.nameAr || '', price: String(item.price), categoryId: item.categoryId, description: item.description || '', image: item.image || '' });
+        setShowModal(true);
     };
 
     const saveItem = async () => {
-        if (!itemForm.name || !itemForm.price) return;
-        if (editingItem) {
-            await db.menuItems.update(editingItem.id, { ...itemForm, price: parseFloat(itemForm.price) });
-            logActivity(user?.id, user?.name, 'menu_edit', itemForm.name, { price: itemForm.price });
+        if (!form.name || !form.price) return;
+        if (editing) {
+            await db.menuItems.update(editing.id, { ...form, price: parseFloat(form.price) });
+            logActivity(user?.id, user?.name, 'menu_edit', form.name, { price: form.price });
         } else {
-            await db.menuItems.add({ id: crypto.randomUUID(), ...itemForm, price: parseFloat(itemForm.price), available: true, stockQty: 100 });
-            logActivity(user?.id, user?.name, 'menu_add', itemForm.name, { price: itemForm.price });
+            await db.menuItems.add({ id: crypto.randomUUID(), ...form, price: parseFloat(form.price), available: true, stockQty: 100 });
+            logActivity(user?.id, user?.name, 'menu_add', form.name, { price: form.price });
         }
-        setShowItemModal(false);
+        setShowModal(false);
+        setEditing(null);
     };
 
     const deleteItem = async (item) => {
