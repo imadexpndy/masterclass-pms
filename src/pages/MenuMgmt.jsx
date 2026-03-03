@@ -8,7 +8,7 @@ import { IconPlus, IconTrash, IconSettings, IconX, IconMenuBoard, IconBox, IconS
 import { generateImageFromText } from '../services/aiImage';
 
 export default function MenuMgmt() {
-    const { t } = useLang();
+    const { t, lang } = useLang();
     const { user } = useAuth();
     const categories = useLiveQuery(() => db.categories.orderBy('sortOrder').toArray()) || [];
     const items = useLiveQuery(() => db.menuItems.toArray()) || [];
