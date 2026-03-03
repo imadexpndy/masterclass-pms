@@ -39,55 +39,32 @@ export async function seedDatabase() {
         await db.categories.bulkAdd(cats);
     }
 
-    // ===== FIX TABLES (If user has old data/12 tables) =====
-    if (tableCount <= 12) {
+    // ===== TABLES — Rooftop only, 12 tables =====
+    const tablesResetDone = window.localStorage.getItem('almisk_tables_reset_v2') === 'true';
+    if (!tablesResetDone) {
         await db.diningTables.clear();
-        console.log("Resetting tables to 8x6 grid...");
+        console.log('Seeding 12 rooftop tables...');
 
-        const tables = [];
-
-        // --- Custom Elements ---
-        tables.push({ id: uid(), name: 'Caisse', type: 'caisse', row: 5, col: 0, status: 'active', zone: 'salle' });
-        tables.push({ id: uid(), name: 'Sortie', type: 'door', row: 5, col: 7, status: 'active', zone: 'salle' });
-        tables.push({ id: uid(), name: 'Entrée', type: 'door', row: 0, col: 7, status: 'active', zone: 'salle' });
-        tables.push({ id: uid(), name: 'Base', type: 'base', row: 2, col: 3, status: 'active', zone: 'salle' });
-        tables.push({ id: uid(), name: 'Base', type: 'base', row: 2, col: 4, status: 'active', zone: 'salle' });
-        tables.push({ id: uid(), name: 'TV 1', type: 'tv', row: 0, col: 3, status: 'active', zone: 'salle' });
-
-        // --- Grid Tables ---
+        const rooftopTables = [];
         let tableNum = 1;
-        for (let r = 0; r < 6; r++) {
-            for (let c = 0; c < 8; c++) {
-                const isOccupied = tables.find(t => t.row === r && t.col === c);
-                if (isOccupied) continue;
-                if (c === 2 || c === 5) continue;
-
-                tables.push({
+        // 4 columns × 3 rows = 12 tables
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 4; col++) {
+                rooftopTables.push({
                     id: uid(),
                     name: `T-${tableNum++}`,
                     status: 'free',
                     seats: 4,
-                    zone: 'salle',
-                    row: r,
-                    col: c,
-                    type: 'table'
+                    zone: 'terrasse',
+                    row,
+                    col,
+                    type: 'table',
                 });
             }
         }
 
-        // --- Terrasse Tables ---
-        for (let i = 1; i <= 20; i++) {
-            tables.push({
-                id: uid(),
-                name: `Terrasse ${i}`,
-                status: 'free',
-                seats: 4,
-                zone: 'terrasse',
-                type: 'table'
-            });
-        }
-
-        await db.diningTables.bulkAdd(tables);
+        await db.diningTables.bulkAdd(rooftopTables);
+        window.localStorage.setItem('almisk_tables_reset_v2', 'true');
     }
 
     const items = [
@@ -204,68 +181,6 @@ export async function seedDatabase() {
         }
     }
 
-    // ===== UPDATE SALLE GRID POSITIONS (8×6 Grid) =====
-    const salleTables = await db.diningTables.where('zone').equals('salle').toArray();
-    const needsGridUpdate = salleTables.some(t => t.row === undefined);
-
-    if (needsGridUpdate && salleTables.length > 0) {
-        const gridLayout = [
-            { row: 0, col: 0 }, { row: 0, col: 1 }, { row: 0, col: 2 }, { row: 0, col: 6 },
-            { row: 1, col: 0 }, { row: 1, col: 1 },
-            { row: 2, col: 0 }, { row: 2, col: 3 }, { row: 2, col: 4 }, { row: 2, col: 5 }, { row: 2, col: 6 },
-            { row: 3, col: 3 }, { row: 3, col: 4 }, { row: 3, col: 5 }, { row: 3, col: 6 },
-            { row: 4, col: 0 }, { row: 4, col: 2 },
-            { row: 5, col: 1 }, { row: 5, col: 2 }, { row: 5, col: 3 }, { row: 5, col: 4 }, { row: 5, col: 5 }, { row: 5, col: 6 }, { row: 5, col: 7 },
-        ];
-
-        const sortedSalle = salleTables.sort((a, b) => {
-            const numA = parseInt(a.name.replace(/\D/g, '')) || 0;
-            const numB = parseInt(b.name.replace(/\D/g, '')) || 0;
-            return numA - numB;
-        });
-
-        for (let i = 0; i < sortedSalle.length; i++) {
-            if (gridLayout[i]) {
-                await db.diningTables.update(sortedSalle[i].id, {
-                    row: gridLayout[i].row,
-                    col: gridLayout[i].col,
-                    type: 'table'
-                });
-            }
-        }
-    }
-
-    // ===== SEED BASES & TVs (if not present) =====
-    const bases = await db.diningTables.where('type').equals('base').toArray();
-    if (bases.length === 0) {
-        await db.diningTables.bulkAdd([
-            { id: 'base-1', name: 'Base 1', status: 'free', zone: 'salle', seats: 0, row: 2, col: 2, type: 'base' },
-            { id: 'base-2', name: 'Base 2', status: 'free', zone: 'salle', seats: 0, row: 4, col: 3, type: 'base' },
-        ]);
-    }
-
-    const tvs = await db.diningTables.where('type').equals('tv').toArray();
-    if (tvs.length === 0) {
-        await db.diningTables.bulkAdd([
-            { id: 'tv-1', name: 'TV1', status: 'free', zone: 'salle', seats: 0, row: 4, col: 5, type: 'tv' },
-            { id: 'tv-2', name: 'TV2', status: 'free', zone: 'salle', seats: 0, row: 4, col: 6, type: 'tv' },
-        ]);
-    }
-
-    const doors = await db.diningTables.where('type').equals('door').toArray();
-    if (doors.length === 0) {
-        await db.diningTables.bulkAdd([
-            { id: 'door-1', name: 'Entrée', status: 'free', zone: 'salle', seats: 0, row: 0, col: 3, type: 'door' },
-            { id: 'door-2', name: 'Sortie', status: 'free', zone: 'salle', seats: 0, row: 5, col: 0, type: 'door' },
-        ]);
-    }
-
-    const caisse = await db.diningTables.where('type').equals('caisse').toArray();
-    if (caisse.length === 0) {
-        await db.diningTables.add(
-            { id: 'caisse-1', name: 'Caisse', status: 'free', zone: 'salle', seats: 0, row: 5, col: 1, type: 'caisse' }
-        );
-    }
 
     console.log('Database seeded with', items.length, 'menu items');
 }
