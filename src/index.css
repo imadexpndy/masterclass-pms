@@ -1784,6 +1784,32 @@ a {
   background: linear-gradient(135deg, rgba(251, 146, 60, 0.08), rgba(251, 146, 60, 0.02));
 }
 
+.table-delete-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.terrasse-table:hover .table-delete-btn {
+  opacity: 1;
+}
+
+.table-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
 /* ── Legend Bar ── */
 .floor-legend {
   display: flex;
